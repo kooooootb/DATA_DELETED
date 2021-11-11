@@ -1,9 +1,6 @@
 #ifndef LAB4_FORAGER_H
 #define LAB4_FORAGER_H
 
-#include "Table.h"
-#include "Creature.h"
-
 class Forager : public Creature {
 private:
 	Table itemTable_;
@@ -13,9 +10,11 @@ public:
 	
 	~Forager() override	= default;
 	
+	int getForce() const { return force_; }
+	
+	void kill(Level *level) override;
 	ErrorCodes receiveItem(Item *item);
 	ErrorCodes throwItem(Level *level, int index);
 };
-
 
 #endif //LAB4_FORAGER_H

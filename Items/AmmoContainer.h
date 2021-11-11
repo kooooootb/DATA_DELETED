@@ -1,9 +1,6 @@
 #ifndef LAB4_AMMOCONTAINER_H
 #define LAB4_AMMOCONTAINER_H
 
-#include "Item.h"
-#include "Operative.h"
-
 class AmmoContainer : public Item {
 private:
 	Ammunition ammoType_;
@@ -24,6 +21,5 @@ public:
 	void setAmmoMax(int);
 	ErrorCodes use(Creature *creature) override;
 };
-
 
 #endif //LAB4_AMMOCONTAINER_H

@@ -1,9 +1,6 @@
 #ifndef LAB4_HEALTHKIT_H
 #define LAB4_HEALTHKIT_H
 
-#include "Item.h"
-#include "Operative.h"
-
 class HealthKit : public Item {
 private:
 	int healAmount_;

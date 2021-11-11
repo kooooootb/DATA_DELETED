@@ -1,8 +1,8 @@
 project(Creatures)
 
 add_library(creatures STATIC
+        Header_Creatures.h
         Creature.cpp
-        Creature.h
         Forager.cpp
         Operative.cpp
         Sentient.cpp

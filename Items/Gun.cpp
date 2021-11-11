@@ -1,4 +1,5 @@
-#include "Gun.h"
+#include "Header_Items.h"
+#include "Creature.h"
 
 Gun::Gun(std::string &name, int weight, int damage, int shootTime, int reloadTime, Ammunition ammoType, int ammoMax, int accuracy) :
 		Item(name, weight) , damage_(damage) , shootTime_(shootTime) , reloadTime_(reloadTime) , ammoType_(ammoType) ,

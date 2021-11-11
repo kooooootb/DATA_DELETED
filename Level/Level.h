@@ -3,8 +3,8 @@
 
 #include "../AllClasses.h"
 
-#include "Creature.h"
-#include <vector>
+#include "Header_Items.h"
+#include "Header_Creatures.h"
 #include "Cell.h"
 
 class Level {
@@ -14,21 +14,28 @@ private:
 	std::vector<Sentient *> sentientAr_;
 	std::vector<Forager *> foragerAr_;
 	Cell **cells_;
-	int x_, y_;
 	Creature *activeCreature;
+	
 public:
-	Level(int x, int y);
+	Level();
 	~Level() { delete cells_; }
 	
-	void setX();
-	void setY();
-	void setCell();
-	int getX() const { return x_; }
-	int getY() const { return y_; }
-	Cell getCell(int x,int y) const { return cells_[x][y]; }
+	Cell **getCell() const { return cells_; }
 	
-	void killActive();
+	void setCell(int x, int y, Cell &cell);
+	
+//	void killActive();
 	void dropItem(Point point, Item *item);
+	
+	void spawnOperative(std::string &);
+	void spawnSentient(std::string &);
+	void spawnWild(std::string &);
+	void spawnForager(std::string &);
+	
+	void killOperative(Creature*);
+	void killSentient(Creature*);
+	void killWild(Creature*);
+	void killForager(Creature*);
 };
 
 

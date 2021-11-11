@@ -1,4 +1,5 @@
-#include "Creature.h"
+#include "Header_Creatures.h"
+#include "Level.h"
 
 Creature::Creature(std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius) :
 	name_(name) , healthMax_(healthMax) , timeMax_(timeMax) , walkTime_(walkTime) , viewRadius_(viewRadius) {
@@ -38,7 +39,7 @@ void Creature::heal(int healAmount) {
 }
 
 void Creature::receiveDamage(Level *level, int damage) {
-	if(damage > healthCurrent_) level->killActive();
+	if(damage > healthCurrent_) kill(level);
 	else healthCurrent_ -= damage;
 }
 

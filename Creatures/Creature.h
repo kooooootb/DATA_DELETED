@@ -3,9 +3,6 @@
 
 #include "../AllClasses.h"
 
-#include <string>
-#include "Level.h"
-
 class Creature {
 protected:
 	std::string name_;
@@ -35,10 +32,15 @@ public:
 	void setTimeMax(int timeMax);
 	
 	void heal(int healAmount);
+	virtual void kill(Level *level) = 0;
 	void spendTime(int time);
 	void walk(Cell **cells, Direction direction);
 	void receiveDamage(Level *level, int damage);
 };
 
+#include "Operative.h"
+#include "Sentient.h"
+#include "Wild.h"
+#include "Forager.h"
 
 #endif //LAB4_CREATURE_H

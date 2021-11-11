@@ -1,8 +1,11 @@
-#include <typeinfo>
+#include "Header_Creatures.h"
+#include "Item.h"
+#include "Level.h"
 #include "Operative.h"
 
-Operative::Operative(std::string &name, Point &coord, float reloadTime, int force, int accuracy) : Creature(name, coord) , reloadTime_(reloadTime),
-																					force_(force) , accuracy_(accuracy) {
+
+Operative::Operative(std::string &name, Point &coord, float reloadTime, int force, int accuracy) : Creature(name, coord) ,
+		reloadTime_(reloadTime), force_(force) , accuracy_(accuracy) {
 	activeGun_ = nullptr;
 	//...
 }
@@ -61,4 +64,8 @@ void Operative::shoot(Level *level, Creature *victim) {
 
 void Operative::setActiveGun(Gun *gun) {
 	activeGun_ = gun;
+}
+
+void Operative::kill(Level *level) {
+	level->killOperative(this);
 }

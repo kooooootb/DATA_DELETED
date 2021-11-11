@@ -1,9 +1,6 @@
 #ifndef LAB4_GUN_H
 #define LAB4_GUN_H
 
-#include "Item.h"
-#include "Operative.h"
-
 class Gun : public Item {
 private:
 	int damage_;
@@ -27,13 +24,12 @@ public:
 	Ammunition getAmmoType() const { return ammoType_; }
 	int getAmmoMax() const { return ammoMax_; }
 	int getAmmoCurrent() const { return ammoCurrent_; };
-	
 	int getReloadTime() const { return reloadTime_; }
 	
 	void setAmmoCurrent(int ammoCurrent);
+	
 	static void receiveDamage(Level *level, int damage, Operative *operative);
 	void shoot(Level *level, Creature *victim, float hitsMultipl);
-	
 	float countHits(int operAccuracy) const;
 //	void reload();//искать в таблице контейнер и использовать первый попавшийся?
 };

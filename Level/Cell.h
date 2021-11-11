@@ -1,13 +1,6 @@
 #ifndef LAB4_CELL_H
 #define LAB4_CELL_H
 
-enum CellType{
-	GLASS,
-	WALL,
-	FLOOR,
-	PARTITION
-};
-
 class Cell {
 private:
 	int type_;

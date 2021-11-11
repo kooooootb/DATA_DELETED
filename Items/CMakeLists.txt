@@ -1,13 +1,9 @@
 project(Items)
 
 add_library(items STATIC
+        Header_Items.h
         AmmoContainer.cpp
-        AmmoContainer.h
         Gun.cpp
-        Gun.h
         HealthKit.cpp
-        HealthKit.h
         Item.cpp
-        Item.h
-        Table.cpp
-        Table.h)
+        Table.cpp)

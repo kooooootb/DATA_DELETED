@@ -1,9 +1,6 @@
 #ifndef LAB4_SENTIENT_H
 #define LAB4_SENTIENT_H
 
-#include "Gun.h"
-#include "Creature.h"
-
 class Sentient : public Creature {
 private:
 	Gun* activeGun_;
@@ -16,7 +13,7 @@ public:
 	void receiveGun(Gun*);
 	void throwGun(Level *level);
 	void shoot(Level *level, Creature *victim);
+	void kill(Level *level) override;
 };
-
 
 #endif //LAB4_SENTIENT_H

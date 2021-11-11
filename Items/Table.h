@@ -1,15 +1,12 @@
 #ifndef LAB4_TABLE_H
 #define LAB4_TABLE_H
 
-#include <vector>
-#include "Item.h"
-
 class Table {
 private:
 	std::vector<Item *> items_;
 	int weight_;
 public:
-	Table() = default;
+	Table() : weight_(0) {}
 	
 	~Table();
 	

@@ -1,48 +1,148 @@
+//#include <SFML/Graphics.hpp>
+
 #include <iostream>
-#include <vector>
-#include "AllClasses.h"
+#include "Map.h"
 
-enum AMMO{
-	BIG,
-	MEDIUM,
-	SMALL
-};
+void func(int *a){
+	a = new int;
+	*a = 100;
+}
 
-class A{
-private:
-	int a = 1;
-protected:
-public:
-	virtual void f() = 0;
-};
-
-class B : public A{
-	int a[100];
-	int b;
-public:
-	void f() override{
-		b = 1;
-		std::cout << "zxc " << b << std::endl;
-	}
-};
-
-int main() {
-//	class B b;
-//	b.f();
+int main()
+{
+//	// Создаем окно размером 600 на 600 и частотой обновления 60 кадров в секунду
+//	int res_X = 1920, res_Y = 1080;
+//	float a = 200, b = 200;
+//	sf::RenderWindow window(sf::VideoMode(res_X, res_Y), "asd");
+//	window.setFramerateLimit(60);
 //
-//	class B *ap = new class B[10], *ar = ap;
-//	ap->f();
+//	sf::RectangleShape shape(sf::Vector2f(a,b));
+//	sf::RectangleShape shape1(sf::Vector2f(a,b));
+//	shape.setFillColor(sf::Color::Red);
+//	shape1.setFillColor(sf::Color::Green);
 //
-//	int a = BIG;
-//	std::cout << a << std::endl;
-//	ErrorCodes a = ERROR;
-//	std::cout << a << std::endl;
-	int b = 5;
-	float a = 0.7;
-	int &&c = 1;
-	c++;
-	std::cout << a << ' ' << (int) a << std::endl;
-	std::cout << b << ' ' << (int)((float)b*a) << std::endl;
-	std::cout << c << std::endl;
+//	sf::Texture pict;
+////	pict.loadFromFile("C:/Users/zavgm/Desktop/ehoJau95KJc.jpg");
+//	pict.loadFromFile("C:/Users/zavgm/Desktop/asd.png");
+//	sf::Sprite s(pict);
+//
+//	sf::Event event;
+//	sf::Clock clock;
+//
+////	s.setScale(20,20);
+//
+//	const sf::Vector2f spriteSize(s.getTexture()->getSize().x * s.getScale().x,s.getTexture()->getSize().y * s.getScale().y);
+//
+//	a = spriteSize.x;
+//	b = spriteSize.y;
+//	int aa = a/2;
+//	int bb = b/4;
+//
+//	sf::Sprite s1(s);
+//	sf::Sprite s2(s);
+//	sf::Sprite s3(s);
+//	sf::Sprite s4(s);
+//	sf::Sprite s5(s);
+//	sf::Sprite s6(s);
+//
+//	sf::Sprite ss(s);
+//	sf::Sprite ss1(s);
+//	sf::Sprite ss2(s);
+//	sf::Sprite ss3(s);
+//	sf::Sprite ss4(s);
+//	sf::Sprite ss5(s);
+//	sf::Sprite ss6(s);
+//
+//	sf::Sprite sss(s);
+//	sf::Sprite sss1(s);
+//	sf::Sprite sss2(s);
+//	sf::Sprite sss3(s);
+//	sf::Sprite sss4(s);
+//	sf::Sprite sss5(s);
+//	sf::Sprite sss6(s);
+//
+//	while (window.isOpen())
+//	{
+//		while (window.pollEvent(event))
+//		{
+//			if (event.type == sf::Event::Closed) window.close();
+//			if (event.type == sf::Event::KeyPressed)
+//			{
+//				// Получаем нажатую клавишу - выполняем соответствующее действие
+//				if (event.key.code == sf::Keyboard::LControl) window.close();
+//			}
+//			if (event.type == sf::Event::MouseMoved)
+//			{
+//				sf::Vector2i pos = sf::Mouse::getPosition(window);
+//
+//				int ak = -100;
+//
+//				s.setPosition(pos.x - a/2 - ak, pos.y);
+//				s1.setPosition(pos.x - 3*aa/2- a/4 - ak, pos.y);
+//				s2.setPosition(pos.x - 5*aa/2- a/4 - ak, pos.y);
+//				s3.setPosition(pos.x - 7*aa/2- a/4 - ak, pos.y);
+//				s4.setPosition(pos.x + aa/2- a/4 - ak, pos.y);
+//				s5.setPosition(pos.x + 3*aa/2- a/4 - ak, pos.y);
+//				s6.setPosition(pos.x + 5*aa/2- a/4 - ak, pos.y);
+//
+//				ss.setPosition(pos.x - a/2, pos.y + bb);
+//				ss1.setPosition(pos.x - 3*aa/2- a/4, pos.y + bb);
+//				ss2.setPosition(pos.x - 5*aa/2- a/4, pos.y + bb);
+//				ss3.setPosition(pos.x - 7*aa/2- a/4, pos.y + bb);
+//				ss4.setPosition(pos.x + aa/2- a/4, pos.y + bb);
+//				ss5.setPosition(pos.x + 3*aa/2- a/4, pos.y + bb);
+//				ss6.setPosition(pos.x + 5*aa/2- a/4, pos.y + bb);
+//
+//				sss.setPosition(pos.x - a/2 + ak, pos.y + 2*bb);
+//				sss1.setPosition(pos.x - 3*aa/2- a/4 + ak, pos.y + 2*bb);
+//				sss2.setPosition(pos.x - 5*aa/2- a/4 + ak, pos.y + 2*bb);
+//				sss3.setPosition(pos.x - 7*aa/2- a/4 + ak, pos.y + 2*bb);
+//				sss4.setPosition(pos.x + aa/2- a/4 + ak, pos.y + 2*bb);
+//				sss5.setPosition(pos.x + 3*aa/2- a/4 + ak, pos.y + 2*bb);
+//				sss6.setPosition(pos.x + 5*aa/2- a/4 + ak, pos.y + 2*bb);
+//
+//				// Получаем нажатую клавишу - выполняем соответствующее действие
+//			}
+//		}
+//
+//		// Выполняем необходимые действия по отрисовке
+//		window.clear();
+////		window.draw(shape);
+//		window.draw(s3);
+//		window.draw(s2);
+//		window.draw(s1);
+//		window.draw(s);
+//		window.draw(s4);
+//		window.draw(s5);
+//		window.draw(s6);
+//
+//		window.draw(ss3);
+//		window.draw(ss2);
+//		window.draw(ss1);
+//		window.draw(ss);
+//		window.draw(ss4);
+//		window.draw(ss5);
+//		window.draw(ss6);
+//
+//		window.draw(sss3);
+//		window.draw(sss2);
+//		window.draw(sss1);
+//		window.draw(sss);
+//		window.draw(sss4);
+//		window.draw(sss5);
+//		window.draw(sss6);
+//
+//		window.display();
+//	}
+	int a;
 	
+	Map<int> map;
+	int *i1 = new int, *i2 = new int;
+	*i1 = 23;
+	*i2 = 42;
+	map.addItem(0, 2, i1);
+	map.print(std::cout);
+
+	
+	return 0;
 }

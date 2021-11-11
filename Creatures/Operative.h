@@ -1,9 +1,7 @@
 #ifndef LAB4_OPERATIVE_H
 #define LAB4_OPERATIVE_H
 
-#include "Gun.h"
 #include "Table.h"
-#include "Creature.h"
 
 class Operative : public Creature {
 private:
@@ -24,13 +22,13 @@ public:
 	Table &getTable() { return itemTable_; }
 	
 	void setActiveGun(Gun *gun);
-	
+
 //	void switchGun(int index);
+	void kill(Level *level) override;
 	ErrorCodes receiveItem(Item *item);
 	void throwItem(Level *level,int index);
 	void useItem(int index);
 	void shoot(Level *level, Creature *victim);
 };
-
 
 #endif //LAB4_OPERATIVE_H

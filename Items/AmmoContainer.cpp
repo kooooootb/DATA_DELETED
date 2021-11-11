@@ -1,4 +1,5 @@
-#include "AmmoContainer.h"
+#include "Header_Items.h"
+#include "Creature.h"
 
 AmmoContainer::AmmoContainer(std::string &name, int weight, Ammunition ammoType, int ammoMax) :
 Item(name, weight + calcAmmoWeightByType(ammoMax)) , ammoType_(ammoType) , ammoMax_(ammoMax) {
@@ -18,7 +19,7 @@ void AmmoContainer::setAmmoMax(int ammoMax) {
 }
 
 ErrorCodes AmmoContainer::use(Creature *creature) {//reload activeGun using container
-	auto *operative = dynamic_cast<Operative*>(creature);
+	Operative *operative = dynamic_cast<Operative*>(creature);
 	if(operative == nullptr) return ERROR;
 	
 	Gun *activeGun = operative->getActiveGun();

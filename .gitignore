@@ -1,3 +1,4 @@
 vvv/**
 cmake-build-debug/**
 .*
+sfml/**

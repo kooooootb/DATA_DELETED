@@ -3,8 +3,6 @@
 
 #include "../AllClasses.h"
 
-#include <string>
-
 class Item {
 protected:
 	std::string name_;
@@ -19,5 +17,9 @@ public:
 	void setWeight(int weight);
 };
 
+#include "Table.h"
+#include "HealthKit.h"
+#include "AmmoContainer.h"
+#include "Gun.h"
 
 #endif //LAB4_ITEM_H

@@ -1,4 +1,7 @@
+#include "Header_Creatures.h"
+#include "Level.h"
 #include "Sentient.h"
+
 
 Sentient::Sentient(std::string &name, Point &coord, int accuracy) : Creature(name, coord) , accuracy_(accuracy){
 	activeGun_ = nullptr;
@@ -22,4 +25,8 @@ void Sentient::shoot(Level *level, Creature *victim) {
 	if(activeGun_ == nullptr) return;
 	
 	activeGun_->shoot(level, victim, activeGun_->countHits(accuracy_));
+}
+
+void Sentient::kill(Level *level) {
+	level->killSentient(this);
 }

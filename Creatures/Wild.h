@@ -1,8 +1,6 @@
 #ifndef LAB4_WILD_H
 #define LAB4_WILD_H
 
-#include "Creature.h"
-
 class Wild : public Creature {
 private:
 	int accuracy_;
@@ -13,6 +11,7 @@ public:
 	~Wild() override;
 	
 	void attack(Creature *victim, Level *level);
+	void kill(Level *level) override;
 };
 
 
