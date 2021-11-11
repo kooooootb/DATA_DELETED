@@ -14,12 +14,12 @@ include_directories(Map)
 add_subdirectory(Creatures)
 add_subdirectory(Items)
 add_subdirectory(Level)
-add_subdirectory(Map)
+#add_subdirectory(Map)
 
 target_link_libraries(lab4 creatures)
 target_link_libraries(lab4 items)
 target_link_libraries(lab4 level)
-target_link_libraries(lab4 map)
+#target_link_libraries(lab4 map)
 
 #set(BUILD_SHARED_LIBS FALSE)
 #

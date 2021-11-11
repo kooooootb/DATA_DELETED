@@ -1,7 +1,8 @@
 //#include <SFML/Graphics.hpp>
 
 #include <iostream>
-#include "Map.h"
+#include <algorithm>
+#include "Map/Map.h"
 
 void func(int *a){
 	a = new int;
@@ -134,15 +135,42 @@ int main()
 //
 //		window.display();
 //	}
-	int a;
+//	int a;
+	Map<int*> map;
 	
-	Map<int> map;
-	int *i1 = new int, *i2 = new int;
-	*i1 = 23;
-	*i2 = 42;
-	map.addItem(0, 2, i1);
+	int **a = new int*[10];
+
+	for(int i = 0;i < 10;++i){
+		a[i] = new int;
+		*a[i] = i * 10 + 10;
+	}
+
+	map.addItem(4, 4, a[0]);
+	map.addItem(0, 0, a[1]);
+	map.addItem(2, 0, a[2]);
+	map.addItem(1, 2, a[3]);
+	map.addItem(2, 0, a[4]);
+	map.addItem(0, 4, a[5]);
+	map.addItem(2, 4, a[6]);
+	map.addItem(3, 4, a[7]);
+	map.addItem(2, 2, a[8]);
+	map.addItem(2, 2, a[9]);
+	
+	std::cout << "added" << std::endl;
+	
+	std::vector<int*> **res = map.getLine(0, 2, 4);
+	
+	std::cout << *(*res[0])[0] << std::endl;
+	std::cout << *(*res[0])[1] << std::endl;
+	
+	delete [] res;
+	
+	map.removeItem(0, 0, a[1]);
+	delete a[1];
+	
 	map.print(std::cout);
 
+	delete [] a;
 	
 	return 0;
 }

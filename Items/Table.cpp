@@ -44,5 +44,7 @@ void Table::changeWeight(int diff) {
 }
 
 void Table::dropAll(Level *level, Point &point) {
-	//
+	for(auto it = items_.begin();it != items_.end();it++){
+		level->getItemMap()
+	}
 }

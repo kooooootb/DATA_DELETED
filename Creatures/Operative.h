@@ -29,6 +29,7 @@ public:
 	void throwItem(Level *level,int index);
 	void useItem(int index);
 	void shoot(Level *level, Creature *victim);
+	void dropAllItems(Level *level);
 };
 
 #endif //LAB4_OPERATIVE_H

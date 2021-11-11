@@ -67,5 +67,10 @@ void Operative::setActiveGun(Gun *gun) {
 }
 
 void Operative::kill(Level *level) {
+	dropAllItems(level);
 	level->killOperative(this);
+}
+
+void Operative::dropAllItems(Level *level) {
+	itemTable_.dropAll(level, coord_);
 }

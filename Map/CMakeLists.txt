@@ -1,5 +1,6 @@
 project(Map)
 
 add_library(map STATIC
-        Map.h
-        Map.cpp)
+        Map.h)
+
+set_target_properties(map PROPERTIES LINKER_LANGUAGE CXX)

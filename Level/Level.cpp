@@ -117,6 +117,6 @@ void Level::killForager(Creature *cr) {
 	foragerAr_.erase(std::find(foragerAr_.begin(), foragerAr_.end(), cr));
 }
 
-void Level::dropItem(Point point, Item *item) {
-
+void Level::dropItem(Point &point, Item *item) {
+	itemMap.addItem(point.x, point.y, item);
 }

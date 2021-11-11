@@ -39,7 +39,7 @@ void Creature::heal(int healAmount) {
 }
 
 void Creature::receiveDamage(Level *level, int damage) {
-	if(damage > healthCurrent_) kill(level);
+	if(damage >= healthCurrent_) kill(level);
 	else healthCurrent_ -= damage;
 }
 
