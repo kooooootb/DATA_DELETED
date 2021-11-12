@@ -9,6 +9,8 @@ Level::Level() {
 	loadSentient(SENTS_CFG);
 	loadWild(WILDS_CFG);
 	loadForager(FORAGS_CFG);
+	
+	activeCreature = operativeAr_[0];
 }
 
 void Level::loadOperative(const char * fname) {
@@ -104,8 +106,8 @@ void Level::loadForager(const char * fname) {
 	fs.close();
 }
 
-void Level::setCell(int x, int y, Cell &cell) {
-	cells_[x][y] = cell;
+void Level::setCell(int x, int y, CellType type) {
+	cells_[x][y].setType(type);
 }
 
 void Level::killOperative(Creature *cr) {
@@ -130,20 +132,24 @@ void Level::dropItem(Point &point, Item *item) {
 }
 
 void Level::loadCells(const char *fname) {
-	cells_ = new Cell*[CELLS_VERT];
-	for(int i = 0;i < CELLS_VERT;++i){
-		cells_[i] = new Cell[CELLS_HORIZ];
+	std::ifstream fs(fname);
+	if (!fs.is_open()) {
+		throw std::runtime_error("No file named for Cell.cfg found");
 	}
 	
-	std::ifstream fs(fname);
-	if (!fs.is_open())
-		throw std::exception();//no file
+	fs >> CELLS_VERT >> CELLS_HORIZ;
 	
-	std::string type;
+	cells_ = new Cell*[CELLS_HORIZ];
+	for(int i = 0;i < CELLS_HORIZ;++i){
+		cells_[i] = new Cell[CELLS_VERT]();
+	}
+	
+	int type;
+	int x,y;
 	while(fs >> type){
 		fs >> type;
-		
-		
+		fs >> x >> y;
+		cells_[y][x].setType(static_cast<CellType>(type));
 	}
 	
 	fs.close();

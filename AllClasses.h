@@ -13,7 +13,7 @@
 enum CellType{
 	GLASS,
 	WALL,
-	FLOOR,
+	FLOOR = 0,
 	PARTITION
 };
 

@@ -1,5 +1,5 @@
-//
-// Created by zavgm on 04.11.2021.
-//
-
 #include "Cell.h"
+
+void Cell::setType(CellType type) {
+	type_ = type;
+}

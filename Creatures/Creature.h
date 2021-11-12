@@ -25,6 +25,7 @@ public:
 	int getTimeMax() const { return timeMax_; }
 	int getTimeCurrent() const { return timeCurrent_; }
 	const Point &getPosition() const { return coord_; }
+	const std::string &getName() const { return name_; }
 	
 	void setHealthMax(int healthMax);
 	void setHealthCurrent(int healthCurrent);

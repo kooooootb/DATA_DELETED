@@ -137,26 +137,22 @@ int main()
 	
 //	std::string a = "testOper.cfg";
 //	level.spawnOperative(a);
-	std::string name = "2123";
-	Point coord(1, 2);
-	int force = 1, accuracy = 1;
-	float reloadTime = 1;
-	Operative *op = new Operative(name, coord, reloadTime, force, accuracy);
-	std::string a;
-	
 	std::ifstream fs("test.txt");
-	if (!fs.is_open())
-		throw std::exception();//no file
 	
-	std::string type;
-	int x, y;
-	while(fs >> type){
-		fs >> x;
-		fs >> y;
-		std::cout << "Type:" << type << " XY:" << x << ' ' << y << std::endl;
-	}
+	Level level;
 	
-	fs.close();
-
+	auto *op = dynamic_cast<Operative *>(level.getActiveCreature());
+	std::cout << op->getName() << std::endl;
+	std::cout << op->getPosition().x << ' ' << op->getPosition().y << std::endl;
+	
+	
+	std::cout << level.getCells()[10][10].getType() << std::endl;
+	level.getCells()[10][11].setType(WALL);
+	std::cout << level.getCells()[10][11].getType() << std::endl;
+	
+	op->walk(level.getCells(), DOWN);
+	
+	std::cout << op->getPosition().x << ' ' << op->getPosition().y << std::endl;
+	
 	return 0;
 }

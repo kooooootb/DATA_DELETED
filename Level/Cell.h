@@ -8,6 +8,8 @@ private:
 	CellType type_;
 public:
 	CellType getType() const { return type_; }
+	
+	void setType(CellType type);
 };
 
 

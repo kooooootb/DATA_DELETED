@@ -3,7 +3,7 @@
 #include "Level.h"
 
 Creature::Creature(std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius) :
-	name_(name) , healthMax_(healthMax) , timeMax_(timeMax) , walkTime_(walkTime) , viewRadius_(viewRadius) {
+	name_(name) , coord_(coord) , healthMax_(healthMax) , timeMax_(timeMax) , walkTime_(walkTime) , viewRadius_(viewRadius) {
 	healthCurrent_ = healthMax;
 	timeCurrent_ = 0;
 }
@@ -17,16 +17,16 @@ void Creature::walk(Cell **cells, Direction direction) {
 				coord_.x--;
 			break;
 		case UP:
-			if(cells[coord_.x][coord_.y + 1].getType() == FLOOR)
-				coord_.y++;
+			if(cells[coord_.x][coord_.y - 1].getType() == FLOOR)
+				coord_.y--;
 			break;
 		case RIGHT:
 			if(cells[coord_.x + 1][coord_.y].getType() == FLOOR)
 				coord_.x++;
 			break;
 		case DOWN:
-			if(cells[coord_.x][coord_.y - 1].getType() == FLOOR)
-				coord_.y--;
+			if(cells[coord_.x][coord_.y + 1].getType() == FLOOR)
+				coord_.y++;
 			break;
 		default:
 			throw std::exception();

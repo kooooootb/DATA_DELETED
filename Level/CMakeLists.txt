@@ -1,8 +1,6 @@
 project(Level)
 
-
-
 add_library(level STATIC
-        Level.h
         Level.cpp
+        Level.h
         Cell.cpp)

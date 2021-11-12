@@ -31,8 +31,9 @@ public:
 	Cell **getCells() const { return cells_; }
 	Map<Item*> getItemMap() const { return itemMap; }
 	Map<Creature*> getCreatureMap() const { return creatureMap; }
+	Creature *getActiveCreature() const { return activeCreature; }
 	
-	void setCell(int x, int y, Cell &cell);
+	void setCell(int x, int y, CellType type);
 	
 	void dropItem(Point &point, Item *item);
 	void addItem(Point &point);

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.18)
 project(lab4)
 
 set(CMAKE_CXX_STANDARD 20)
-#set(EXECUTABLE_OUTPUT_PATH ../files)
+set(EXECUTABLE_OUTPUT_PATH ../files)
 
 add_executable(lab4 main.cpp)
 
@@ -11,15 +11,17 @@ include_directories(Items)
 include_directories(Level)
 include_directories(Map)
 
-#add_subdirectory(Creatures)
-#add_subdirectory(Items)
-#add_subdirectory(Level)
-#
+add_subdirectory(Creatures)
+add_subdirectory(Items)
+add_subdirectory(Level)
+
 #target_link_libraries(lab4 creatures)
-#target_link_libraries(lab4 items)
-#target_link_libraries(lab4 level)
 
+add_library(lib INTERFACE)
 
+target_link_libraries(lib INTERFACE level creatures items)
+
+target_link_libraries(lab4 lib)
 
 #set(BUILD_SHARED_LIBS FALSE)
 #
