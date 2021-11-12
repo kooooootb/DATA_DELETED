@@ -3,8 +3,8 @@
 
 #include "../AllClasses.h"
 
-#include "Header_Items.h"
-#include "Header_Creatures.h"
+#include "Item.h"
+#include "Creature.h"
 #include "Cell.h"
 #include "Map.h"
 
@@ -19,8 +19,13 @@ private:
 	Map<Item*> itemMap;
 	Map<Creature*> creatureMap;
 	
+	unsigned int C_OPERATIVES = 0;
+	unsigned int C_SENTIENTS = 0;
+	unsigned int C_WILDS = 0;
+	unsigned int C_FORAGERS = 0;
+	unsigned int CELLS_HORIZ = 0, CELLS_VERT = 0;
 public:
-	Level();
+	Level();//constructor loads creatures and cells from default files
 	~Level() { delete cells_; }
 	
 	Cell **getCells() const { return cells_; }
@@ -30,11 +35,15 @@ public:
 	void setCell(int x, int y, Cell &cell);
 	
 	void dropItem(Point &point, Item *item);
+	void addItem(Point &point);
 	
-	void spawnOperative(std::string &);
-	void spawnSentient(std::string &);
-	void spawnWild(std::string &);
-	void spawnForager(std::string &);
+	void loadCells(const char *);
+	
+	//spawn all creatures from file
+	void loadOperative(const char *);
+	void loadSentient(const char *);
+	void loadWild(const char *);
+	void loadForager(const char *);
 	
 	//killCreature == remove it from creatureAr_; should be called by creature->kill()
 	void killOperative(Creature*);

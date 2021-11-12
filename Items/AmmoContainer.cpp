@@ -1,5 +1,6 @@
 #include "Header_Items.h"
 #include "Creature.h"
+#include "../Parameters.h"
 
 AmmoContainer::AmmoContainer(std::string &name, int weight, Ammunition ammoType, int ammoMax) :
 Item(name, weight + calcAmmoWeightByType(ammoMax)) , ammoType_(ammoType) , ammoMax_(ammoMax) {

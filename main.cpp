@@ -1,8 +1,7 @@
 //#include <SFML/Graphics.hpp>
 
 #include <iostream>
-#include <algorithm>
-#include "Map/Map.h"
+#include "Level.h"
 
 void func(int *a){
 	a = new int;
@@ -23,8 +22,8 @@ int main()
 //	shape1.setFillColor(sf::Color::Green);
 //
 //	sf::Texture pict;
-////	pict.loadFromFile("C:/Users/zavgm/Desktop/ehoJau95KJc.jpg");
-//	pict.loadFromFile("C:/Users/zavgm/Desktop/asd.png");
+//	pict.loadFromFile("C:/Users/zavgm/Desktop/ehoJau95KJc.jpg");
+////	pict.loadFromFile("C:/Users/zavgm/Desktop/asd.png");
 //	sf::Sprite s(pict);
 //
 //	sf::Event event;
@@ -135,42 +134,29 @@ int main()
 //
 //		window.display();
 //	}
-//	int a;
-	Map<int*> map;
 	
-	int **a = new int*[10];
-
-	for(int i = 0;i < 10;++i){
-		a[i] = new int;
-		*a[i] = i * 10 + 10;
+//	std::string a = "testOper.cfg";
+//	level.spawnOperative(a);
+	std::string name = "2123";
+	Point coord(1, 2);
+	int force = 1, accuracy = 1;
+	float reloadTime = 1;
+	Operative *op = new Operative(name, coord, reloadTime, force, accuracy);
+	std::string a;
+	
+	std::ifstream fs("test.txt");
+	if (!fs.is_open())
+		throw std::exception();//no file
+	
+	std::string type;
+	int x, y;
+	while(fs >> type){
+		fs >> x;
+		fs >> y;
+		std::cout << "Type:" << type << " XY:" << x << ' ' << y << std::endl;
 	}
+	
+	fs.close();
 
-	map.addItem(4, 4, a[0]);
-	map.addItem(0, 0, a[1]);
-	map.addItem(2, 0, a[2]);
-	map.addItem(1, 2, a[3]);
-	map.addItem(2, 0, a[4]);
-	map.addItem(0, 4, a[5]);
-	map.addItem(2, 4, a[6]);
-	map.addItem(3, 4, a[7]);
-	map.addItem(2, 2, a[8]);
-	map.addItem(2, 2, a[9]);
-	
-	std::cout << "added" << std::endl;
-	
-	std::vector<int*> **res = map.getLine(0, 2, 4);
-	
-	std::cout << *(*res[0])[0] << std::endl;
-	std::cout << *(*res[0])[1] << std::endl;
-	
-	delete [] res;
-	
-	map.removeItem(0, 0, a[1]);
-	delete a[1];
-	
-	map.print(std::cout);
-
-	delete [] a;
-	
 	return 0;
 }

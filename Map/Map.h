@@ -29,9 +29,9 @@ public:
 	
 	~Map();
 	
-	void addItem(int x, int y, T item);
+	void addItem(const Point &point, T item);
 	
-	void removeItem(int x, int y, T item);
+	void removeItem(const Point &point, T item);
 	
 	std::vector<T> ** getLine(int y, int begin, int end);
 	
@@ -101,7 +101,8 @@ CellT *Map<T>::removeCell(int index, CellT *&ar, int &amount){
 }
 
 template<class T>
-void Map<T>::addItem(int x, int y, T item){
+void Map<T>::addItem(const Point &point, T item){
+	int x = point.x, y = point.y;
 	int i;
 	VertCell *vCell = nullptr;
 	for(i = 0;i < amountY;++i){
@@ -140,7 +141,8 @@ void Map<T>::addItem(int x, int y, T item){
 }
 
 template<class T>
-void Map<T>::removeItem(int x, int y, T item){
+void Map<T>::removeItem(const Point &point, T item){
+	int x = point.x, y = point.y;
 	VertCell *vCell = nullptr;//100% that item will be there
 	int iV, iH;
 	for(iV = 0;iV < amountY;++iV){

@@ -1,9 +1,11 @@
 #include "Header_Items.h"
 #include "Creature.h"
+#include "../Parameters.h"
 
-Gun::Gun(std::string &name, int weight, int damage, int shootTime, int reloadTime, Ammunition ammoType, int ammoMax, int accuracy) :
+Gun::Gun(std::string &name, int weight, int damage, int shootTime, int reloadTime, Ammunition ammoType, int ammoMax, int accuracy,
+		 int switchTime) :
 		Item(name, weight) , damage_(damage) , shootTime_(shootTime) , reloadTime_(reloadTime) , ammoType_(ammoType) ,
-		ammoMax_(ammoMax) , accuracy_(accuracy) {
+		ammoMax_(ammoMax) , accuracy_(accuracy) , switchTime_(switchTime) {
 	ammoCurrent_ = ammoMax_;
 }
 
@@ -25,6 +27,8 @@ ErrorCodes Gun::use(Creature *creature) {
 		operative->getTable().addItem(activeGun);
 	}
 	operative->setActiveGun(this);
+	
+	creature->spendTime(switchTime_);
 	
 	return TOREMOVE;
 }
@@ -51,16 +55,18 @@ int Gun::calcAmmoWeightByType(int amount) const {
 	}
 }
 
-void Gun::shoot(Level *level, Creature *victim, float hitsMultipl) {
+void Gun::shoot(Level *level, Creature *victim, Creature *shooter, float hitsMultipl) {
 	int amount;
 	if((amount = calcAmountByType()) < ammoCurrent_) amount = ammoCurrent_;
+	if(shooter->getTimeCurrent() < shootTime_ * amount) amount = shooter->getTimeCurrent() / shootTime_;
 	int hits;
-	if(calcAmountByType() == 1)
+	if(amount == 1)
 		hits = hitsMultipl > 0.7 ? 1 : 0;
-	else hits = (int)((float)amount * hitsMultipl) + 1;
+	else hits = (int)((float)amount * hitsMultipl);
 	victim->receiveDamage(level, damage_ * hits);
 	
 	ammoCurrent_ -= amount;
+	shooter->spendTime(shootTime_ * amount);
 	weight_ -= calcAmmoWeightByType(amount);
 }
 

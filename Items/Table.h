@@ -1,6 +1,8 @@
 #ifndef LAB4_TABLE_H
 #define LAB4_TABLE_H
 
+#include "../AllClasses.h"
+
 class Table {
 private:
 	std::vector<Item *> items_;
@@ -17,7 +19,7 @@ public:
 	void setItem(int,Item*);
 	
 	void addItem(Item*);
-//	void calcWeight();
+	void calcWeight();
 	void changeWeight(int diff);
 	Item *deleteItem(int index);
 	void dropAll(Level *level, Point &point);

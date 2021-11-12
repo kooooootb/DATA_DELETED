@@ -1,7 +1,7 @@
+#include "Table.h"
 #include "Header_Creatures.h"
 #include "Item.h"
 #include "Level.h"
-#include "Forager.h"
 
 
 Forager::Forager(std::string &name, Point &coord, int force) : Creature(name, coord) , force_(force) {
@@ -26,5 +26,10 @@ ErrorCodes Forager::throwItem(Level *level, int index) {
 }
 
 void Forager::kill(Level *level) {
+	dropAllItems(level);
 	level->killForager(this);
+}
+
+void Forager::dropAllItems(Level *level) {
+	itemTable_.dropAll(level, coord_);
 }

@@ -1,10 +1,10 @@
+#include "Table.h"
 #include "Header_Creatures.h"
 #include "Item.h"
 #include "Level.h"
-#include "Operative.h"
 
 
-Operative::Operative(std::string &name, Point &coord, float reloadTime, int force, int accuracy) : Creature(name, coord) ,
+Operative::Operative(std::string &name, Point &coord, float reloadTime = 10, int force = 100, int accuracy = 100) : Creature(name, coord) ,
 		reloadTime_(reloadTime), force_(force) , accuracy_(accuracy) {
 	activeGun_ = nullptr;
 	//...
@@ -59,7 +59,7 @@ void Operative::useItem(int index) {
 void Operative::shoot(Level *level, Creature *victim) {
 	if(activeGun_ == nullptr) return;
 	
-	activeGun_->shoot(level, victim, activeGun_->countHits(accuracy_));
+	activeGun_->shoot(level, victim, this, activeGun_->countHits(accuracy_));
 }
 
 void Operative::setActiveGun(Gun *gun) {
@@ -73,4 +73,6 @@ void Operative::kill(Level *level) {
 
 void Operative::dropAllItems(Level *level) {
 	itemTable_.dropAll(level, coord_);
+	level->getItemMap().addItem(coord_, activeGun_);
+	activeGun_ = nullptr;
 }

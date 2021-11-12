@@ -10,12 +10,13 @@ private:
 	int ammoCurrent_;
 	int ammoMax_;
 	int accuracy_;
+	int switchTime_;
 	
 	int calcAmmoWeightByType(int amount) const;
 	int calcAmountByType() const;
 public:
 	
-	Gun(std::string &name, int weight, int damage, int shootTime, int reloadTime, Ammunition ammoType, int ammoMax, int accuracy);
+	Gun(std::string &name, int weight, int damage, int shootTime, int reloadTime, Ammunition ammoType, int ammoMax, int accuracy, int switchTime);
 	
 	~Gun() override = default;
 	
@@ -29,7 +30,7 @@ public:
 	void setAmmoCurrent(int ammoCurrent);
 	
 	static void receiveDamage(Level *level, int damage, Operative *operative);
-	void shoot(Level *level, Creature *victim, float hitsMultipl);
+	void shoot(Level *level, Creature *victim, Creature *shooter, float hitsMultipl);
 	float countHits(int operAccuracy) const;
 //	void reload();//искать в таблице контейнер и использовать первый попавшийся?
 };

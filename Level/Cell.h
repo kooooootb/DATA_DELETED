@@ -1,11 +1,13 @@
 #ifndef LAB4_CELL_H
 #define LAB4_CELL_H
 
+#include "../AllClasses.h"
+
 class Cell {
 private:
-	int type_;
+	CellType type_;
 public:
-	int getType() const { return type_; }
+	CellType getType() const { return type_; }
 };
 
 

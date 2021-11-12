@@ -2,3 +2,4 @@ vvv/**
 cmake-build-debug/**
 .*
 sfml/**
+**.exe

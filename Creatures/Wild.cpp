@@ -1,5 +1,5 @@
+#include "Table.h"
 #include "Header_Creatures.h"
-#include "Wild.h"
 #include "Level.h"
 
 Wild::Wild(std::string &name, Point coord, int accuracy, int damage) : Creature(name, coord) ,

@@ -9,16 +9,6 @@
 #include <stdexcept>
 #include <map>
 
-const int WEIGHTLARGE = 10, WEIGHTMEDIUM = 5, WEIGHTSMALL = 2;//bullets' weight
-const int AMOUNTLARGE = 1, AMOUNTMEDIUM = 5, AMOUNTSMALL = 4;//bullets per shot
-
-const int C_OPERATIVES = 5;
-const int C_SENTIENTS = 5;
-const int C_WILDS = 5;
-const int C_FORAGERS = 5;
-
-const int CELLS_HORIZ = 20, CELLS_VERT = 20;
-const int CELLSIZE = 100;
 
 enum CellType{
 	GLASS,

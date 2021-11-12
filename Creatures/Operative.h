@@ -1,8 +1,6 @@
 #ifndef LAB4_OPERATIVE_H
 #define LAB4_OPERATIVE_H
 
-#include "Table.h"
-
 class Operative : public Creature {
 private:
 	float reloadTime_;

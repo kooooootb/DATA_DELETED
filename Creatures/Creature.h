@@ -24,6 +24,7 @@ public:
 	int getViewRadius() const { return viewRadius_; }
 	int getTimeMax() const { return timeMax_; }
 	int getTimeCurrent() const { return timeCurrent_; }
+	const Point &getPosition() const { return coord_; }
 	
 	void setHealthMax(int healthMax);
 	void setHealthCurrent(int healthCurrent);

@@ -1,3 +1,4 @@
+#include "Table.h"
 #include "Header_Creatures.h"
 #include "Level.h"
 

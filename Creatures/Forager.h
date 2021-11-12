@@ -15,6 +15,7 @@ public:
 	void kill(Level *level) override;
 	ErrorCodes receiveItem(Item *item);
 	ErrorCodes throwItem(Level *level, int index);
+	void dropAllItems(Level *level);
 };
 
 #endif //LAB4_FORAGER_H
