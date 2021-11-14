@@ -1,5 +1,6 @@
+#include <SFML/Graphics.hpp>
 #include "Table.h"
-#include "Header_Creatures.h"
+#include "Creature.h"
 #include "Item.h"
 #include "Level.h"
 
@@ -32,4 +33,8 @@ void Forager::kill(Level *level) {
 
 void Forager::dropAllItems(Level *level) {
 	itemTable_.dropAll(level, coord_);
+}
+
+void Forager::drawCell(sf::RectangleShape &shape) {
+
 }

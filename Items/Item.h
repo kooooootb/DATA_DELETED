@@ -15,6 +15,9 @@ public:
 	virtual ErrorCodes use(Creature *creature) = 0;
 	int getWeight() const { return weight_; }
 	void setWeight(int weight);
+	const std::string &getName() const{ return name_; }
+	
+	virtual void drawCell(sf::RectangleShape &shape) = 0;
 };
 
 #include "Table.h"

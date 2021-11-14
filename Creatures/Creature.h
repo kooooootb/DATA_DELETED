@@ -36,8 +36,10 @@ public:
 	void heal(int healAmount);
 	virtual void kill(Level *level) = 0;
 	void spendTime(int time);
-	void walk(Cell **cells, Direction direction);
+	void walk(Level &level, Direction direction);
 	void receiveDamage(Level *level, int damage);
+	
+	virtual void drawCell(sf::RectangleShape &shape) = 0;
 };
 
 #include "Operative.h"

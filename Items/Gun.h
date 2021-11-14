@@ -33,6 +33,8 @@ public:
 	void shoot(Level *level, Creature *victim, Creature *shooter, float hitsMultipl);
 	float countHits(int operAccuracy) const;
 //	void reload();//искать в таблице контейнер и использовать первый попавшийся?
+	
+	void drawCell(sf::RectangleShape &shape) override;
 };
 
 

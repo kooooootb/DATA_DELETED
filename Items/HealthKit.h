@@ -11,6 +11,8 @@ public:
 	~HealthKit() override = default;
 	
 	ErrorCodes use(Creature *creature) override;
+	
+	void drawCell(sf::RectangleShape &shape) override;
 };
 
 

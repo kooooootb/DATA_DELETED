@@ -1,5 +1,6 @@
+#include <SFML/Graphics.hpp>
 #include "Table.h"
-#include "Header_Creatures.h"
+#include "Creature.h"
 #include "Level.h"
 
 
@@ -28,7 +29,11 @@ void Sentient::shoot(Level *level, Creature *victim) {
 }
 
 void Sentient::kill(Level *level) {
-	level->getItemMap().addItem(coord_, activeGun_);
+	level->addItem(coord_, activeGun_);
 	activeGun_ = nullptr;
 	level->killSentient(this);
+}
+
+void Sentient::drawCell(sf::RectangleShape &shape) {
+	shape.setFillColor(sf::Color(210,100,0));
 }

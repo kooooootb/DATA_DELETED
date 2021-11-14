@@ -12,6 +12,8 @@ public:
 	
 	void attack(Creature *victim, Level *level);
 	void kill(Level *level) override;
+	
+	void drawCell(sf::RectangleShape &shape) override;
 };
 
 

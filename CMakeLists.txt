@@ -4,7 +4,7 @@ project(lab4)
 set(CMAKE_CXX_STANDARD 20)
 set(EXECUTABLE_OUTPUT_PATH ../files)
 
-add_executable(lab4 main.cpp)
+add_executable(lab4 main.cpp Game.cpp Game.h dialog.cpp dialog.h)
 
 include_directories(Creatures)
 include_directories(Items)
@@ -18,14 +18,13 @@ add_subdirectory(Level)
 #target_link_libraries(lab4 creatures)
 
 add_library(lib INTERFACE)
-
 target_link_libraries(lib INTERFACE level creatures items)
 
 target_link_libraries(lab4 lib)
 
-#set(BUILD_SHARED_LIBS FALSE)
-#
-#add_subdirectory(sfml)
-#include_directories(sfml/include)
-#
-#target_link_libraries(lab4 sfml-graphics sfml-audio sfml-network sfml-window sfml-system)
+set(BUILD_SHARED_LIBS FALSE)
+
+add_subdirectory(sfml)
+include_directories(sfml/include)
+
+target_link_libraries(lab4 sfml-graphics sfml-audio sfml-network sfml-window sfml-system)

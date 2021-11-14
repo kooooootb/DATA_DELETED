@@ -20,6 +20,8 @@ public:
 	void setAmmoCurrent(int);
 	void setAmmoMax(int);
 	ErrorCodes use(Creature *creature) override;
+	
+	void drawCell(sf::RectangleShape &shape) override;
 };
 
 #endif //LAB4_AMMOCONTAINER_H

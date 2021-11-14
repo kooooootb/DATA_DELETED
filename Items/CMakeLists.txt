@@ -7,3 +7,7 @@ add_library(items STATIC
         HealthKit.cpp
         Item.cpp
         Table.cpp)
+
+include_directories(sfml/include)
+
+target_link_libraries(items sfml-graphics sfml-window sfml-system)

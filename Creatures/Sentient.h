@@ -14,6 +14,8 @@ public:
 	void throwGun(Level *level);
 	void shoot(Level *level, Creature *victim);
 	void kill(Level *level) override;
+	
+	void drawCell(sf::RectangleShape &shape) override;
 };
 
 #endif //LAB4_SENTIENT_H

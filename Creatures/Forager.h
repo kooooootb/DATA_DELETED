@@ -16,6 +16,8 @@ public:
 	ErrorCodes receiveItem(Item *item);
 	ErrorCodes throwItem(Level *level, int index);
 	void dropAllItems(Level *level);
+	
+	void drawCell(sf::RectangleShape &shape) override;
 };
 
 #endif //LAB4_FORAGER_H

@@ -1,6 +1,5 @@
 #include "Item.h"
 #include "Level.h"
-#include "Table.h"
 
 
 Table::~Table() {
@@ -48,7 +47,8 @@ void Table::changeWeight(int diff) {
 
 void Table::dropAll(Level *level, Point &point) {
 	for(auto it = items_.begin();it != items_.end();it++){
-		level->getItemMap().addItem(point, *it);
+//		level->getItemMap().addItem(point, *it);
+		level->addItem(point, *it);
 	}
 	items_.clear();
 }

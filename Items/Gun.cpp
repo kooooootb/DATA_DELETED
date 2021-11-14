@@ -1,6 +1,8 @@
-#include "Header_Items.h"
+#include <SFML/Graphics.hpp>
+#include "Item.h"
 #include "Creature.h"
 #include "../Parameters.h"
+
 
 Gun::Gun(std::string &name, int weight, int damage, int shootTime, int reloadTime, Ammunition ammoType, int ammoMax, int accuracy,
 		 int switchTime) :
@@ -72,4 +74,8 @@ void Gun::shoot(Level *level, Creature *victim, Creature *shooter, float hitsMul
 
 float Gun::countHits(int operAccuracy) const {
 	return (float)(operAccuracy + accuracy_) / 200;
+}
+
+void Gun::drawCell(sf::RectangleShape &shape) {
+	shape.setFillColor(sf::Color(0,100,5));
 }

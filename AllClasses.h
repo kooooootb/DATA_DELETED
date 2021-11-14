@@ -8,13 +8,20 @@
 #include <fstream>
 #include <stdexcept>
 #include <map>
+#include <algorithm>
 
+enum CreatType{
+	OPERATIVE,
+	SENTIENT,
+	WILD,
+	FORAGER
+};
 
 enum CellType{
-	GLASS,
-	WALL,
 	FLOOR = 0,
-	PARTITION
+	WALL = 1,
+	GLASS = 2,
+	PARTITION = 3
 };
 
 enum Ammunition{
@@ -55,6 +62,10 @@ class Item;
 class Table;
 class Cell;
 class Level;
+
+namespace sf{
+	class RectangleShape;
+}
 
 //#include "Creature.h"
 //#include "Forager.h"

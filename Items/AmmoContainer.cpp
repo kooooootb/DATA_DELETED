@@ -1,4 +1,5 @@
-#include "Header_Items.h"
+#include <SFML/Graphics.hpp>
+#include "Item.h"
 #include "Creature.h"
 #include "../Parameters.h"
 
@@ -66,4 +67,8 @@ int AmmoContainer::calcAmmoWeightByType(int amount) {
 		default:
 			throw std::exception();
 	}
+}
+
+void AmmoContainer::drawCell(sf::RectangleShape &shape) {
+
 }

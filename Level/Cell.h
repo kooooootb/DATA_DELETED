@@ -7,6 +7,8 @@ class Cell {
 private:
 	CellType type_;
 public:
+	Cell() : type_(FLOOR) {}
+	
 	CellType getType() const { return type_; }
 	
 	void setType(CellType type);

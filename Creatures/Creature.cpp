@@ -10,23 +10,36 @@ Creature::Creature(std::string &name, Point &coord, int healthMax, int timeMax, 
 
 Creature::~Creature() = default;//nothing to delete
 
-void Creature::walk(Cell **cells, Direction direction) {
+void Creature::walk(Level &level, Direction direction) {
+	const std::vector<std::vector<Cell>> &cells = level.getCells();
 	switch (direction){
 		case LEFT:
-			if(cells[coord_.x - 1][coord_.y].getType() == FLOOR)
+			if(coord_.x == 0) return;
+			if(cells[coord_.x - 1][coord_.y].getType() == FLOOR){
+				level.moveCreature(coord_.x, coord_.y, this, LEFT);
 				coord_.x--;
+			}
 			break;
 		case UP:
-			if(cells[coord_.x][coord_.y - 1].getType() == FLOOR)
+			if(coord_.y == 0) return;
+			if(cells[coord_.x][coord_.y - 1].getType() == FLOOR){
+				level.moveCreature(coord_.x, coord_.y, this, UP);
 				coord_.y--;
+			}
 			break;
 		case RIGHT:
-			if(cells[coord_.x + 1][coord_.y].getType() == FLOOR)
+			if(coord_.x == level.getHorizCells() - 1) return;
+			if(cells[coord_.x + 1][coord_.y].getType() == FLOOR){
+				level.moveCreature(coord_.x, coord_.y, this, RIGHT);
 				coord_.x++;
+			}
 			break;
 		case DOWN:
-			if(cells[coord_.x][coord_.y + 1].getType() == FLOOR)
+			if(coord_.y == level.getVertCells() - 1) return;
+			if(cells[coord_.x][coord_.y + 1].getType() == FLOOR){
+				level.moveCreature(coord_.x, coord_.y, this, DOWN);
 				coord_.y++;
+			}
 			break;
 		default:
 			throw std::exception();

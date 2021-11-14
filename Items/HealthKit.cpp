@@ -1,3 +1,4 @@
+#include <SFML/Graphics.hpp>
 #include "Item.h"
 #include "Creature.h"
 
@@ -11,4 +12,8 @@ ErrorCodes HealthKit::use(Creature *creature) {
 	
 	creature->spendTime(healTime_);
 	return TODELETE;
+}
+
+void HealthKit::drawCell(sf::RectangleShape &shape) {
+
 }

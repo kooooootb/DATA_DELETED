@@ -28,6 +28,8 @@ public:
 	void useItem(int index);
 	void shoot(Level *level, Creature *victim);
 	void dropAllItems(Level *level);
+	
+	void drawCell(sf::RectangleShape &shape) override;
 };
 
 #endif //LAB4_OPERATIVE_H

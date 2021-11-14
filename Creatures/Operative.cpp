@@ -1,5 +1,6 @@
+#include <SFML/Graphics.hpp>
 #include "Table.h"
-#include "Header_Creatures.h"
+#include "Creature.h"
 #include "Item.h"
 #include "Level.h"
 
@@ -24,7 +25,9 @@ Operative::~Operative() {
 //useItem == switchGun
 
 ErrorCodes Operative::receiveItem(Item *item) {
-	if(item->getWeight() + itemTable_.getWeight() + activeGun_->getWeight() > force_) return ERROR;//too heavy
+	int sumWeight = item->getWeight() + itemTable_.getWeight();
+	if(activeGun_ != nullptr)  sumWeight += activeGun_->getWeight();
+	if(sumWeight > force_) return ERROR;//too heavy
 	
 	itemTable_.addItem(item);
 	
@@ -73,6 +76,15 @@ void Operative::kill(Level *level) {
 
 void Operative::dropAllItems(Level *level) {
 	itemTable_.dropAll(level, coord_);
-	level->getItemMap().addItem(coord_, activeGun_);
+	level->addItem(coord_, activeGun_);
 	activeGun_ = nullptr;
+}
+
+void Operative::drawCell(sf::RectangleShape &shape) {
+	shape.setFillColor(sf::Color(10,0,115));
+	
+	sf::Texture texture;
+	
+	
+	
 }
