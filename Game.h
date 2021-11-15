@@ -18,6 +18,8 @@ private:
 	std::vector<Item*> *nearItems;
 	
 	Creature *cr;
+	
+	int getIntFromWindow(int amount);
 public:
 	Game();
 	

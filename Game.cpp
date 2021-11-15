@@ -32,7 +32,7 @@ interfaceWindow(sf::Vector2f((float)WINDOWWIDTH / 4, (float)WINDOWHEIGHT / 3))
 	
 	textItems.setFont(font);
 	textItems.setCharacterSize(FONTSIZE);
-	textItems.setPosition((float)WINDOWWIDTH * 3 / 4, CELLSIZE);
+	textItems.setPosition((float)WINDOWWIDTH * 3 / 4, FONTSIZE);
 	
 	nearItems = level.getItemMap().getItem(coord.x, coord.y);
 	
@@ -93,7 +93,7 @@ void Game::refreshInterface(){
 	}else{
 		textItems.setString("Press F to take items");
 	}
-	textItems.setPosition((float)WINDOWWIDTH * 3 / 4, CELLSIZE);
+	textItems.setPosition((float)WINDOWWIDTH * 3 / 4, FONTSIZE);
 }
 
 void Game::start() {
@@ -179,6 +179,12 @@ void Game::switchCreature() {
 		window.draw(text);
 	}
 	window.display();
+	int choice = getIntFromWindow(amount);
+	
+	level.setActive(choice);
+}
+
+int Game::getIntFromWindow(int amount){
 	int choice = -1;
 	
 	sf::String sfInput;
@@ -214,7 +220,7 @@ void Game::switchCreature() {
 		if(flag) break;
 	}
 	
-	level.setActive(choice);
+	return choice;
 }
 
 void Game::takeItem() {
@@ -239,40 +245,8 @@ void Game::takeItem() {
 			window.draw(text);
 		}
 		window.display();
-		int choice = -1;
 		
-		sf::String sfInput;
-		bool flag = false;
-		while(window.isOpen()){
-			sf::Event event;
-			while (window.pollEvent(event)){
-				if (event.type == sf::Event::Closed)
-					window.close();
-				if (event.type == sf::Event::TextEntered){
-					sfInput += event.text.unicode;
-				}
-				if (event.type == sf::Event::KeyPressed){
-					if (event.key.code == sf::Keyboard::Enter) {
-						bool correct = true;
-						try {
-							choice = std::stoi(sfInput.toAnsiString());
-						} catch (std::invalid_argument &ia) {
-							correct = false;
-						}
-						if (choice < 0 || choice > amount) correct = false;
-						if (!correct) {
-							std::cout << "Wrong option" << std::endl;
-//					std::cout << "Wrong option, typed:" << sfInput.toAnsiString() << std::endl;
-							sfInput = "";
-							break;
-						}
-						
-						flag = true;
-					}
-				}
-			}
-			if(flag) break;
-		}
+		int choice = getIntFromWindow(amount);
 		
 		auto *op = dynamic_cast<Operative*>(cr);
 		op->receiveItem((*nearItems)[choice]);
