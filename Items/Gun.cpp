@@ -15,8 +15,8 @@ void Gun::setAmmoCurrent(int ammoCurrent) {
 	ammoCurrent_ = ammoCurrent;
 }
 
-void Gun::receiveDamage(Level *level, int damage, Operative *operative) {
-	operative->receiveDamage(level, damage);
+void Gun::receiveDamage(int damage, Operative *operative) {
+	operative->receiveDamage(damage);
 }
 
 ErrorCodes Gun::use(Creature *creature) {
@@ -57,23 +57,26 @@ int Gun::calcAmmoWeightByType(int amount) const {
 	}
 }
 
-void Gun::shoot(Level *level, Creature *victim, Creature *shooter, float hitsMultipl) {
+void Gun::shoot(Creature *victim, Creature *shooter, float hitsMultipl) {
 	int amount;
-	if((amount = calcAmountByType()) < ammoCurrent_) amount = ammoCurrent_;
+	if((amount = calcAmountByType()) > ammoCurrent_) amount = ammoCurrent_;
 	if(shooter->getTimeCurrent() < shootTime_ * amount) amount = shooter->getTimeCurrent() / shootTime_;
 	int hits;
 	if(amount == 1)
 		hits = hitsMultipl > 0.7 ? 1 : 0;
 	else hits = (int)((float)amount * hitsMultipl);
-	victim->receiveDamage(level, damage_ * hits);
+	victim->receiveDamage(damage_ * hits);
 	
 	ammoCurrent_ -= amount;
 	shooter->spendTime(shootTime_ * amount);
 	weight_ -= calcAmmoWeightByType(amount);
 }
 
-float Gun::countHits(int operAccuracy) const {
-	return (float)(operAccuracy + accuracy_) / 200;
+float Gun::countHitsMultipl(float crAccuracy) const {
+	float res = (crAccuracy * (float)accuracy_);
+	if(res > 1.0) res = 1.0;
+	
+	return res;
 }
 
 void Gun::drawCell(sf::RectangleShape &shape) {

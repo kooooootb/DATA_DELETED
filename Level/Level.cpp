@@ -11,7 +11,7 @@ Level::Level() {
 	loadSentient(SENTS_CFG);
 	loadWild(WILDS_CFG);
 	loadForager(FORAGS_CFG);
-	
+
 	loadHKits(HKITS_CFG);
 	loadAConts(ACONTS_CFG);
 	loadGuns(GUNS_CFG);
@@ -19,29 +19,44 @@ Level::Level() {
 	activeCreature = operativeAr_[0];
 }
 
+void Level::skipComms(std::ifstream &fs){
+	while(!fs.eof()){
+		char ch = (char)fs.peek();
+		if(ch == '#') fs.ignore(std::numeric_limits<int>::max(), '\n');
+		else{
+			break;
+		}
+	}
+}
+
 void Level::loadOperative(const char * fname) {
 	std::ifstream fs(fname);
-	if (!fs.is_open())
+	if (!fs.is_open()) {
 		return;//no file
+	}
+	
+	skipComms(fs);
 	
 	std::string name;
 	while(std::getline(fs, name)){
 		while(std::all_of(name.begin(), name.end(), isspace)){
 			if(std::getline(fs, name).eof()) return;
 		}
-		int x, y, force, accuracy;
-		float reloadTime;
-		fs >> x >> y >> reloadTime >> force >> accuracy;
+		//std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, float reloadTime, int force, float accuracy
+		int x, y, force, healthMax, timeMax, walkTime, viewRadius;
+		float reloadTime, accuracy;
+		fs >> x >> y >> healthMax >> timeMax >> walkTime >> viewRadius >> reloadTime >> force >> accuracy;
 		Point coord(x, y);
 		
-		auto *operative = new Operative(name, coord, reloadTime, force, accuracy);
+		if(invalidArgs(x, y, force) || reloadTime < 0 || accuracy < 0)
+			continue;
+		
+		auto *operative = new Operative(this, name, coord, healthMax, timeMax, walkTime, viewRadius, reloadTime, force, accuracy);
 		
 		operativeAr_.push_back(operative);
 		creatureMap.addItem(coord, operative);
 		C_OPERATIVES += 1;
 	}
-	
-//	std::cout << "Loaded operatives" << std::endl;
 	
 	fs.close();
 }
@@ -51,16 +66,23 @@ void Level::loadSentient(const char * fname) {
 	if (!fs.is_open())
 		return;//no file
 	
+	skipComms(fs);
+	
 	std::string name;
 	while(std::getline(fs, name)){
 		while(std::all_of(name.begin(), name.end(), isspace)){
 			if(std::getline(fs, name).eof()) return;
 		}
-		int x, y, accuracy;
-		fs >> x >> y >> accuracy;
+		//std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, float accuracy
+		int x, y, healthMax, timeMax, walkTime, viewRadius;
+		float accuracy;
+		fs >> x >> y >> healthMax >> timeMax >> walkTime >> viewRadius >> accuracy;
 		Point coord(x, y);
 		
-		auto *sentient = new Sentient(name, coord, accuracy);
+		if(invalidArgs(x, y) || accuracy < 0)
+			continue;
+		
+		auto *sentient = new Sentient(this, name, coord, healthMax, timeMax, walkTime, viewRadius, accuracy);
 		
 		sentientAr_.push_back(sentient);
 		creatureMap.addItem(coord, sentient);
@@ -75,16 +97,22 @@ void Level::loadWild(const char * fname) {
 	if (!fs.is_open())
 		return;//no file
 	
+	skipComms(fs);
+	
 	std::string name;
 	while(std::getline(fs, name)){
 		while(std::all_of(name.begin(), name.end(), isspace)){
 			if(std::getline(fs, name).eof()) return;
 		}
-		int x, y, damage, accuracy;
-		fs >> x >> y >> accuracy >> damage;
+		//std::string &name, Point coord, int healthMax, int timeMax, int walkTime, int viewRadius, int accuracy, int damage
+		int x, y, damage, accuracy, healthMax, timeMax, walkTime, viewRadius;
+		fs >> x >> y >> healthMax >> timeMax >> walkTime >> viewRadius >> accuracy >> damage;
 		Point coord(x, y);
 		
-		auto *wild = new Wild(name, coord, accuracy, damage);
+		if(invalidArgs(x, y, accuracy, damage))
+			continue;
+		
+		auto *wild = new Wild(this, name, coord, healthMax, timeMax, walkTime, viewRadius, accuracy, damage);
 		
 		wildAr_.push_back(wild);
 		creatureMap.addItem(coord, wild);
@@ -99,16 +127,22 @@ void Level::loadForager(const char * fname) {
 	if (!fs.is_open())
 		return;//no file
 	
+	skipComms(fs);
+	
 	std::string name;
 	while(std::getline(fs, name)){
 		while(std::all_of(name.begin(), name.end(), isspace)){
 			if(std::getline(fs, name).eof()) return;
 		}
-		int x, y, force;
-		fs >> x >> y >> force;
+		//std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, int force
+		int x, y, force, healthMax, timeMax, walkTime, viewRadius;
+		fs >> x >> y >> healthMax >> timeMax >> walkTime >> viewRadius >> force;
 		Point coord(x, y);
 		
-		auto *forager = new Forager(name, coord, force);
+		if(invalidArgs(x, y, force))
+			continue;
+		
+		auto *forager = new Forager(this, name, coord, healthMax, timeMax, walkTime, viewRadius, force);
 		
 		foragerAr_.push_back(forager);
 		creatureMap.addItem(coord, forager);
@@ -123,6 +157,8 @@ void Level::loadGuns(const char *fname) {
 	if (!fs.is_open())
 		return;//no file
 	
+	skipComms(fs);
+	
 	std::string name;
 	while(std::getline(fs, name)){
 		while(std::all_of(name.begin(), name.end(), isspace)){
@@ -131,6 +167,11 @@ void Level::loadGuns(const char *fname) {
 		int x, y, weight, damage, shootTime, reloadTime, ammoTypeInt, ammoMax, accuracy, switchTime;
 		fs >> x >> y >> weight >> damage >> shootTime >> reloadTime >> ammoTypeInt >> ammoMax >> accuracy >> switchTime;
 		Point coord(x, y);
+		
+		if(x < 0 || x >= CELLS_HORIZ || y < 0 || y >= CELLS_VERT || weight < 0 || damage < 0 || shootTime < 0 || reloadTime < 0 ||
+			ammoTypeInt < 0 || ammoTypeInt >= AMMUNITION_COUNT || ammoMax < 0 || accuracy < 0 || accuracy > 100 || switchTime < 0 )
+			continue;
+		
 		auto ammoType = static_cast<Ammunition>(ammoTypeInt);
 		
 		auto *gun = new Gun(name, weight, damage, shootTime, reloadTime, ammoType, ammoMax, accuracy, switchTime);
@@ -146,6 +187,8 @@ void Level::loadHKits(const char *fname) {
 	if (!fs.is_open())
 		return;//no file
 	
+	skipComms(fs);
+	
 	std::string name;
 	while(std::getline(fs, name)){
 		while(std::all_of(name.begin(), name.end(), isspace)){
@@ -154,6 +197,9 @@ void Level::loadHKits(const char *fname) {
 		int x, y, weight, healAmount, healTime;
 		fs >> x >> y >> weight >> healAmount >> healTime;
 		Point coord(x, y);
+		
+		if(x < 0 || x >= CELLS_HORIZ || y < 0 || y >= CELLS_VERT || weight < 0 || healTime < 0 || healAmount < 0)
+			continue;
 		
 		auto *hkit = new HealthKit(name, weight, healAmount, healTime);
 		
@@ -168,6 +214,8 @@ void Level::loadAConts(const char *fname) {
 	if (!fs.is_open())
 		return;//no file
 	
+	skipComms(fs);
+	
 	std::string name;
 	while(std::getline(fs, name)){
 		while(std::all_of(name.begin(), name.end(), isspace)){
@@ -176,6 +224,11 @@ void Level::loadAConts(const char *fname) {
 		int x, y, weight, ammoTypeInt, ammoMax;
 		fs >> x >> y >> weight >> ammoTypeInt >> ammoMax;
 		Point coord(x, y);
+		
+		if(x < 0 || x >= CELLS_HORIZ || y < 0 || y >= CELLS_VERT || weight < 0 ||
+			ammoTypeInt < 0 || ammoTypeInt >= AMMUNITION_COUNT || ammoMax < 0 )
+			continue;
+		
 		auto ammoType = static_cast<Ammunition>(ammoTypeInt);
 		
 		auto *acont = new AmmoContainer(name, weight, ammoType, ammoMax);
@@ -231,6 +284,17 @@ void Level::loadCells(const char *fname) {
 		cells_[x][y].setType(static_cast<CellType>(type));
 	}
 	
+	for(auto it = cells_[0].begin(), end = cells_[0].end();it != end;++it){
+		(*it).setType(WALL);
+	}
+	for(auto it = cells_.back().begin(), end = cells_.back().end();it != end;++it){
+		(*it).setType(WALL);
+	}
+	for(auto it = cells_.begin(), end = cells_.end();it != end;++it){
+		(*it)[0].setType(WALL);
+		(*it).back().setType(WALL);
+	}
+	
 	fs.close();
 }
 
@@ -279,4 +343,8 @@ void Level::setActive(int i) {
 			break;
 	}
 	
+}
+
+bool Level::invalidArgs(int x, int y, int int1, int int2) const {
+	return (x < 0 || x >= CELLS_VERT || y < 0 || y >= CELLS_HORIZ || int1 < 0 || int2 < 0);
 }

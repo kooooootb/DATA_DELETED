@@ -6,20 +6,49 @@
 
 #include "Level.h"
 
+enum Tips{
+	T_ACTCREATURE = 0,
+	T_TAKE,
+	T_SHOOT,
+	T_USE,
+	T_ERROR,
+	T_COUNT
+};
+
+enum Stats{
+	S_TIME = 0,
+	S_HEALTH,
+	S_COUNT
+};
+
 class Game {
 private:
 	Level level;
 	sf::RenderWindow window;
 	std::array<std::array<sf::RectangleShape, WINDOWHEIGHT_AMOUNT>, WINDOWWIDTH_AMOUNT> wCells;
-	sf::RectangleShape interfaceWindow;
-	sf::Text textActCreature, textItems;
+	sf::RectangleShape interfaceWindow, invWindow;
 	sf::Font font;
 	
-	std::vector<Item*> *nearItems;
+	std::vector<Item*> *nearItems;//items in creature's position
+	std::vector<Creature*> nearCreatures;//creatures in actCreature's radius of view
+	
+	std::vector<sf::Text> mesTips;//0 - active creature, 1 - taking items, 2 - shoot, 3 - use
+	std::vector<sf::Text> mesInv;
+	std::vector<sf::Text> mesStats;
 	
 	Creature *cr;
 	
 	int getIntFromWindow(int amount);
+	void redrawWindow();
+	
+	void refreshActcreature();
+	void refreshTake();
+	void refreshShoot();
+	void refreshUse();
+	void refreshTime();
+	void refreshHealth();
+	
+	void cleanTips(int amount);
 public:
 	Game();
 	
@@ -29,12 +58,15 @@ public:
 	void refreshMap();
 	void refreshInterface();
 	
-	//draw draws shapes
+	//draw shapes
 	void drawMap();
 	void drawInterface();
+	void showError(const std::string &mes);
 	
-	void switchCreature();
-	void takeItem();
+	void switchInt();
+	void takeInt();
+	void shootInt();
+	void useInt();
 	
 	void start();
 	

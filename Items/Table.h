@@ -1,29 +1,86 @@
 #ifndef LAB4_TABLE_H
 #define LAB4_TABLE_H
 
+/*!
+ * \file
+ * \brief Заголовочный файл с описанием класса Table
+ *
+ * Данный файл содержит производный класс для описания Таблицы инвентаря существа
+*/
+
 #include "../AllClasses.h"
 
+/*! \addtogroup item Описатели предметов
+ *	@{
+ */
+
+/*!
+ * \brief Производный класс для описания Таблицы инвентаря существа
+ *
+ * Класс, содержащий в себе массив указателей на предметы.
+ * Выполняет функции инвентаря.
+ */
 class Table {
 private:
-	std::vector<Item *> items_;
-	int weight_;
+	std::vector<Item *> items_; ///< Массив указателей на предметы
+	int weight_; ///< Общий вес инвентаря
 public:
+	/*!
+	 * Конструктор класса, инициализирующий его параметры
+	 */
 	Table() : weight_(0) {}
 	
 	~Table();
 	
+	/*!
+	 * Возвращает количество предметов в инвентаре
+	 */
 	int getAmount() const;
+	/*!
+	 * Возвращает указатель на предмет по его номеру в инвентаре или nullptr при отсутствии предмета в инвентаре с таким номером
+	 */
 	Item *getItem(int);
+	/*!
+	 * Возвращает weight_
+	 */
 	int getWeight() const;
+	std::vector<Item*> getVector() const { return items_; }
 	
-	void setItem(int,Item*);
+	/*!
+	 * Заменяет предмет с данным индексом на данный предмет
+	 * @param num индекс заменяемого предмета
+	 * @param item заменяющий предмет
+	 */
+	void setItem(int num, Item *item);
 	
-	void addItem(Item*);
+	/*!
+	 * Добавляет предмет в инвентарь
+	 * @param item добавляемый предмет
+	 */
+	void addItem(Item *item);
+	/*!
+	 * Обновляет вес инвентаря
+	 */
 	void calcWeight();
+	/*!
+	 * Изменяет вес инвентаря на данную величину
+	 * @param diff величина изменения веса
+	 */
 	void changeWeight(int diff);
+	/*!
+	 * Убирает предмет с данным индексом из инвентаря
+	 * @param index индекс убираемого предмета
+	 * @return указатель на убранный предмет, nullptr при отсутствии предмета с данным индексом
+	 */
 	Item *deleteItem(int index);
-	void dropAll(Level *level, Point &point);
+	/*!
+	 * Выкидывает все предметы из инвентаря
+	 * @param level ссылка на уровень, на котором выкидываются предметы
+	 * @param point позиция на уровне куда выкидываются предметы
+	 */
+	void dropAll(Level &level, Point &point);
 };
 
+/*! @} */
 
 #endif //LAB4_TABLE_H

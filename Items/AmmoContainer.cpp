@@ -21,7 +21,7 @@ void AmmoContainer::setAmmoMax(int ammoMax) {
 }
 
 ErrorCodes AmmoContainer::use(Creature *creature) {//reload activeGun using container
-	Operative *operative = dynamic_cast<Operative*>(creature);
+	auto *operative = dynamic_cast<Operative*>(creature);
 	if(operative == nullptr) return ERROR;
 	
 	Gun *activeGun = operative->getActiveGun();
@@ -32,7 +32,7 @@ ErrorCodes AmmoContainer::use(Creature *creature) {//reload activeGun using cont
 	int magSize = activeGun->getAmmoMax();
 	int oddAmmo = activeGun->getAmmoCurrent();
 	
-	operative->spendTime((int)((float)activeGun->getReloadTime() * operative->getReloadTime()));
+	operative->spendTime((int)((float)activeGun->getReloadTime() * operative->getReloadTimeMultipl()));
 	
 	if(ammoCurrent_ + oddAmmo > magSize){//full mag -> container isn't empty
 		activeGun->setAmmoCurrent(magSize);

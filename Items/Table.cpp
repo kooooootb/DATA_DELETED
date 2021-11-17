@@ -18,6 +18,8 @@ void Table::addItem(Item *item){
 }
 
 void Table::setItem(int num, Item *item) {
+	if(num >= items_.size()) return;
+	
 	if(num < items_.size()){
 		delete items_[num];
 		items_[num] = item;
@@ -25,6 +27,8 @@ void Table::setItem(int num, Item *item) {
 }
 
 Item * Table::getItem(int num) {
+	if(num >= items_.size()) return nullptr;
+	
 	return items_[num];
 }
 
@@ -45,10 +49,9 @@ void Table::changeWeight(int diff) {
 	weight_ += diff;
 }
 
-void Table::dropAll(Level *level, Point &point) {
+void Table::dropAll(Level &level, Point &point) {
 	for(auto it = items_.begin();it != items_.end();it++){
-//		level->getItemMap().addItem(point, *it);
-		level->addItem(point, *it);
+		level.addItem(point, *it);
 	}
 	items_.clear();
 }

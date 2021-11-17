@@ -5,7 +5,7 @@
 #include "Level.h"
 
 
-Forager::Forager(std::string &name, Point &coord, int force) : Creature(name, coord) , force_(force) {
+Forager::Forager(Level *level, std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, int force) : Creature(level, name, coord, healthMax, timeMax, walkTime, viewRadius) , force_(force) {
 
 }
 
@@ -17,22 +17,22 @@ ErrorCodes Forager::receiveItem(Item *item) {
 	return OK;
 }
 
-ErrorCodes Forager::throwItem(Level *level, int index) {
+ErrorCodes Forager::throwItem(int index) {
 	Item *item = itemTable_.getItem(index);
 	if(item == nullptr) return ERROR;
 	
-	level->dropItem(coord_, item);
+	level_.dropItem(coord_, item);
 	
 	return OK;
 }
 
-void Forager::kill(Level *level) {
-	dropAllItems(level);
-	level->killForager(this);
+void Forager::kill() {
+	dropAllItems();
+	level_.killForager(this);
 }
 
-void Forager::dropAllItems(Level *level) {
-	itemTable_.dropAll(level, coord_);
+void Forager::dropAllItems() {
+	itemTable_.dropAll(level_, coord_);
 }
 
 void Forager::drawCell(sf::RectangleShape &shape) {

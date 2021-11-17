@@ -2,32 +2,35 @@
 #define LAB4_ALLCLASSES_H
 
 #include <string>
-#include <string>
 #include <vector>
 #include <typeinfo>
 #include <fstream>
 #include <stdexcept>
 #include <map>
 #include <algorithm>
+#include <stack>
 
 enum CreatType{
-	OPERATIVE,
+	OPERATIVE = 0,
 	SENTIENT,
 	WILD,
-	FORAGER
+	FORAGER,
+	CREATURES_COUNT
 };
 
 enum CellType{
 	FLOOR = 0,
 	WALL = 1,
 	GLASS = 2,
-	PARTITION = 3
+	PARTITION = 3,
+	CELLSTYPE_COUNT
 };
 
 enum Ammunition{
-	LARGE_CALIBER,
+	LARGE_CALIBER = 0,
 	MEDIUM_CALIBER,
-	SMALL_CALIBER
+	SMALL_CALIBER,
+	AMMUNITION_COUNT
 };
 
 enum ErrorCodes{

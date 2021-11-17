@@ -5,8 +5,7 @@
 #include "Level.h"
 
 
-Operative::Operative(std::string &name, Point &coord, float reloadTime = 10, int force = 100, int accuracy = 100) : Creature(name, coord) ,
-		reloadTime_(reloadTime), force_(force) , accuracy_(accuracy) {
+Operative::Operative(Level *level, std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, float reloadTime, int force, float accuracy) : Creature(level, name, coord, healthMax, timeMax, walkTime, viewRadius) , reloadTimeMultipl_(reloadTime) , force_(force) , accuracyMultipl_(accuracy) {
 	activeGun_ = nullptr;
 	//...
 }
@@ -34,11 +33,11 @@ ErrorCodes Operative::receiveItem(Item *item) {
 	return OK;
 }
 
-void Operative::throwItem(Level *level, int index) {
+void Operative::throwItem(int index) {
 	Item *item = itemTable_.deleteItem(index);
 	if(item == nullptr) return;
 	
-	level->dropItem(coord_, item);
+	level_.dropItem(coord_, item);
 }
 
 void Operative::useItem(int index) {
@@ -59,24 +58,24 @@ void Operative::useItem(int index) {
 	}
 }
 
-void Operative::shoot(Level *level, Creature *victim) {
-	if(activeGun_ == nullptr) return;
+void Operative::shoot(Creature *victim) {
+	if(activeGun_ == nullptr || victim == this) return;
 	
-	activeGun_->shoot(level, victim, this, activeGun_->countHits(accuracy_));
+	activeGun_->shoot(victim, this, activeGun_->countHitsMultipl(accuracyMultipl_));
 }
 
 void Operative::setActiveGun(Gun *gun) {
 	activeGun_ = gun;
 }
 
-void Operative::kill(Level *level) {
-	dropAllItems(level);
-	level->killOperative(this);
+void Operative::kill() {
+	dropAllItems();
+	level_.killOperative(this);
 }
 
-void Operative::dropAllItems(Level *level) {
-	itemTable_.dropAll(level, coord_);
-	level->addItem(coord_, activeGun_);
+void Operative::dropAllItems() {
+	itemTable_.dropAll(level_, coord_);
+	if(activeGun_ != nullptr) level_.addItem(coord_, activeGun_);
 	activeGun_ = nullptr;
 }
 

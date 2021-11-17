@@ -6,8 +6,8 @@ const int AMOUNTLARGE = 1, AMOUNTMEDIUM = 5, AMOUNTSMALL = 4;//bullets shot at 1
 
 //map parameters for graphic window
 const int CELLSIZE = 20;//even
-const int WINDOWWIDTH_AMOUNT = 91;//odd, crashes if WINDOWWIDTH > 1920
-const int WINDOWHEIGHT_AMOUNT = 53;//odd, crashes if WINDOWHEIGHT > 1080
+const int WINDOWWIDTH_AMOUNT = 93;//odd, crashes if WINDOWWIDTH > 1920
+const int WINDOWHEIGHT_AMOUNT = 45;//odd, crashes if WINDOWHEIGHT > 1080
 //const unsigned int WINDOWWIDTH_AMOUNT = 3;//odd, crashes if WINDOWWIDTH > 1920
 //const unsigned int WINDOWHEIGHT_AMOUNT = 3;//odd, crashes if WINDOWHEIGHT > 1080
 const int WINDOWWIDTH = CELLSIZE * WINDOWWIDTH_AMOUNT;
@@ -17,7 +17,7 @@ const int XOFFSET = WINDOWWIDTH_AMOUNT / 2;
 const int YOFFSET = WINDOWHEIGHT_AMOUNT / 2;
 
 //messages parameters
-const unsigned int FONTSIZE = CELLSIZE;
+const unsigned int FONTSIZE = 3 * CELLSIZE / 4;
 const unsigned int CHOOSEOFFSET = FONTSIZE * 5;
 
 //config files' names

@@ -4,7 +4,8 @@
 #include "Level.h"
 
 
-Sentient::Sentient(std::string &name, Point &coord, int accuracy) : Creature(name, coord) , accuracy_(accuracy){
+Sentient::Sentient(Level *level, std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, float accuracy) : Creature(level, name, coord, healthMax, timeMax, walkTime, viewRadius) ,
+	accuracyMultipl_(accuracy){
 	activeGun_ = nullptr;
 }
 
@@ -16,22 +17,22 @@ void Sentient::receiveGun(Gun *gun) {
 	activeGun_ = gun;
 }
 
-void Sentient::throwGun(Level *level) {
+void Sentient::throwGun() {
 	if(activeGun_ == nullptr) return;
 	
-	level->dropItem(coord_, activeGun_);
+	level_.dropItem(coord_, activeGun_);
 }
 
-void Sentient::shoot(Level *level, Creature *victim) {
+void Sentient::shoot(Creature *victim) {
 	if(activeGun_ == nullptr) return;
 	
-	activeGun_->shoot(level, victim, this, activeGun_->countHits(accuracy_));
+	activeGun_->shoot(victim, this, activeGun_->countHitsMultipl(accuracyMultipl_));
 }
 
-void Sentient::kill(Level *level) {
-	level->addItem(coord_, activeGun_);
+void Sentient::kill() {
+	if(activeGun_ != nullptr) level_.addItem(coord_, activeGun_);
 	activeGun_ = nullptr;
-	level->killSentient(this);
+	level_.killSentient(this);
 }
 
 void Sentient::drawCell(sf::RectangleShape &shape) {

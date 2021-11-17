@@ -25,10 +25,13 @@ private:
 	unsigned int C_WILDS = 0;
 	unsigned int C_FORAGERS = 0;
 	unsigned int CELLS_HORIZ = 0, CELLS_VERT = 0;
+	
+	bool invalidArgs(int x, int y, int int1 = 1, int int2 = 1) const;
+	static void skipComms(std::ifstream &fs);
 public:
 	Level();//constructor loads creatures and cells from default files
-	~Level() = default;
 	
+	~Level() = default;
 	std::vector<std::vector<Cell>> &getCells() { return cells_; }
 	ErrorCodes getCell(int x, int y, Cell &cell) const;//return pointer to cell or nullptr if indexes were invalid
 	Map<Item*> &getItemMap() { return itemMap; }
@@ -37,17 +40,17 @@ public:
 	unsigned int getHorizCells() const { return CELLS_HORIZ; }
 	unsigned int getVertCells() const { return CELLS_VERT; }
 	const std::vector<std::vector<Cell>> &getCells() const { return cells_; }
+	
 	const std::vector<Operative *> &getOperativeArray() const { return operativeAr_; }
-	
 	void setCell(int x, int y, CellType type);
-	void setActive(int i);
 	
+	void setActive(int i);
 	void dropItem(Point &point, Item *item);
 	void addItem(Point &point, Item *item);
+	
 	void moveCreature(int x, int y, Creature *creature, Direction direction);
 	
 	void loadCells(const char *);
-	
 	//spawn all creatures from file
 	void loadOperative(const char *);
 	void loadSentient(const char *);
@@ -55,12 +58,13 @@ public:
 	void loadForager(const char *);
 	void loadHKits(const char *);
 	void loadAConts(const char *);
-	void loadGuns(const char *);
 	
+	void loadGuns(const char *);
 	//killCreature == remove it from creatureAr_; should be called by creature->kill()
 	void killOperative(Creature*);
 	void killSentient(Creature*);
 	void killWild(Creature*);
+	
 	void killForager(Creature*);
 };
 

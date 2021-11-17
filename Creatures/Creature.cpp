@@ -2,42 +2,42 @@
 #include "Header_Creatures.h"
 #include "Level.h"
 
-Creature::Creature(std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius) :
-	name_(name) , coord_(coord) , healthMax_(healthMax) , timeMax_(timeMax) , walkTime_(walkTime) , viewRadius_(viewRadius) {
+Creature::Creature(Level *level, std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius) :
+	name_(name) , coord_(coord) , healthMax_(healthMax) , timeMax_(timeMax) , walkTime_(walkTime) , viewRadius_(viewRadius) , level_(*level){
 	healthCurrent_ = healthMax;
-	timeCurrent_ = 0;
+	timeCurrent_ = timeMax_;
 }
 
 Creature::~Creature() = default;//nothing to delete
 
-void Creature::walk(Level &level, Direction direction) {
-	const std::vector<std::vector<Cell>> &cells = level.getCells();
+void Creature::walk(Direction direction) {
+	const std::vector<std::vector<Cell>> &cells = level_.getCells();
 	switch (direction){
 		case LEFT:
 			if(coord_.x == 0) return;
 			if(cells[coord_.x - 1][coord_.y].getType() == FLOOR){
-				level.moveCreature(coord_.x, coord_.y, this, LEFT);
+				level_.moveCreature(coord_.x, coord_.y, this, LEFT);
 				coord_.x--;
 			}
 			break;
 		case UP:
 			if(coord_.y == 0) return;
 			if(cells[coord_.x][coord_.y - 1].getType() == FLOOR){
-				level.moveCreature(coord_.x, coord_.y, this, UP);
+				level_.moveCreature(coord_.x, coord_.y, this, UP);
 				coord_.y--;
 			}
 			break;
 		case RIGHT:
-			if(coord_.x == level.getHorizCells() - 1) return;
+			if(coord_.x == level_.getHorizCells() - 1) return;
 			if(cells[coord_.x + 1][coord_.y].getType() == FLOOR){
-				level.moveCreature(coord_.x, coord_.y, this, RIGHT);
+				level_.moveCreature(coord_.x, coord_.y, this, RIGHT);
 				coord_.x++;
 			}
 			break;
 		case DOWN:
-			if(coord_.y == level.getVertCells() - 1) return;
+			if(coord_.y == level_.getVertCells() - 1) return;
 			if(cells[coord_.x][coord_.y + 1].getType() == FLOOR){
-				level.moveCreature(coord_.x, coord_.y, this, DOWN);
+				level_.moveCreature(coord_.x, coord_.y, this, DOWN);
 				coord_.y++;
 			}
 			break;
@@ -52,8 +52,8 @@ void Creature::heal(int healAmount) {
 	healthCurrent_ = healthCurrent_ + healAmount > healthMax_ ? healthMax_ : healthCurrent_ + healAmount ;
 }
 
-void Creature::receiveDamage(Level *level, int damage) {
-	if(damage >= healthCurrent_) kill(level);
+void Creature::receiveDamage(int damage) {
+	if(damage >= healthCurrent_) kill();
 	else healthCurrent_ -= damage;
 }
 
