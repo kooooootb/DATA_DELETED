@@ -1,5 +1,5 @@
 #include "dialog.h"
 
 int main(){
-	menu();
+	Dialog::menu();
 }

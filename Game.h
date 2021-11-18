@@ -11,66 +11,79 @@ enum Tips{
 	T_TAKE,
 	T_SHOOT,
 	T_USE,
+	T_THROW,
 	T_ERROR,
+	T_INTMES,
 	T_COUNT
 };
 
 enum Stats{
 	S_TIME = 0,
 	S_HEALTH,
+	S_AMMO,
+	S_WEIGHT,
 	S_COUNT
 };
 
-class Game {
-private:
-	Level level;
-	sf::RenderWindow window;
-	std::array<std::array<sf::RectangleShape, WINDOWHEIGHT_AMOUNT>, WINDOWWIDTH_AMOUNT> wCells;
-	sf::RectangleShape interfaceWindow, invWindow;
-	sf::Font font;
-	
-	std::vector<Item*> *nearItems;//items in creature's position
-	std::vector<Creature*> nearCreatures;//creatures in actCreature's radius of view
-	
-	std::vector<sf::Text> mesTips;//0 - active creature, 1 - taking items, 2 - shoot, 3 - use
-	std::vector<sf::Text> mesInv;
-	std::vector<sf::Text> mesStats;
-	
-	Creature *cr;
-	
-	int getIntFromWindow(int amount);
-	void redrawWindow();
-	
-	void refreshActcreature();
-	void refreshTake();
-	void refreshShoot();
-	void refreshUse();
-	void refreshTime();
-	void refreshHealth();
-	
-	void cleanTips(int amount);
-public:
-	Game();
-	
-	~Game() = default;
-	
-	//refresh moves and changes shapes
-	void refreshMap();
-	void refreshInterface();
-	
-	//draw shapes
-	void drawMap();
-	void drawInterface();
-	void showError(const std::string &mes);
-	
-	void switchInt();
-	void takeInt();
-	void shootInt();
-	void useInt();
-	
-	void start();
-	
-};
+namespace nodata{
+	class Game {
+	private:
+		Level level;
+		sf::RenderWindow window;
+//	std::array<std::array<sf::RectangleShape, WINDOWHEIGHT_AMOUNT>, WINDOWWIDTH_AMOUNT> wCells;
+		sf::RectangleShape **wCells;
+		sf::RectangleShape interfaceWindow, invWindow;
+		sf::Font font;
+		
+		std::vector<Item*> *nearItems;//items in creature's position
+		std::vector<Creature*> nearCreatures;//creatures in actCreature's radius of view
+		
+		std::vector<sf::Text> mesTips;//0 - active creature, 1 - taking items, 2 - shoot, 3 - use
+		std::vector<sf::Text> mesInv;
+		std::vector<sf::Text> mesStats;
+		
+		Creature *cr;
+		
+		int getIntFromWindow(int amount);
+		void redrawWindow();
+		
+		void refreshActcreature();
+		void refreshTake();
+		void refreshShoot();
+		void refreshUse();
+		void refreshThrow();
+		void refreshTime();
+		void refreshHealth();
+		void refreshAmmo();
+		void refreshWeight();
+		
+		void cleanTips(int amount);
+	public:
+		Game();
+		
+		~Game();
+		
+		//refresh moves and changes shapes
+		void refreshMap();
+		void refreshInterface();
+		
+		//draw shapes
+		void drawMap();
+		void drawInterface();
+		void showError(const std::string &mes);
+		void setIntmes(const std::string &mes);
+		void clearIntmes();
+		
+		void switchInt();
+		void takeInt();
+		void shootInt();
+		void useInt();
+		void throwInt();
+		
+		void start();
+		
+	};
+}
 
 
 #endif //LAB4_GAME_H

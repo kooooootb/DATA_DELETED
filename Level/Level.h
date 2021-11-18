@@ -8,65 +8,191 @@
 #include "Cell.h"
 #include "Map.h"
 
-class Level {
-private:
-	std::vector<Operative *> operativeAr_;
-	std::vector<Wild *> wildAr_;
-	std::vector<Sentient *> sentientAr_;
-	std::vector<Forager *> foragerAr_;
-	std::vector<std::vector<Cell>> cells_;
-	Creature *activeCreature;
-	Map<Item*> itemMap;
-	Map<Creature*> creatureMap;
-	CreatType turn;
-	
-	unsigned int C_OPERATIVES = 0;
-	unsigned int C_SENTIENTS = 0;
-	unsigned int C_WILDS = 0;
-	unsigned int C_FORAGERS = 0;
-	unsigned int CELLS_HORIZ = 0, CELLS_VERT = 0;
-	
-	bool invalidArgs(int x, int y, int int1 = 1, int int2 = 1) const;
-	static void skipComms(std::ifstream &fs);
-public:
-	Level();//constructor loads creatures and cells from default files
-	
-	~Level() = default;
-	std::vector<std::vector<Cell>> &getCells() { return cells_; }
-	ErrorCodes getCell(int x, int y, Cell &cell) const;//return pointer to cell or nullptr if indexes were invalid
-	Map<Item*> &getItemMap() { return itemMap; }
-	const Map<Creature*> &getCreatureMap() const { return creatureMap; }
-	Creature *getActiveCreature() const { return activeCreature; }
-	unsigned int getHorizCells() const { return CELLS_HORIZ; }
-	unsigned int getVertCells() const { return CELLS_VERT; }
-	const std::vector<std::vector<Cell>> &getCells() const { return cells_; }
-	
-	const std::vector<Operative *> &getOperativeArray() const { return operativeAr_; }
-	void setCell(int x, int y, CellType type);
-	
-	void setActive(int i);
-	void dropItem(Point &point, Item *item);
-	void addItem(Point &point, Item *item);
-	
-	void moveCreature(int x, int y, Creature *creature, Direction direction);
-	
-	void loadCells(const char *);
-	//spawn all creatures from file
-	void loadOperative(const char *);
-	void loadSentient(const char *);
-	void loadWild(const char *);
-	void loadForager(const char *);
-	void loadHKits(const char *);
-	void loadAConts(const char *);
-	
-	void loadGuns(const char *);
-	//killCreature == remove it from creatureAr_; should be called by creature->kill()
-	void killOperative(Creature*);
-	void killSentient(Creature*);
-	void killWild(Creature*);
-	
-	void killForager(Creature*);
-};
+namespace nodata{
+	/*!
+	 * \file
+	 * \brief Заголовочный файл с описанием класса Level
+	 *
+	 * Данный файл содержит класс для описание уровня, хранения существ и предметов, их загрузки из файлов
+	 */
+
+	/*! \defgroup level Описатели уровня
+	 *	\brief Данный модуль предназначен для описания уровня
+	 *	@{
+	 */
+
+	/*!
+	 * \brief Класс для описания уровня
+	 *
+	 * Класс для описания уровня.
+	 * Указатели на существа команд хранятся в соответствуюших векторах.
+	 * Указатели на существа также хранятся в карте существ для их быстрого обнаружения.
+	 * Указатели на предметы хранятся в карте предметов.
+	*/
+	class Level {
+	private:
+		std::vector<Creature *> operativeAr_; ///< Вектор содержащий всех оперативников на уровне
+		std::vector<Creature *> wildAr_; ///< Вектор содержащий всех диких существ на уровне
+		std::vector<Creature *> sentientAr_; ///< Вектор содержащий всех разумных существ на уровне
+		std::vector<Creature *> foragerAr_; ///< Вектор содержащий всех фуражиров на уровне
+		std::vector<std::vector<Cell>> cells_; ///< Двумерный массив клеток, составляющих пространство, по которым передвигаются существа
+		Creature *activeCreature; ///< Текущее активное существо
+		Map<Item*> itemMap; ///< Карта выпавших предметов
+		Map<Creature*> creatureMap; ///< Карта существ
+		CreatType turn; ///< Определяет команду, совершающую текущих ход
+		
+		/*!
+		 * Проверяет корректность введенных координат
+		 * @return true если коодинаты корректны, false в другом случае
+		 */
+		bool invalidArgs(int x, int y) const;
+		/*!
+		 * Передвигает курсор в файловом потоке, пропуская строки-комментарии(начинающиеся на '#')
+		 * @param fs файловый поток
+		 */
+		static void skipComms(std::ifstream &fs);
+	public:
+		/*!
+		 * Конструктор класса Level загружает клетки и существа из стандартных файлов, устанавливает активное существо и дает ход команде оперативников.
+		 * Типы клеток загружаются из файла с названием CELLS_CFG.
+		 * Оперативники загружаются из файла с названием OPERS_CFG.
+		 * Разумные существа загружаются из файла с названием SENTS_CFG.
+		 * Дикие существа загружаются из файла с названием WILDS_CFG.
+		 * Фуражеры загружаются из файла с названием FORAGS_CFG.
+		 * Все названия файлов опеределены в файле Parameters.h
+		 */
+		Level();
+		
+		~Level() = default;
+		
+		/*!
+		 * Возвращает ссылку на массив клеток
+		 */
+		std::vector<std::vector<Cell>> &getCells() { return cells_; }
+		/*!
+		 * Возвращает константную ссылку на массив клеток
+		 */
+		const std::vector<std::vector<Cell>> &getCells() const { return cells_; }
+		/*!
+		 * Передает тип клетки, находящейся на данных координатах, по ссылке cell.
+		 * Если клетка не может находиться на данных координатах, возвращает ERROR
+		 */
+		ErrorCodes getCell(int x, int y, Cell &cell) const;
+		/*!
+		 * Возвращает ссылку на карту предметов
+		 */
+		Map<Item*> &getItemMap() { return itemMap; }
+		/*!
+		 * Возвращает константную ссылку на карту предметов
+		 */
+		const Map<Item*> &getItemMap() const { return itemMap; }
+		/*!
+		 * Возвращает константную ссылку на карту существ
+		 */
+		const Map<Creature*> &getCreatureMap() const { return creatureMap; }
+		/*!
+		 * Возвращает указатель на текущее активное существо
+		 */
+		Creature *getActiveCreature() const { return activeCreature; }
+		/*!
+		 * Возвращает количество клеток в одной горизонтали
+		 */
+		unsigned int getHorizCells() const { return cells_.size(); }
+		/*!
+		 * Возвращает количество клеток в одной горизонтали
+		 */
+		unsigned int getVertCells() const { return cells_.back().size(); }
+		/*!
+		 * Возвращает массив существ команды, совершающей текущий ход
+		 */
+		const std::vector<Creature *> &getCurrentTeam() const;
+		
+		/*!
+		 * Устанавливает тип type для клетки, находящейся на данных координатах x и y
+		 */
+		void setCell(int x, int y, CellType type);
+		
+		/*!
+		 * Устанавливает текущее активное существо
+		 * @param i индекс существа в соответствующем массиве команды, которая совершает текущий ход
+		 */
+		void setActive(int i);
+		/*!
+		 * Добавляет предмет на карту предметов
+		 * @param point координата, на которую добавляется предмет
+		 * @param item добавляемый предмет
+		 */
+		void dropItem(Point &point, Item *item);
+		
+		/*!
+		 * Передвигает существо в данном направлении
+		 * @param x, y координаты существа до передвижения
+		 * @param creature указатель на существо
+		 * @param direction направление
+		 */
+		void moveCreature(int x, int y, Creature *creature, Direction direction);
+		
+		/*!
+		 * Загружает клетки из данного файла
+		 * @param fname название файла для загрузки
+		 */
+		void loadCells(const char *fname);
+		/*!
+		 * Загружает оперативников из данного файла
+		 * @param fname название файла для загрузки
+		 */
+		void loadOperative(const char *fname);
+		/*!
+		 * Загружает разумных существ из данного файла
+		 * @param fname название файла для загрузки
+		 */
+		void loadSentient(const char *fname);
+		/*!
+		 * Загружает диких существ из данного файла
+		 * @param fname название файла для загрузки
+		 */
+		void loadWild(const char *fname);
+		/*!
+		 * Загружает фуражеров из данного файла
+		 * @param fname название файла для загрузки
+		 */
+		void loadForager(const char *fname);
+		/*!
+		 * Загружает аптечки из данного файла
+		 * @param fname название файла для загрузки
+		 */
+		void loadHKits(const char *fname);
+		/*!
+		 * Загружает контейнеры для патронов из данного файла
+		 * @param fname название файла для загрузки
+		 */
+		void loadAConts(const char *fname);
+		/*!
+		 * Загружает оружия из данного файла
+		 * @param fname название файла для загрузки
+		 */
+		void loadGuns(const char *);
+		
+		/*!
+		 * Убирает данного оперативника из карты существ и вектора оперативников
+		 */
+		void killOperative(Creature*);
+		/*!
+		 * Убирает данное разумное существо из карты существ и вектора разумных существ
+		 */
+		void killSentient(Creature*);
+		/*!
+		 * Убирает данное дикое существо из карты существ и вектора диких существ
+		 */
+		void killWild(Creature*);
+		/*!
+		 * Убирает данного фуражера из карты существ и вектора фуражеров
+		 */
+		void killForager(Creature*);
+	};
+
+	/*! @} */
+}
 
 
 #endif //LAB4_LEVEL_H

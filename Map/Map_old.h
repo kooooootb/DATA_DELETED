@@ -4,7 +4,7 @@
 #include "../AllClasses.h"
 
 template<class T>
-class Map {
+class Map_Old {
 private:
 	struct HorCell{
 		int x;

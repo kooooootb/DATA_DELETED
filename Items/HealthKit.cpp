@@ -2,18 +2,21 @@
 #include "Item.h"
 #include "Creature.h"
 
-HealthKit::HealthKit(std::string &name, int weight, int healAmount, int healTime) : Item(name, weight) ,
-healAmount_(healAmount) , healTime_(healTime) {
-
-}
-
-ErrorCodes HealthKit::use(Creature *creature) {
-	creature->heal(healAmount_);
+namespace nodata{
+	HealthKit::HealthKit(std::string &name, int weight, int healAmount, int healTime) : Item(name, weight) ,
+																						healAmount_(healAmount) , healTime_(healTime) {
+		
+	}
 	
-	creature->spendTime(healTime_);
-	return TODELETE;
-}
-
-void HealthKit::drawCell(sf::RectangleShape &shape) {
-
+	ErrorCodes HealthKit::use(Creature *creature) {
+		if(healTime_ > creature->getTimeCurrent()) return ERROR;//not enough time
+		creature->heal(healAmount_);
+		
+		creature->spendTime(healTime_);
+		return TODELETE;
+	}
+	
+	void HealthKit::drawCell(sf::RectangleShape &shape) {
+		shape.setFillColor(sf::Color(255,5,5));
+	}
 }

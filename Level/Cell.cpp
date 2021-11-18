@@ -1,5 +1,7 @@
 #include "Cell.h"
 
-void Cell::setType(CellType type) {
-	type_ = type;
+namespace nodata{
+	void Cell::setType(CellType type) {
+		type_ = type;
+	}
 }

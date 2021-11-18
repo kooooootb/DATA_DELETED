@@ -9,6 +9,7 @@
 #include <map>
 #include <algorithm>
 #include <stack>
+#include <cmath>
 
 enum CreatType{
 	OPERATIVE = 0,
@@ -53,32 +54,24 @@ struct Point{
 	explicit Point(int X = 0, int Y = 0) : x(X), y(Y) {}
 };
 
-class Creature;
-class Forager;
-class Operative;
-class Sentient;
-class Wild;
-class AmmoContainer;
-class Gun;
-class HealthKit;
-class Item;
-class Table;
-class Cell;
-class Level;
+namespace nodata{
+	class Creature;
+	class Forager;
+	class Operative;
+	class Sentient;
+	class Wild;
+	class AmmoContainer;
+	class Gun;
+	class HealthKit;
+	class Item;
+	class Table;
+	class Cell;
+	class Level;
+}
 
 namespace sf{
 	class RectangleShape;
 }
-
-//#include "Creature.h"
-//#include "Forager.h"
-//#include "Operative.h"
-//#include "Sentient.h"
-//#include "Wild.h"
-//#include "Item.h"
-//#include "Table.h"
-//#include "Cell.h"
-//#include "Level.h"
 
 
 #endif //LAB4_ALLCLASSES_H
