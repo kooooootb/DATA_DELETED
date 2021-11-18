@@ -59,6 +59,7 @@ namespace nodata{
 	
 	void Creature::setHealthCurrent(int healthCurrent) {
 		healthCurrent_ = healthCurrent;
+		if(healthMax_ < healthCurrent) healthMax_ = healthCurrent;
 	}
 	
 	void Creature::setWalkTime(int walkTime) {
@@ -71,6 +72,7 @@ namespace nodata{
 	
 	void Creature::setTimeMax(int timeMax) {
 		timeMax_ = timeMax;
+		if(timeCurrent_ > timeMax) timeCurrent_ = timeMax;
 	}
 	
 	void Creature::spendTime(int time) {

@@ -3,6 +3,8 @@
 #include "Creature.h"
 #include "Item.h"
 #include "Level.h"
+#include "Operative.h"
+
 
 namespace nodata{
 	Operative::Operative(Level *level, std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, float reloadTime, int force, float accuracy) : Creature(level, name, coord, healthMax, timeMax, walkTime, viewRadius) , reloadTimeMultipl_(reloadTime) , force_(force) , accuracyMultipl_(accuracy) {
@@ -85,5 +87,10 @@ namespace nodata{
 	
 	int Operative::getWeight() const {
 		return itemTable_.getWeight() + (activeGun_ == nullptr ? 0 : activeGun_->getWeight());
+	}
+	
+	void Operative::setForce(int force) {
+		if(force <= 0) return;
+		force_ = force;
 	}
 }

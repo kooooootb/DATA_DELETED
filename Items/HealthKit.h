@@ -33,6 +33,11 @@ namespace nodata{
 		~HealthKit() override = default;
 		
 		/*!
+		 * Возвращает healTime_
+		 */
+		int getHealTime() const { return healTime_; }
+		
+		/*!
 		 * Восстанавливает здоровье существа на значение healAmount_
 		 * @param creature указатель на существо, использующее аптечку
 		 * @return TODELETE для удаления аптечки после использования

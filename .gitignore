@@ -5,3 +5,4 @@ sfml/**
 **.exe
 files/*
 !files/*.cfg
+Tests/gtest/**

@@ -62,6 +62,11 @@ namespace nodata{
 		 * Все названия файлов опеределены в файле Parameters.h
 		 */
 		Level();
+		/*!
+		 * Конструктор класса Level загружает клетки из данного файла, создает оперативника по умолчанию, устанавливает активное существо и дает ход команде оперативников.
+		 * @param cellsFname Название файла для загрузки клеток
+		 */
+		explicit Level(const char *cellsFname);
 		
 		~Level() = default;
 		
@@ -189,6 +194,11 @@ namespace nodata{
 		 * Убирает данного фуражера из карты существ и вектора фуражеров
 		 */
 		void killForager(Creature*);
+		
+		void spawnOperator(std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, float reloadTime, int force, float accuracy);
+		void spawnSentient(std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, float accuracy);
+		void spawnWild(std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, int accuracy, int damage);
+		void spawnForager(std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, int force);
 	};
 
 	/*! @} */

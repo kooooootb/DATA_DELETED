@@ -20,6 +20,17 @@ namespace nodata{
 		activeCreature = operativeAr_[0];
 	}
 	
+	Level::Level(const char *cellsFname) {
+		turn = OPERATIVE;
+		loadCells(cellsFname);
+		activeCreature = nullptr;
+		std::string name("default");
+		Point coord(1, 1);
+		spawnOperator(name, coord, 100, 100, 1, 10, 1, 100, 1);
+		
+		activeCreature = operativeAr_[0];
+	}
+	
 	void Level::skipComms(std::ifstream &fs){
 		while(!fs.eof()){
 			char ch = (char)fs.peek();
@@ -367,6 +378,48 @@ namespace nodata{
 				return wildAr_;
 			case FORAGER:
 				return foragerAr_;
+			default:
+				throw std::exception();
 		}
+	}
+	
+	void Level::spawnOperator(std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, float reloadTime, int force, float accuracy) {
+		if(invalidArgs(coord.x, coord.y) || reloadTime < 0 || accuracy < 0)
+			return;
+		
+		auto *operative = new Operative(this, name, coord, healthMax, timeMax, walkTime, viewRadius, reloadTime, force, accuracy);
+		
+		operativeAr_.push_back(operative);
+		creatureMap.addItem(coord, operative);
+	}
+	
+	void Level::spawnSentient(std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius,float accuracy) {
+		if(invalidArgs(coord.x, coord.y) || accuracy < 0)
+			return;
+		
+		auto *sentient = new Sentient(this, name, coord, healthMax, timeMax, walkTime, viewRadius, accuracy);
+		
+		sentientAr_.push_back(sentient);
+		creatureMap.addItem(coord, sentient);
+	}
+	
+	void Level::spawnWild(std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, int accuracy, int damage) {
+		if(invalidArgs(coord.x, coord.y))
+			return;
+		
+		auto *wild = new Wild(this, name, coord, healthMax, timeMax, walkTime, viewRadius, accuracy, damage);
+		
+		wildAr_.push_back(wild);
+		creatureMap.addItem(coord, wild);
+	}
+	
+	void Level::spawnForager(std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, int force) {
+		if(invalidArgs(coord.x, coord.y))
+			return;
+		
+		auto *forager = new Forager(this, name, coord, healthMax, timeMax, walkTime, viewRadius, force);
+		
+		foragerAr_.push_back(forager);
+		creatureMap.addItem(coord, forager);
 	}
 }

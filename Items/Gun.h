@@ -75,6 +75,10 @@ namespace nodata{
 		 * Возвращает reloadTime_
 		 */
 		int getReloadTime() const { return reloadTime_; }
+		/*!
+		 * Возвращает shootTime_
+		 */
+		int getShootTime() const { return shootTime_; }
 		
 		/*!
 		 * Устанавливает ammoCurrent_
