@@ -2,6 +2,7 @@
 #include "Item.h"
 #include "Creature.h"
 #include "../Parameters.h"
+#include "Level.h"
 
 namespace nodata{
 	Gun::Gun(std::string &name, int weight, int damage, int shootTime, int reloadTime, Ammunition ammoType, int ammoMax, float accuracy,
@@ -61,18 +62,36 @@ namespace nodata{
 	}
 	
 	void Gun::shoot(Creature *victim, Creature *shooter, double hitsMultipl) {
-		int amount;
-		if((amount = calcAmountByType()) > ammoCurrent_) amount = ammoCurrent_;//not enough bullets
-		if(shooter->getTimeCurrent() < shootTime_ * amount) amount = shooter->getTimeCurrent() / shootTime_;//not enough time
-		int hits;
-		if(amount == 1)
-			hits = hitsMultipl > 0.7 ? 1 : 0;
-		else hits = (int)((float)amount * hitsMultipl);
-		victim->receiveDamage(damage_ * hits);
+		srand(time(nullptr));
+		if(rand() % 100 < hitsMultipl * 100) victim->receiveDamage(damage_);
 		
-		ammoCurrent_ -= amount;
-		shooter->spendTime(shootTime_ * amount);
-		weight_ -= calcAmmoWeightByType(amount);
+		ammoCurrent_ -= 1;
+		shooter->spendTime(shootTime_);
+		weight_ -= calcAmmoWeightByType(1);
+	}
+	
+	void Gun::shoot(Level &level, const Point &coord, Creature *shooter, double hitsMultipl) {
+		if(ammoCurrent_ < 1 || shooter->getTimeCurrent() < shootTime_) return;
+		const std::vector<Creature*>* creatures = level.getCreatureMap()[coord];
+		Cell cell;
+		ErrorCodes status = level.getCell(coord, cell);
+		if(creatures != nullptr){//shoot creature
+			int amount = (int)(*creatures).size();
+			if(amount == 1){
+				shoot((*creatures)[0], shooter, hitsMultipl);
+			}
+			else{
+				srand(time(nullptr));
+				shoot((*creatures)[rand() % amount], shooter, hitsMultipl);
+			}
+		}
+		else if(status != ERROR){//shoot cell
+			srand(time(nullptr));
+			if(cell.getType() == GLASS && rand() % 100 < (int)(hitsMultipl * 100)) level.setCell(coord, FLOOR);
+			ammoCurrent_ -= 1;
+			shooter->spendTime(shootTime_);
+		}
+
 	}
 	
 	double Gun::countHitsMultipl(double crAccuracy, double dist) const {

@@ -84,6 +84,11 @@ namespace nodata{
 		 */
 		ErrorCodes getCell(int x, int y, Cell &cell) const;
 		/*!
+		 * Передает тип клетки, находящейся на данных координатах, по ссылке cell.
+		 * Если клетка не может находиться на данных координатах, возвращает ERROR
+		 */
+		ErrorCodes getCell(const Point &point, Cell &cell) const;
+		/*!
 		 * Возвращает ссылку на карту предметов
 		 */
 		Map<Item*> &getItemMap() { return itemMap; }
@@ -116,6 +121,10 @@ namespace nodata{
 		 * Устанавливает тип type для клетки, находящейся на данных координатах x и y
 		 */
 		void setCell(int x, int y, CellType type);
+		/*!
+		 * Устанавливает тип type для клетки, находящейся на данных координатах point
+		 */
+		void setCell(const Point &point, CellType type);
 		
 		/*!
 		 * Устанавливает текущее активное существо

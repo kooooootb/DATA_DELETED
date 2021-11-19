@@ -288,6 +288,15 @@ namespace nodata{
 			{
 				if (event.type == sf::Event::Closed)
 					window.close();
+				if (event.type == sf::Event::MouseButtonPressed){
+					auto *op = dynamic_cast<Operative*>(cr);
+					if(op == nullptr || op->getActiveGun() == nullptr) break;
+					Point point(sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + cr->getPosition().x, sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + cr->getPosition().y);
+					op->shoot(point);
+					refreshMap();
+					refreshInterface();
+					redrawWindow();
+				}
 				if (event.type == sf::Event::KeyPressed)
 				{
 					switch(event.key.code){

@@ -66,6 +66,12 @@ namespace nodata{
 		activeGun_->shoot(victim, this, activeGun_->countHitsMultipl(accuracyMultipl_, sqrt(pow(coord_.x - victim->getPosition().x, 2) + pow(coord_.y - victim->getPosition().y, 2))));
 	}
 	
+	void Operative::shoot(const Point &point) {
+		if(activeGun_ == nullptr || (coord_.x == point.x && coord_.y == point.y)) return;
+		
+		activeGun_->shoot(level_, point, this, activeGun_->countHitsMultipl(accuracyMultipl_, sqrt(pow(coord_.x - point.x, 2) + pow(coord_.y - point.y, 2))));
+	}
+	
 	void Operative::setActiveGun(Gun *gun) {
 		activeGun_ = gun;
 	}

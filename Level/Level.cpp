@@ -264,6 +264,10 @@ namespace nodata{
 		cells_[x][y].setType(type);
 	}
 	
+	void Level::setCell(const Point &point, CellType type) {
+		cells_[point.x][point.y].setType(type);
+	}
+	
 	void Level::killOperative(Creature *cr) {
 		operativeAr_.erase(std::find(operativeAr_.begin(), operativeAr_.end(), cr));
 		creatureMap.removeItem(cr->getPosition(), cr);
@@ -322,6 +326,14 @@ namespace nodata{
 	}
 	
 	ErrorCodes Level::getCell(int x, int y, Cell &cell) const {
+		if(x < 0 || x >= cells_.size() || y < 0 || y >= cells_.back().size())
+			return ERROR;
+		cell = cells_[x][y];
+		return OK;
+	}
+	
+	ErrorCodes Level::getCell(const Point &point, Cell &cell) const {
+		int x = point.x, y = point.y;
 		if(x < 0 || x >= cells_.size() || y < 0 || y >= cells_.back().size())
 			return ERROR;
 		cell = cells_[x][y];

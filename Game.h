@@ -35,7 +35,7 @@ namespace nodata{
 		sf::RectangleShape interfaceWindow, invWindow;
 		sf::Font font;
 		
-		std::vector<Item*> *nearItems;//items in creature's position
+		const std::vector<Item*> *nearItems;//items in creature's position
 		std::vector<Creature*> nearCreatures;//creatures in actCreature's radius of view
 		
 		std::vector<sf::Text> mesTips;//0 - active creature, 1 - taking items, 2 - shoot, 3 - use

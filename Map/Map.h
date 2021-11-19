@@ -78,7 +78,7 @@ namespace nodata{
 		 * @param point координаты
 		 * @return указатель на вектор элементов или nullptr если он отсутствует
 		 */
-		std::vector<T>* operator[](const Point &point);
+		const std::vector<T>* operator[](const Point &point) const;
 		
 		/*!
 		 * Выводит данные о карте в поток вывода
@@ -171,7 +171,7 @@ namespace nodata{
 	}
 	
 	template<class T>
-	std::vector<T> *Map<T>::operator[](const Point &point) {
+	const std::vector<T> *Map<T>::operator[](const Point &point) const{
 		int x = point.x, y = point.y;
 		if(vertAr.count(y) == 0) return nullptr;
 		if(vertAr.at(y).count(x) == 0) return nullptr;
