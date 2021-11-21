@@ -9,7 +9,7 @@
 enum Tips{
 	T_ACTCREATURE = 0,
 	T_TAKE,
-	T_SHOOT,
+	T_ENDT,//end turn
 	T_USE,
 	T_THROW,
 	T_ERROR,
@@ -36,7 +36,6 @@ namespace nodata{
 		sf::Font font;
 		
 		const std::vector<Item*> *nearItems;//items in creature's position
-		std::vector<Creature*> nearCreatures;//creatures in actCreature's radius of view
 		
 		std::vector<sf::Text> mesTips;//0 - active creature, 1 - taking items, 2 - shoot, 3 - use
 		std::vector<sf::Text> mesInv;
@@ -46,10 +45,12 @@ namespace nodata{
 		
 		int getIntFromWindow(int amount);
 		void redrawWindow();
+		void drawCell(int x, int y);
+		void drawRay(int x, int y);
 		
 		void refreshActcreature();
 		void refreshTake();
-		void refreshShoot();
+		void refreshEndt();
 		void refreshUse();
 		void refreshThrow();
 		void refreshTime();
@@ -78,6 +79,7 @@ namespace nodata{
 		void takeInt();
 		void shootInt();
 		void useInt();
+		ErrorCodes endInt();
 		void throwInt();
 		
 		void start();

@@ -4,12 +4,14 @@
 #include "../Parameters.h"
 #include "Level.h"
 
+#include <iostream>
+
 namespace nodata{
 	Gun::Gun(std::string &name, int weight, int damage, int shootTime, int reloadTime, Ammunition ammoType, int ammoMax, float accuracy,
 			 int switchTime) :
 			Item(name, 0) , damage_(damage) , shootTime_(shootTime) , reloadTime_(reloadTime) , ammoType_(ammoType) ,
 			ammoMax_(ammoMax) , accuracy_(accuracy) , switchTime_(switchTime) {
-		setWeight(weight + calcAmmoWeightByType(ammoMax));
+		setWeight(weight + calcAmmoWeightByType(ammoMax, ammoType));
 		ammoCurrent_ = ammoMax_;
 	}
 	
@@ -48,8 +50,8 @@ namespace nodata{
 		}
 	}
 	
-	int Gun::calcAmmoWeightByType(int amount) const {
-		switch(ammoType_){
+	int Gun::calcAmmoWeightByType(int amount, Ammunition ammoType) {
+		switch(ammoType){
 			case LARGE_CALIBER:
 				return amount * WEIGHTLARGE;
 			case MEDIUM_CALIBER:
@@ -61,43 +63,56 @@ namespace nodata{
 		}
 	}
 	
-	void Gun::shoot(Creature *victim, Creature *shooter, double hitsMultipl) {
+	void Gun::shoot(Creature *victim, Creature *shooter) {
+		victim->receiveDamage(damage_);
+		
+//		ammoCurrent_ -= 1;
+//		shooter->spendTime(shootTime_);
+//		weight_ -= calcAmmoWeightByType(1, ammoType_);
+	}
+	
+	void Gun::shoot(Level &level, Point coord, Creature *shooter, int hitsMultipl) {
+		if (ammoCurrent_ < 1 || shooter->getTimeCurrent() < shootTime_) return;
+		
 		srand(time(nullptr));
-		if(rand() % 100 < hitsMultipl * 100) victim->receiveDamage(damage_);
+		if (hitsMultipl != 0) {
+			coord.x += rand() % hitsMultipl;
+			coord.y += rand() % hitsMultipl;
+		}
+		
+		//make ray
+		level.setRay(shooter->getPosition(), coord);
+		for (Level::Iterator it = level.begin(), endIt = level.end(); it != endIt; ++it) {
+			CellType type = (*it).getType();
+			Point curPoint = it.getPoint();
+			if (type != FLOOR || level.getCreatureMap()[curPoint] != nullptr) {
+				coord = curPoint;
+				break;
+			}
+		}
+		
+		//shoot
+		const std::vector<Creature *> *creatures = level.getCreatureMap()[coord];
+		Cell cell;
+		ErrorCodes status = level.getCell(coord, cell);
+		if (creatures != nullptr) {//shoot creature
+			int amount = (int) (*creatures).size();
+			srand(time(nullptr));
+			shoot((*creatures)[rand() % amount], shooter);
+		} else if (status != ERROR) {//shoot cell
+			if ((cell.getType() == GLASS || cell.getType() == PARTITION)) level.setCell(coord, FLOOR);
+		}
 		
 		ammoCurrent_ -= 1;
 		shooter->spendTime(shootTime_);
-		weight_ -= calcAmmoWeightByType(1);
+		weight_ -= calcAmmoWeightByType(1, ammoType_);
 	}
 	
-	void Gun::shoot(Level &level, const Point &coord, Creature *shooter, double hitsMultipl) {
-		if(ammoCurrent_ < 1 || shooter->getTimeCurrent() < shootTime_) return;
-		const std::vector<Creature*>* creatures = level.getCreatureMap()[coord];
-		Cell cell;
-		ErrorCodes status = level.getCell(coord, cell);
-		if(creatures != nullptr){//shoot creature
-			int amount = (int)(*creatures).size();
-			if(amount == 1){
-				shoot((*creatures)[0], shooter, hitsMultipl);
-			}
-			else{
-				srand(time(nullptr));
-				shoot((*creatures)[rand() % amount], shooter, hitsMultipl);
-			}
-		}
-		else if(status != ERROR){//shoot cell
-			srand(time(nullptr));
-			if(cell.getType() == GLASS && rand() % 100 < (int)(hitsMultipl * 100)) level.setCell(coord, FLOOR);
-			ammoCurrent_ -= 1;
-			shooter->spendTime(shootTime_);
-		}
-
-	}
-	
-	double Gun::countHitsMultipl(double crAccuracy, double dist) const {
-		double res = crAccuracy * accuracy_ / (dist - 7);
-		if(res > 1.0 || res < 0) res = 1.0;
-		return res;
+	int Gun::countAccuracy(double crAccuracy, double dist) const {
+		double res = (dist - 2) / (crAccuracy * accuracy_);
+		if(res < 0) res = 0;
+		res = sqrt(res);
+		return (int)res;
 	}
 	
 	void Gun::drawCell(sf::RectangleShape &shape) {

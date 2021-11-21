@@ -295,13 +295,12 @@ namespace nodata{
 			throw std::runtime_error("No file named for Cell.cfg found");
 		}
 		
-		int cellsHoriz, cellsVert;
+		fs >> vertCells >> horizCells;
 		
-		fs >> cellsVert >> cellsHoriz;
+		cells_ = new Cell*[horizCells];
 		
-		cells_.resize(cellsHoriz);
-		for(auto it = cells_.begin();it != cells_.end();++it){
-			(*it).resize(cellsVert);
+		for(int i = 0;i < horizCells;++i){
+			cells_[i] = new Cell[vertCells];
 		}
 		
 		int type;
@@ -311,22 +310,21 @@ namespace nodata{
 			cells_[x][y].setType(static_cast<CellType>(type));
 		}
 		
-		for(auto it = cells_[0].begin(), end = cells_[0].end();it != end;++it){
-			(*it).setType(WALL);
+		//goes after initialization to avoid retyping by save file
+		for(int i = 0;i < horizCells;++i){
+			cells_[i][0].setType(WALL);
+			cells_[i][vertCells - 1].setType(WALL);
 		}
-		for(auto it = cells_.back().begin(), end = cells_.back().end();it != end;++it){
-			(*it).setType(WALL);
-		}
-		for(auto it = cells_.begin(), end = cells_.end();it != end;++it){
-			(*it)[0].setType(WALL);
-			(*it).back().setType(WALL);
+		for(int i = 0;i < vertCells;++i){
+			cells_[0][i].setType(WALL);
+			cells_[vertCells - 1][i].setType(WALL);
 		}
 		
 		fs.close();
 	}
 	
 	ErrorCodes Level::getCell(int x, int y, Cell &cell) const {
-		if(x < 0 || x >= cells_.size() || y < 0 || y >= cells_.back().size())
+		if(x < 0 || x >= horizCells || y < 0 || y >= vertCells)
 			return ERROR;
 		cell = cells_[x][y];
 		return OK;
@@ -334,7 +332,7 @@ namespace nodata{
 	
 	ErrorCodes Level::getCell(const Point &point, Cell &cell) const {
 		int x = point.x, y = point.y;
-		if(x < 0 || x >= cells_.size() || y < 0 || y >= cells_.back().size())
+		if(x < 0 || x >= horizCells || y < 0 || y >= vertCells)
 			return ERROR;
 		cell = cells_[x][y];
 		return OK;
@@ -377,10 +375,25 @@ namespace nodata{
 	}
 	
 	bool Level::invalidArgs(int x, int y) const {
-		return (x < 0 || x >= cells_.back().size() || y < 0 || y >= cells_.size());
+		return (x < 0 || x >= horizCells || y < 0 || y >= vertCells);
 	}
 	
 	const std::vector<Creature *> &Level::getCurrentTeam() const {
+		switch(turn){
+			case OPERATIVE:
+				return operativeAr_;
+			case SENTIENT:
+				return sentientAr_;
+			case WILD:
+				return wildAr_;
+			case FORAGER:
+				return foragerAr_;
+			default:
+				throw std::exception();
+		}
+	}
+	
+	std::vector<Creature *> &Level::getCurrentTeam() {
 		switch(turn){
 			case OPERATIVE:
 				return operativeAr_;
@@ -433,5 +446,35 @@ namespace nodata{
 		
 		foragerAr_.push_back(forager);
 		creatureMap.addItem(coord, forager);
+	}
+	
+	CellIt Level::begin() const {
+		return CellIt(rayBegin, rayEnd, *this);
+	}
+	
+	CellIt Level::end() const {
+		return CellIt(*this, rayBegin, rayEnd);
+	}
+	
+	void Level::setRay(const Point &begin, const Point &end) {
+		rayBegin = begin;
+		rayEnd = end;
+	}
+	
+	Level::~Level() {
+		for(int i = 0;i < horizCells;++i){
+			delete [] cells_[i];
+		}
+		delete [] cells_;
+	}
+	
+	void Level::setTurn(CreatType cr){
+		turn = cr;
+	}
+	
+	void Level::resetTime() {
+		for(auto it = getCurrentTeam().begin(), endIt = getCurrentTeam().end();it != endIt;++it){
+			(*it)->resetTime();
+		}
 	}
 }

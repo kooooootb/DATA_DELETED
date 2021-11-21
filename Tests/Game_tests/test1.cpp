@@ -83,6 +83,7 @@ TEST(Creatures, kill) {
 TEST(Creatures, spendTime) {
 	nodata::Level level("testCells.cfg");
 	nodata::Operative *oper = initOperative(level);
+	nodata::Operative *victim = initOperative(level);
 	Point coord(1, 1);
 	int time = oper->getTimeCurrent();
 	oper->walk(LEFT);
@@ -95,8 +96,8 @@ TEST(Creatures, spendTime) {
 	oper->receiveItem(gun);
 	oper->useItem(0);
 	time = oper->getTimeCurrent();
-	oper->shoot(level.getCurrentTeam().front());
-	ASSERT_EQ(oper->getTimeCurrent(), time - AMOUNTSMALL * oper->getActiveGun()->getShootTime());
+	oper->shoot(victim);
+	ASSERT_EQ(oper->getTimeCurrent(), time - oper->getActiveGun()->getShootTime());
 	nodata::AmmoContainer *acont = initACont();
 	oper->receiveItem(acont);
 	time = oper->getTimeCurrent();
@@ -153,7 +154,7 @@ TEST(Map, add_receive){
 	ASSERT_EQ(item, gun);
 	oper->receiveItem(gun);
 	level.getItemMap().removeItem(point, gun);
-	std::vector<nodata::Item*>*nitem = level.getItemMap()[point];
+	const std::vector<nodata::Item*>*nitem = level.getItemMap()[point];
 	ASSERT_EQ(nitem, nullptr);
 }
 
@@ -181,7 +182,7 @@ TEST(Item, ACont_use){
 	oper->receiveItem(gun);
 	oper->useItem(0);
 	oper->shoot(victim);
-	ASSERT_EQ(oper->getActiveGun()->getAmmoMax() - AMOUNTSMALL, oper->getActiveGun()->getAmmoCurrent());
+	ASSERT_EQ(oper->getActiveGun()->getAmmoMax() - 1, oper->getActiveGun()->getAmmoCurrent());
 	nodata::AmmoContainer *acont = initACont();
 	oper->receiveItem(acont);
 	oper->useItem(0);

@@ -6,6 +6,7 @@
 #include "Item.h"
 #include "Creature.h"
 #include "Cell.h"
+#include "CellIt.h"
 #include "Map.h"
 
 namespace nodata{
@@ -35,11 +36,16 @@ namespace nodata{
 		std::vector<Creature *> wildAr_; ///< Вектор содержащий всех диких существ на уровне
 		std::vector<Creature *> sentientAr_; ///< Вектор содержащий всех разумных существ на уровне
 		std::vector<Creature *> foragerAr_; ///< Вектор содержащий всех фуражиров на уровне
-		std::vector<std::vector<Cell>> cells_; ///< Двумерный массив клеток, составляющих пространство, по которым передвигаются существа
+		Cell **cells_; ///< Двумерный массив клеток, составляющих пространство, по которым передвигаются существа
 		Creature *activeCreature; ///< Текущее активное существо
 		Map<Item*> itemMap; ///< Карта выпавших предметов
 		Map<Creature*> creatureMap; ///< Карта существ
 		CreatType turn; ///< Определяет команду, совершающую текущих ход
+		
+		int horizCells, vertCells;
+		
+		friend class CellIt;
+		Point rayBegin, rayEnd;
 		
 		/*!
 		 * Проверяет корректность введенных координат
@@ -68,16 +74,22 @@ namespace nodata{
 		 */
 		explicit Level(const char *cellsFname);
 		
-		~Level() = default;
+		~Level();
+		
+		typedef CellIt Iterator;
+		Iterator begin() const;
+		Iterator end() const;
+		
+		void setRay(const Point &begin, const Point &end);
 		
 		/*!
-		 * Возвращает ссылку на массив клеток
+		 * Возвращает указатель на массив клеток
 		 */
-		std::vector<std::vector<Cell>> &getCells() { return cells_; }
+		Cell **getCells() { return cells_; }
 		/*!
-		 * Возвращает константную ссылку на массив клеток
+		 * Возвращает указатель на массив клеток
 		 */
-		const std::vector<std::vector<Cell>> &getCells() const { return cells_; }
+		Cell **getCells() const { return cells_; }
 		/*!
 		 * Передает тип клетки, находящейся на данных координатах, по ссылке cell.
 		 * Если клетка не может находиться на данных координатах, возвращает ERROR
@@ -107,15 +119,19 @@ namespace nodata{
 		/*!
 		 * Возвращает количество клеток в одной горизонтали
 		 */
-		unsigned int getHorizCells() const { return cells_.size(); }
+		int getHorizCells() const { return horizCells; }
 		/*!
 		 * Возвращает количество клеток в одной горизонтали
 		 */
-		unsigned int getVertCells() const { return cells_.back().size(); }
+		int getVertCells() const { return vertCells; }
 		/*!
-		 * Возвращает массив существ команды, совершающей текущий ход
+		 * Возвращает константную ссылку на массив существ команды, совершающей текущий ход
 		 */
 		const std::vector<Creature *> &getCurrentTeam() const;
+		/*!
+		 * Возвращает ссылку на массив существ команды, совершающей текущий ход
+		 */
+		std::vector<Creature *> &getCurrentTeam();
 		
 		/*!
 		 * Устанавливает тип type для клетки, находящейся на данных координатах x и y
@@ -125,6 +141,10 @@ namespace nodata{
 		 * Устанавливает тип type для клетки, находящейся на данных координатах point
 		 */
 		void setCell(const Point &point, CellType type);
+		/*!
+		 * Передает ход
+		 */
+		 void setTurn(CreatType cr);
 		
 		/*!
 		 * Устанавливает текущее активное существо
@@ -145,6 +165,10 @@ namespace nodata{
 		 * @param direction направление
 		 */
 		void moveCreature(int x, int y, Creature *creature, Direction direction);
+		/*!
+		 * Восстанавливает текущее время у членов текущей команды
+		 */
+		 void resetTime();
 		
 		/*!
 		 * Загружает клетки из данного файла

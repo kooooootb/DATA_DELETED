@@ -11,47 +11,64 @@
 #include <stack>
 #include <cmath>
 
+/*!
+* \file
+* \brief Заголовочный файл с перечислениями, структурами и прототипами классов.
+*
+* Данный файл содержит стандартные структуры необходимые программе
+*/
+
+/// Набор существ
 enum CreatType{
-	OPERATIVE = 0,
-	SENTIENT,
-	WILD,
-	FORAGER,
-	CREATURES_COUNT
+	OPERATIVE = 0, ///< Оперативник
+	SENTIENT, ///< Разумное существо
+	WILD, ///< Дикое существо
+	FORAGER, ///< Одомашненный фуражер
+	CREATURES_COUNT ///< Количество существ, оставлять последним
 };
 
+/// Типы клeток
 enum CellType{
-	FLOOR = 0,
-	WALL = 1,
-	GLASS = 2,
-	PARTITION = 3,
-	CELLSTYPE_COUNT
+	FLOOR = 0, ///< Пол
+	WALL = 1, ///< Стена
+	GLASS = 2, ///< Стекло
+	PARTITION = 3, ///< Перегородка
+	CELLSTYPE_COUNT ///< Количество типов клеток, оставлять последним
 };
 
+/// Типы патронов
 enum Ammunition{
-	LARGE_CALIBER = 0,
-	MEDIUM_CALIBER,
-	SMALL_CALIBER,
-	AMMUNITION_COUNT
+	LARGE_CALIBER = 0, ///< Крупный калибр
+	MEDIUM_CALIBER, ///< Средний калибр
+	SMALL_CALIBER, ///< Малый калибр
+	AMMUNITION_COUNT ///< Количество типов, оставлять последним
 };
 
+/// Типы ошибок
 enum ErrorCodes{
-	ERROR = -1,
-	OK,
-	TODELETE,
-	TOREMOVE
+	ERROR = -1, ///< Ошибка
+	OK, ///< Успех
+	TODELETE, ///< Элемент нужно очистить после завершения
+	TOREMOVE ///< Элемент нужно убрать из массива после завершения
 };
 
+/// Направления
 enum Direction{
-	LEFT,
-	UP,
-	RIGHT,
-	DOWN
+	LEFT, ///< Влево
+	UP, ///< Вверх
+	RIGHT, ///< Вправо
+	DOWN ///< Вниз
 };
 
+///Структура точки или вектора
 struct Point{
-	int x,y;
+	int x,y; ///< координаты
 	
-	explicit Point(int X = 0, int Y = 0) : x(X), y(Y) {}
+	explicit Point(int X = 0, int Y = 0) : x(X), y(Y) {} ///< Инициализирующий конструктор
+	
+	bool operator!=(const Point &point) const{
+		return (point.x != x || point.y != y);
+	}
 };
 
 namespace nodata{

@@ -36,40 +36,51 @@ namespace nodata{
 	}
 	
 	void Operative::throwItem(int index) {
-		Item *item = itemTable_.deleteItem(index);
-		if(item == nullptr) return;
-		
-		level_.dropItem(coord_, item);
+		if(index == -1){//throw active gun
+			level_.dropItem(coord_, activeGun_);
+			activeGun_ = nullptr;
+		}
+		else{
+			Item *item = itemTable_.deleteItem(index);
+			if(item == nullptr) return;
+			
+			level_.dropItem(coord_, item);
+		}
 	}
 	
 	void Operative::useItem(int index) {
-		Item *item = itemTable_.getItem(index);
-		if(item == nullptr) return;
-		
-		ErrorCodes status = item->use(this);
-		
-		switch(status){
-			case TODELETE:
-				delete itemTable_.deleteItem(index);
-				break;
-			case TOREMOVE:
-				itemTable_.deleteItem(index);
-				break;
-			default:
-				break;
+		if(index == -1){
+			receiveItem(activeGun_);
+			activeGun_ = nullptr;
+		}else{
+			Item *item = itemTable_.getItem(index);
+			if(item == nullptr) return;
+			
+			ErrorCodes status = item->use(this);
+			
+			switch(status){
+				case TODELETE:
+					delete itemTable_.deleteItem(index);
+					break;
+				case TOREMOVE:
+					itemTable_.deleteItem(index);
+					break;
+				default:
+					break;
+			}
 		}
 	}
 	
 	void Operative::shoot(Creature *victim) {
 		if(activeGun_ == nullptr || victim == this) return;
 		
-		activeGun_->shoot(victim, this, activeGun_->countHitsMultipl(accuracyMultipl_, sqrt(pow(coord_.x - victim->getPosition().x, 2) + pow(coord_.y - victim->getPosition().y, 2))));
+		activeGun_->shoot(victim, this);
 	}
 	
 	void Operative::shoot(const Point &point) {
-		if(activeGun_ == nullptr || (coord_.x == point.x && coord_.y == point.y)) return;
+		if(activeGun_ == nullptr) return;
 		
-		activeGun_->shoot(level_, point, this, activeGun_->countHitsMultipl(accuracyMultipl_, sqrt(pow(coord_.x - point.x, 2) + pow(coord_.y - point.y, 2))));
+		activeGun_->shoot(level_, point, this, activeGun_->countAccuracy(accuracyMultipl_,sqrt(pow(coord_.x - point.x, 2) + pow(coord_.y - point.y, 2))));
 	}
 	
 	void Operative::setActiveGun(Gun *gun) {

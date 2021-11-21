@@ -33,12 +33,6 @@ namespace nodata{
 		int switchTime_; ///< Время, затрачиваемое при смене оружия
 		
 		/*!
-		 * Вспомогательная функция для расчета веса определенного количества патронов
-		 * @param amount количество патронов
-		 * @return вес патронов
-		 */
-		int calcAmmoWeightByType(int amount) const;
-		/*!
 		 * Вспомогательная функция для расчета количества выстрелов из оружия за один вызов функции shoot() в зависимости от типа патронов
 		 * @return количество выстрелов
 		 */
@@ -95,14 +89,21 @@ namespace nodata{
 		 * @param shooter существо-стрелок
 		 * @param hitsMultipl коэффициент попаданий
 		 */
-		void shoot(Creature *victim, Creature *shooter, double hitsMultipl);
-		void shoot(Level &level, const Point &coord, Creature *shooter, double hitsMultipl);
+		void shoot(Creature *victim, Creature *shooter);
+		void shoot(Level &level, Point coord, Creature *shooter, int hitsMultipl);
 		/*!
 		 * Функция вычисляет коэффициент количества попаданий в зависимости от точности стрелявшего существа и точности оружия. Коэффициент не может быть больше единицы.
 		 * @param crAccuracy коэффициент точности стреляющего
 		 * @return коэффициент количества попаданий
 		 */
-		double countHitsMultipl(double crAccuracy, double dist) const;
+		int countAccuracy(double crAccuracy, double dist) const;
+		
+		/*!
+		 * Вспомогательная функция для расчета веса определенного количества патронов
+		 * @param amount количество патронов
+		 * @return вес патронов
+		 */
+		static int calcAmmoWeightByType(int amount, Ammunition ammoType);
 		
 		/*!
 		 * Метод для отображения выпавшего оружия на экране

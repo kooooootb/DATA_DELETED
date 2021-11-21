@@ -13,7 +13,7 @@ namespace nodata{
 	
 	void Creature::walk(Direction direction) {
 		if(timeCurrent_ < walkTime_) return;
-		const std::vector<std::vector<Cell>> &cells = level_.getCells();
+		Cell **cells = level_.getCells();
 		switch (direction) {
 			case LEFT:
 				if (coord_.x == 0) return;
@@ -77,5 +77,9 @@ namespace nodata{
 	
 	void Creature::spendTime(int time) {
 		timeCurrent_ -= time;
+	}
+	
+	void Creature::resetTime() {
+		timeCurrent_ = timeMax_;
 	}
 }

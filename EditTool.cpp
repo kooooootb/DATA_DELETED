@@ -115,7 +115,7 @@ namespace edittool{
 	}
 	
 	void EditTool::refreshInterface() {
-		std::string mes("1 for WALL, 2 for FLOOR, 3 for GLASS, 4 for PARTITION");
+		std::string mes("1 for WALL, 2 for FLOOR, 3 for GLASS, 4 for PARTITION\nR to refresh circle radius\nE to build circle\nF to build line\nT to refresh line length\nV to build row\nY to refresh row length");
 		mesTips[E_CELL].setString(mes);
 	}
 	
@@ -123,6 +123,66 @@ namespace edittool{
 		for(int i = 0;i < WINDOWWIDTH_AMOUNT;++i)
 			for(int j = 0;j < WINDOWHEIGHT_AMOUNT;++j)
 				window.draw(wCells[i][j]);
+	}
+	
+	void EditTool::setCell(int x, int y){
+		if(x < 0 || y < 0 || x >= cellsHoriz || y >= cellsVert) return;
+		
+		level.getCells()[x][y].setType(celltype);
+	}
+	
+	void EditTool::buildCircle() {
+		int xM = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, yM = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
+//		if(xM < 0 || yM < 0 || xM >= cellsHoriz || yM >= cellsVert) return;
+		
+		int r = Rad;
+		int d = 3 - 2 * r;
+		int x = 0, y = r;
+		
+		while(y >= x){
+			setCell(xM + x,yM + y);
+			setCell(xM - x, yM + y);
+			setCell(xM + x, yM - y);
+			setCell(xM - x, yM - y);
+			setCell(xM + y,yM +  x);
+			setCell(xM - y,yM +  x);
+			setCell(xM + y, yM - x);
+			setCell(xM - y, yM - x);
+			x++;
+			
+			if(d >= 0){
+				setCell(xM + x,yM + y);
+				setCell(xM - x, yM + y);
+				setCell(xM + x, yM - y);
+				setCell(xM - x, yM - y);
+				setCell(xM + y,yM +  x);
+				setCell(xM - y,yM +  x);
+				setCell(xM + y, yM - x);
+				setCell(xM - y, yM - x);
+				y--;
+				d = d + 4 * (x - y) + 10;
+			}else{
+				d = d + 4 * x + 6;
+			}
+		}
+	}
+	
+	void EditTool::buildColumn() {
+		int xM = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, yM = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
+		
+		for(int i = 0;i < colLength;++i){
+			setCell(xM, yM);
+			yM++;
+		}
+	}
+	
+	void EditTool::buildRow() {
+		int xM = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, yM = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
+		
+		for(int i = 0;i < rowLength;++i){
+			setCell(xM, yM);
+			xM++;
+		}
 	}
 	
 	void EditTool::start() {
@@ -134,8 +194,9 @@ namespace edittool{
 				if (event.type == sf::Event::Closed)
 					window.close();
 				if (event.type == sf::Event::MouseButtonPressed){
-					int x = sf::Mouse::getPosition(window).x/CELLSIZE, y = sf::Mouse::getPosition(window).y/CELLSIZE;
-					level.getCells()[x - XOFFSET + coord.x][y - YOFFSET + coord.y].setType(celltype);
+					int x = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, y = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
+					if(x < 0 || y < 0 || x >= cellsHoriz || y >= cellsVert) break;
+					level.getCells()[x][y].setType(celltype);
 					
 					refreshMap();
 					redrawWindow();
@@ -158,6 +219,15 @@ namespace edittool{
 					switch(event.key.code){
 						case sf::Keyboard::LControl:
 							window.close();
+							break;
+						case sf::Keyboard::E:
+							buildCircle();
+							break;
+						case sf::Keyboard::F:
+							buildColumn();
+							break;
+						case sf::Keyboard::V:
+							buildRow();
 							break;
 						case sf::Keyboard::W:
 							coord.y-=VIEWSTEP;
@@ -183,6 +253,15 @@ namespace edittool{
 						case sf::Keyboard::Num4:
 							celltype = PARTITION;
 							break;
+						case sf::Keyboard::R:
+							Rad = getIntFromWindow(100);
+							break;
+						case sf::Keyboard::T:
+							colLength = getIntFromWindow(100);
+							break;
+						case sf::Keyboard::Y:
+							rowLength = getIntFromWindow(100);
+							break;
 						default :
 							//display "wrong button"
 							break;
@@ -194,7 +273,7 @@ namespace edittool{
 			
 			redrawWindow();
 		}
-		const std::vector<std::vector<Cell>> &cells = level.getCells();
+		Cell **cells = level.getCells();
 		
 		std::ofstream fs(CELLS_CFG, std::ios::trunc);
 		if (!fs.is_open()) {

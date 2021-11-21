@@ -28,6 +28,10 @@ namespace edittool{
 		std::vector<sf::Text> mesTips;
 		
 		unsigned int cellsVert, cellsHoriz;
+		int Rad = 9;
+		int colLength = 4;
+		int rowLength = 4;
+		
 		CellType celltype = FLOOR;
 		bool mousePressed = false;
 		int getIntFromWindow(int amount);
@@ -40,6 +44,11 @@ namespace edittool{
 		//refresh moves and changes shapes
 		void refreshMap();
 		void refreshInterface();
+		
+		void buildCircle();
+		void buildColumn();
+		void buildRow();
+		void setCell(int x, int y);
 		
 		//draw shapes
 		void drawMap();

@@ -43,11 +43,11 @@ namespace nodata{
 		}
 		mesTips[T_ACTCREATURE].setPosition((float)WINDOWWIDTH * 3 / 4, 0);
 		mesTips[T_TAKE].setPosition((float)WINDOWWIDTH * 3 / 4, FONTSIZE);
-		mesTips[T_SHOOT].setPosition((float)WINDOWWIDTH * 3 / 4, 2 * FONTSIZE);
+		mesTips[T_ENDT].setPosition((float)WINDOWWIDTH * 3 / 4, 2 * FONTSIZE);
 		mesTips[T_USE].setPosition((float)WINDOWWIDTH * 3 / 4, 3 * FONTSIZE);
 		mesTips[T_THROW].setPosition((float)WINDOWWIDTH * 3 / 4, 4 * FONTSIZE);
 		mesTips[T_ERROR].setPosition(0, WINDOWHEIGHT - FONTSIZE);
-		mesTips[T_INTMES].setPosition((float)WINDOWWIDTH / 2, 0);
+		mesTips[T_INTMES].setPosition((float)WINDOWWIDTH / 2 - FONTSIZE * 10, 0);
 		
 		for(int i = 0;i < S_COUNT;++i){
 			mesStats.emplace_back("", font, FONTSIZE);
@@ -62,7 +62,7 @@ namespace nodata{
 	}
 	
 	int Game::getIntFromWindow(int amount){
-		setIntmes("Use keyboard to select element or LControl to exit");
+		setIntmes("Use keyboard to select element and Enter to confirm or LControl to exit");
 		int choice = -1;
 		
 		sf::String sfInput;
@@ -104,54 +104,94 @@ namespace nodata{
 		clearIntmes();
 		return choice;
 	}
+
+	void Game::drawCell(int xR, int yR) {
+		Cell cell;
+		const Point &coord = cr->getPosition();
+		Point pointR(xR, yR);//on the map
+		int x = xR - coord.x + XOFFSET, y = yR - coord.y + YOFFSET;//on the screen
+		if(x < 0 || y < 0 || x >= WINDOWWIDTH_AMOUNT || y >= WINDOWHEIGHT_AMOUNT){
+			return;
+		}
+		const std::vector<Item*> *item = level.getItemMap()[pointR];
+		const std::vector<Creature*> *creature = level.getCreatureMap()[pointR];
+		
+		ErrorCodes flag = level.getCell(pointR, cell);
+		if (flag == OK) {
+			switch (cell.getType()) {
+				case FLOOR:
+					wCells[x][y].setFillColor(sf::Color(25, 25, 25));
+					if (item != nullptr) {
+						for (auto it = (*item).begin(), end = (*item).end(); it != end; ++it)
+							(*it)->drawCell(wCells[x][y]);
+					}
+					if (creature != nullptr) {
+						for (auto it = (*creature).begin(), end = (*creature).end(); it != end; ++it)
+							(*it)->drawCell(wCells[x][y]);
+					}
+					break;
+				case WALL:
+					wCells[x][y].setFillColor(sf::Color(55, 55, 55));
+					break;
+				case GLASS:
+					wCells[x][y].setFillColor(sf::Color(46, 155, 155));
+					break;
+				case PARTITION:
+					wCells[x][y].setFillColor(sf::Color(80, 30, 0));
+					break;
+			}
+		} else if (flag == ERROR) wCells[x][y].setFillColor(sf::Color::Black);
+	}
+	
+	void Game::drawRay(int x, int y) {
+		const Point &coord = cr->getPosition();
+		Point endP(coord.x + x, coord.y - y);
+		level.setRay(coord, endP);
+		for (Level::Iterator it = level.begin(), endIt = level.end(); it != endIt; ++it) {
+			drawCell(it.getPoint().x, it.getPoint().y);
+			if((*it).getType() == WALL || (*it).getType() == PARTITION){
+				break;
+			}
+		}
+	}
 	
 	void Game::refreshMap(){
-		const Point &coord = level.getActiveCreature()->getPosition();
-		
-		nearItems = level.getItemMap()[coord];
-		nearCreatures.clear();
-		
-		for(int j = 0;j < WINDOWHEIGHT_AMOUNT;++j){
-			const std::vector<const std::vector<Item*>*> items = level.getItemMap().getLine(j + coord.y - YOFFSET, coord.x - XOFFSET, coord.x - XOFFSET + WINDOWWIDTH_AMOUNT);
-			const std::vector<const std::vector<Creature*>*> creatures = level.getCreatureMap().getLine(j + coord.y - YOFFSET, coord.x - XOFFSET, coord.x - XOFFSET + WINDOWWIDTH_AMOUNT);
-			
-			for(auto itPtr = creatures.begin(), endPtr = creatures.end();itPtr != endPtr;++itPtr){
-				if(*itPtr != nullptr){
-					const std::vector<Creature*> &v = **itPtr;
-					for(auto it = v.begin(), end = v.end();it != end;++it){
-						nearCreatures.push_back(*it);
-					}
-				}
+		for(int i = 0;i < WINDOWWIDTH_AMOUNT;++i){
+			for(int j = 0;j < WINDOWHEIGHT_AMOUNT;++j){
+				wCells[i][j].setFillColor(sf::Color::Black);
 			}
+		}
+		
+		(*(level.getCreatureMap()[cr->getPosition()]))[0]->drawCell(wCells[XOFFSET][YOFFSET]);
+		
+		int r = cr->getViewRadius();
+		int d = 3 - 2 * r;
+		int x = 0, y = r;
+		
+		while(y >= x){
+			drawRay(x, y);
+			drawRay(-x, y);
+			drawRay(x, -y);
+			drawRay(-x, -y);
+			drawRay(y, x);
+			drawRay(-y, x);
+			drawRay(y, -x);
+			drawRay(-y, -x);
+			x++;
 			
-			for(int i = 0;i < WINDOWWIDTH_AMOUNT;++i){
-				Cell cell;
-				ErrorCodes flag = level.getCell(coord.x - XOFFSET + i, coord.y - YOFFSET + j, cell);
-				if(flag == OK){
-					switch(cell.getType()){
-						case FLOOR:
-							wCells[i][j].setFillColor(sf::Color(25,25,25));
-							if(items[i] != nullptr){
-								for(auto it = (*items[i]).begin(), end = (*items[i]).end();it != end;++it)
-									(*it)->drawCell(wCells[i][j]);
-							}
-							if(creatures[i] != nullptr){
-								for(auto it = (*creatures[i]).begin(), end = (*creatures[i]).end();it != end;++it)
-									(*it)->drawCell(wCells[i][j]);
-							}
-							break;
-						case WALL:
-							wCells[i][j].setFillColor(sf::Color(55,55,55));
-							break;
-						case GLASS:
-							wCells[i][j].setFillColor(sf::Color(46,155,155));
-							break;
-						case PARTITION:
-							wCells[i][j].setFillColor(sf::Color(80,30,0));
-							break;
-					}
-				}
-				else if(flag == ERROR) wCells[i][j].setFillColor(sf::Color::Black);
+			if(d >= 0){
+				drawRay(x, y);
+				drawRay(-x, y);
+				drawRay(x, -y);
+				drawRay(-x, -y);
+				drawRay(y, x);
+				drawRay(-y, x);
+				drawRay(y, -x);
+				drawRay(-y, -x);
+				y--;
+				d = d + 4 * (x - y) + 10;
+			}else{
+				d = d + 4 * x + 6;
 			}
 		}
 	}
@@ -163,6 +203,7 @@ namespace nodata{
 	}
 	
 	void Game::refreshTake() {
+		nearItems = level.getItemMap()[cr->getPosition()];
 		if(nearItems == nullptr){
 			mesTips[T_TAKE].setString("No items available");
 		}else{
@@ -170,12 +211,8 @@ namespace nodata{
 		}
 	}
 	
-	void Game::refreshShoot() {
-		if(nearCreatures.empty()){
-			mesTips[T_SHOOT].setString("No creatures in the area");
-		}else{
-			mesTips[T_SHOOT].setString("Press E to shoot");
-		}
+	void Game::refreshEndt() {
+		mesTips[T_ENDT].setString("Press R to end turn");
 	}
 	
 	void Game::refreshUse() {
@@ -232,7 +269,7 @@ namespace nodata{
 	void Game::refreshInterface(){
 		refreshActcreature();
 		refreshTake();
-		refreshShoot();
+		refreshEndt();
 		refreshUse();
 		refreshTime();
 		refreshThrow();
@@ -289,13 +326,7 @@ namespace nodata{
 				if (event.type == sf::Event::Closed)
 					window.close();
 				if (event.type == sf::Event::MouseButtonPressed){
-					auto *op = dynamic_cast<Operative*>(cr);
-					if(op == nullptr || op->getActiveGun() == nullptr) break;
-					Point point(sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + cr->getPosition().x, sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + cr->getPosition().y);
-					op->shoot(point);
-					refreshMap();
-					refreshInterface();
-					redrawWindow();
+					shootInt();
 				}
 				if (event.type == sf::Event::KeyPressed)
 				{
@@ -336,10 +367,6 @@ namespace nodata{
 							window.pollEvent(event);
 							takeInt();
 							break;
-						case sf::Keyboard::E:
-							window.pollEvent(event);
-							shootInt();
-							break;
 						case sf::Keyboard::I:
 							window.pollEvent(event);
 							useInt();
@@ -347,6 +374,12 @@ namespace nodata{
 						case sf::Keyboard::Q:
 							window.pollEvent(event);
 							throwInt();
+							break;
+						case sf::Keyboard::R:
+							window.pollEvent(event);
+							if(endInt() == ERROR){
+								window.close();
+							}
 							break;
 						default :
 							//display "wrong button"
@@ -423,39 +456,20 @@ namespace nodata{
 		}
 	}
 	
-	void Game::shootInt(){
-		if(nearCreatures.empty()) return;
-		
-		auto op = dynamic_cast<Operative*>(cr);
-		if(op == nullptr) return;
-		
-		int amount = -1;
-		for(auto it = nearCreatures.begin(), end = nearCreatures.end();it != end;++it){
-			amount++;
-			
-			mesTips.emplace_back(std::to_string(amount) + (*it)->getName(), font, FONTSIZE);
-			mesTips.back().setPosition((float)WINDOWWIDTH * 3 / 4, (float)(CHOOSEOFFSET + amount * FONTSIZE));
-		}
-		redrawWindow();
-		int choice;
-		if((choice = getIntFromWindow(amount)) == ERROR){
-			cleanTips(amount);
-			return;
-		}
-		
-		op->shoot(nearCreatures[choice]);
-		
-		for(int i = 0;i < amount + 1;i++){
-			mesTips.pop_back();
-		}
-	}
-	
 	void Game::useInt() {
 		auto op = dynamic_cast<Operative*>(cr);
 		if(op == nullptr) return;
 		
 		const std::vector<Item*> &items = op->getTable().getVector();
 		int amount = -1;
+		
+		if(op->getActiveGun() != nullptr){
+			amount++;
+			
+			mesTips.emplace_back(std::to_string(amount) + op->getActiveGun()->getName(), font, FONTSIZE);
+			mesTips.back().setPosition((float)WINDOWWIDTH * 3 / 4, (float)(CHOOSEOFFSET + amount * FONTSIZE));
+		}
+		
 		for(auto it = items.begin(), end = items.end();it != end;++it){
 			amount++;
 			
@@ -467,6 +481,10 @@ namespace nodata{
 		if((choice = getIntFromWindow(amount)) == ERROR){
 			cleanTips(amount);
 			return;
+		}
+		
+		if(op->getActiveGun() != nullptr){
+			choice -= 1;
 		}
 		
 		op->useItem(choice);
@@ -480,6 +498,14 @@ namespace nodata{
 		
 		const std::vector<Item*> &items = op->getTable().getVector();
 		int amount = -1;
+		
+		if(op->getActiveGun() != nullptr){
+			amount++;
+			
+			mesTips.emplace_back(std::to_string(amount) + op->getActiveGun()->getName(), font, FONTSIZE);
+			mesTips.back().setPosition((float)WINDOWWIDTH * 3 / 4, (float)(CHOOSEOFFSET + amount * FONTSIZE));
+		}
+		
 		for(auto it = items.begin(), end = items.end();it != end;++it){
 			amount++;
 			
@@ -493,9 +519,37 @@ namespace nodata{
 			return;
 		}
 		
+		if(op->getActiveGun() != nullptr){
+			choice -= 1;
+		}
+		
 		op->throwItem(choice);
 		
 		cleanTips(amount);
+	}
+	
+	void Game::shootInt(){
+		auto *op = dynamic_cast<Operative*>(cr);
+		if(op == nullptr || op->getActiveGun() == nullptr) return;
+		Point mousePos(sf::Mouse::getPosition(window).x / CELLSIZE - XOFFSET + cr->getPosition().x, sf::Mouse::getPosition(window).y / CELLSIZE - YOFFSET + cr->getPosition().y);
+		
+		op->shoot(mousePos);
+		
+		refreshMap();
+		refreshInterface();
+		redrawWindow();
+	}
+	
+	ErrorCodes Game::endInt() {
+		//other creatures moves here
+		
+		level.setTurn(OPERATIVE);
+		if(level.getCurrentTeam().empty()){
+			std::cout << "Game over!" << std::endl;
+			return ERROR;
+		}
+		level.resetTime();
+		return OK;
 	}
 	
 	void Game::redrawWindow() {

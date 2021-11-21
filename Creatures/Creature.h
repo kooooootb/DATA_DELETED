@@ -122,6 +122,7 @@ namespace nodata{
 		 * @param damage нанесенный урон
 		 */
 		void receiveDamage(int damage);
+		void resetTime();
 		
 		/*!
 		 * Виртуальный метод для отображения существа на экране
