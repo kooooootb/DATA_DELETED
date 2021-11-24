@@ -16,11 +16,6 @@ namespace nodata{
 		invWindow.setPosition(0, 0);
 		
 		sf::Vector2f cellSize(CELLSIZE, CELLSIZE);
-//	for(int i = 0;i < WINDOWWIDTH_AMOUNT;++i)
-//		for(int j = 0;j < WINDOWHEIGHT_AMOUNT;++j){
-//			wCells[i][j].setSize(cellSize);
-//			wCells[i][j].setPosition((float)i * CELLSIZE, (float)j * CELLSIZE);
-//		}
 		wCells = new sf::RectangleShape*[WINDOWWIDTH_AMOUNT];
 		for(int i = 0;i < WINDOWWIDTH_AMOUNT;++i){
 			wCells[i] = new sf::RectangleShape[WINDOWHEIGHT_AMOUNT];
@@ -56,6 +51,8 @@ namespace nodata{
 		mesStats[S_HEALTH].setPosition((float)WINDOWWIDTH * 3 / 4, WINDOWHEIGHT - 2 * FONTSIZE);
 		mesStats[S_AMMO].setPosition((float)WINDOWWIDTH * 3 / 4, WINDOWHEIGHT - 3 * FONTSIZE);
 		mesStats[S_WEIGHT].setPosition((float)WINDOWWIDTH * 3 / 4, WINDOWHEIGHT - 4 * FONTSIZE);
+		
+//		if(!operText.loadFromFile())
 		
 		refreshMap();
 		refreshInterface();
@@ -318,6 +315,7 @@ namespace nodata{
 	}
 	
 	void Game::start() {
+		ErrorCodes status;
 		while (window.isOpen())
 		{
 			sf::Event event;
@@ -331,7 +329,7 @@ namespace nodata{
 				if (event.type == sf::Event::KeyPressed)
 				{
 					switch(event.key.code){
-						case sf::Keyboard::LAlt:
+						case sf::Keyboard::Escape:
 							window.close();
 							break;
 						case sf::Keyboard::W:
@@ -377,8 +375,12 @@ namespace nodata{
 							break;
 						case sf::Keyboard::R:
 							window.pollEvent(event);
-							if(endInt() == ERROR){
+							status = endInt();
+							if(status == ERROR){
 								window.close();
+							}
+							else if(status == SUCCESS){
+								showError("You won!");
 							}
 							break;
 						default :
@@ -535,12 +537,19 @@ namespace nodata{
 		
 		op->shoot(mousePos);
 		
+		Point from(XOFFSET * CELLSIZE, YOFFSET * CELLSIZE);
+		mousePos.x = (mousePos.x - cr->getPosition().x + XOFFSET) * CELLSIZE;
+		mousePos.y = (mousePos.y - cr->getPosition().y + YOFFSET) * CELLSIZE;
+		
+		setLine(from, mousePos);
+		
 		refreshMap();
 		refreshInterface();
 		redrawWindow();
 	}
 	
 	ErrorCodes Game::endInt() {
+		level.moveSentients();
 		//other creatures moves here
 		
 		level.setTurn(OPERATIVE);
@@ -548,14 +557,35 @@ namespace nodata{
 			std::cout << "Game over!" << std::endl;
 			return ERROR;
 		}
+		if(level.enemyDied()){
+			std::cout << "You win!" << std::endl;
+			return SUCCESS;
+		}
 		level.resetTime();
 		return OK;
+	}
+	
+	void Game::setLine(const Point &from, const Point &to) {
+		clock.restart();
+		
+		line[0] = sf::Vertex(sf::Vector2f((float)from.x + ((float)CELLSIZE)/2, (float)from.y + ((float)CELLSIZE)/2));
+		line[1] = sf::Vertex(sf::Vector2f((float)to.x + ((float)CELLSIZE)/2, (float)to.y + ((float)CELLSIZE)/2));
+		
+		period = sf::milliseconds(200);
 	}
 	
 	void Game::redrawWindow() {
 		window.clear();
 		drawMap();
 		drawInterface();
+		window.draw(line, 2, sf::Lines);
+		
+		if(clock.getElapsedTime() > period){
+			line[0].position = sf::Vector2f(0,0);
+			line[1].position = sf::Vector2f(0,0);
+			period = sf::seconds(1000000);
+		}
+		
 		window.display();
 	}
 	

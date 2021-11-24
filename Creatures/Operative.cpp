@@ -77,7 +77,7 @@ namespace nodata{
 		activeGun_->shoot(victim, this);
 	}
 	
-	void Operative::shoot(const Point &point) {
+	void Operative::shoot(Point &point) {
 		if(activeGun_ == nullptr) return;
 		
 		activeGun_->shoot(level_, point, this, activeGun_->countAccuracy(accuracyMultipl_,sqrt(pow(coord_.x - point.x, 2) + pow(coord_.y - point.y, 2))));

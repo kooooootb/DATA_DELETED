@@ -13,6 +13,7 @@ namespace edittool{
 	
 	enum EditTips{
 		E_CELL = 0,
+		E_ERROR = 1,
 		E_COUNT
 	};
 	
@@ -32,9 +33,28 @@ namespace edittool{
 		int colLength = 4;
 		int rowLength = 4;
 		
+		CreatType creatType = OPERATIVE;
 		CellType celltype = FLOOR;
+		bool drawingCell = true;
 		bool mousePressed = false;
+		
+		void buildCell();
+		void buildCreature();
+		
+		void buildOperative();
+		void buildSentient();
+		void buildWild();
+		void buildForager();
+		void clearCell();
+		
+		std::string getString(const char *mes);
+		float getFloat(const char * mes, float amount);
+		int getInt(const char * mes, int amount);
+		void clearError();
+		
 		int getIntFromWindow(int amount);
+		float getFloatFromWindow(float amount);
+		std::string getStringFromWindow();
 		void redrawWindow();
 	public:
 		EditTool();

@@ -49,7 +49,8 @@ enum ErrorCodes{
 	ERROR = -1, ///< Ошибка
 	OK, ///< Успех
 	TODELETE, ///< Элемент нужно очистить после завершения
-	TOREMOVE ///< Элемент нужно убрать из массива после завершения
+	TOREMOVE, ///< Элемент нужно убрать из массива после завершения
+	SUCCESS ///< Функция завершилась с успехом
 };
 
 /// Направления
@@ -68,6 +69,10 @@ struct Point{
 	
 	bool operator!=(const Point &point) const{
 		return (point.x != x || point.y != y);
+	}
+	
+	bool operator==(const Point &point) const{
+		return (point.x == x && point.y == y);
 	}
 };
 

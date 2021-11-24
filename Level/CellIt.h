@@ -15,8 +15,6 @@ namespace nodata{
 		
 		int vertCells, horizCells;
 	public:
-//		CellIt(const Point &End);
-//		CellIt(const Point &Begin, const Point &End);
 		CellIt(const Point &Begin, const Point &End, const Level &level);
 		CellIt(const Level &level, const Point &Begin, const Point &End);
 		

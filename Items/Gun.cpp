@@ -71,13 +71,16 @@ namespace nodata{
 //		weight_ -= calcAmmoWeightByType(1, ammoType_);
 	}
 	
-	void Gun::shoot(Level &level, Point coord, Creature *shooter, int hitsMultipl) {
-		if (ammoCurrent_ < 1 || shooter->getTimeCurrent() < shootTime_) return;
+	void Gun::shoot(Level &level, Point &coord, Creature *shooter, int hitsMultipl) {
+		if (ammoCurrent_ < 1 || shooter->getTimeCurrent() < shootTime_ || coord == shooter->getPosition()) {
+			coord = shooter->getPosition();
+			return;
+		}
 		
 		srand(time(nullptr));
 		if (hitsMultipl != 0) {
-			coord.x += rand() % hitsMultipl;
-			coord.y += rand() % hitsMultipl;
+			coord.x += rand() % (2 * hitsMultipl) - hitsMultipl;
+			coord.y += rand() % (2 * hitsMultipl) - hitsMultipl;
 		}
 		
 		//make ray

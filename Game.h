@@ -43,6 +43,13 @@ namespace nodata{
 		
 		Creature *cr;
 		
+		sf::Clock clock;
+		sf::Vertex line[2];
+		sf::Time period;
+		
+		
+		sf::Texture operText;
+		
 		int getIntFromWindow(int amount);
 		void redrawWindow();
 		void drawCell(int x, int y);
@@ -57,6 +64,8 @@ namespace nodata{
 		void refreshHealth();
 		void refreshAmmo();
 		void refreshWeight();
+		
+		void setLine(const Point &from, const Point &to);
 		
 		void cleanTips(int amount);
 	public:

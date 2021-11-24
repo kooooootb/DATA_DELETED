@@ -90,7 +90,7 @@ namespace nodata{
 		 * @param hitsMultipl коэффициент попаданий
 		 */
 		void shoot(Creature *victim, Creature *shooter);
-		void shoot(Level &level, Point coord, Creature *shooter, int hitsMultipl);
+		void shoot(Level &level, Point &coord, Creature *shooter, int hitsMultipl);
 		/*!
 		 * Функция вычисляет коэффициент количества попаданий в зависимости от точности стрелявшего существа и точности оружия. Коэффициент не может быть больше единицы.
 		 * @param crAccuracy коэффициент точности стреляющего

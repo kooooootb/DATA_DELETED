@@ -40,4 +40,7 @@ static const char * HKITS_CFG = "HKits.cfg";
 static const char * ACONTS_CFG = "AConts.cfg";
 static const char * GUNS_CFG = "Guns.cfg";
 
+//Textures
+static const char * OPERTEXTURE = "testTexture.png";
+
 #endif //LAB4_PARAMETERS_H

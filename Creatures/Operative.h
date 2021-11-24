@@ -103,7 +103,7 @@ namespace nodata{
 		 * Стреляет в клетку из активного оружия при его наличии
 		 * @param point клетка
 		 */
-		void shoot(const Point &point);
+		void shoot(Point &point);
 		/*!
 		 * Выбрасывает все предметы из инвентаря оперативника
 		 */

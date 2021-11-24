@@ -477,4 +477,12 @@ namespace nodata{
 			(*it)->resetTime();
 		}
 	}
+	
+	bool Level::enemyDied() const{
+		return sentientAr_.empty() && wildAr_.empty() && foragerAr_.empty();
+	}
+	
+	void Level::moveSentients(){
+	
+	}
 }
