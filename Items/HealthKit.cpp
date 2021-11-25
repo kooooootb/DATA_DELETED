@@ -3,8 +3,7 @@
 #include "Creature.h"
 
 namespace nodata{
-	HealthKit::HealthKit(std::string &name, int weight, int healAmount, int healTime) : Item(name, weight) ,
-																						healAmount_(healAmount) , healTime_(healTime) {
+	HealthKit::HealthKit(std::string &name, int weight, int healAmount, int healTime) : Item(name, weight) , healAmount_(healAmount) , healTime_(healTime) {
 		
 	}
 	
@@ -14,9 +13,5 @@ namespace nodata{
 		
 		creature->spendTime(healTime_);
 		return TODELETE;
-	}
-	
-	void HealthKit::drawCell(sf::RectangleShape &shape) {
-		shape.setFillColor(sf::Color(255,5,5));
 	}
 }

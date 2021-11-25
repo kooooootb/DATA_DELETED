@@ -43,11 +43,6 @@ namespace nodata{
 		 * @return TODELETE для удаления аптечки после использования
 		 */
 		ErrorCodes use(Creature *creature) override;
-		
-		/*!
-		 * Метод для отображения выпавшей аптечки на экране
-		 */
-		void drawCell(sf::RectangleShape &shape) override;
 	};
 
 /*! @} */

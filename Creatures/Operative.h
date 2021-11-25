@@ -108,11 +108,6 @@ namespace nodata{
 		 * Выбрасывает все предметы из инвентаря оперативника
 		 */
 		void dropAllItems();
-		
-		/*!
-		 * Метод для отображения оперативника на экране
-		 */
-		void drawCell(sf::RectangleShape &shape) override;
 	};
 
 /*! @} */

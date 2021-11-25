@@ -30,8 +30,6 @@ namespace nodata{
 	private:
 		Level level;
 		sf::RenderWindow window;
-//	std::array<std::array<sf::RectangleShape, WINDOWHEIGHT_AMOUNT>, WINDOWWIDTH_AMOUNT> wCells;
-		sf::RectangleShape **wCells;
 		sf::RectangleShape interfaceWindow, invWindow;
 		sf::Font font;
 		
@@ -47,8 +45,9 @@ namespace nodata{
 		sf::Vertex line[2];
 		sf::Time period;
 		
-		
-		sf::Texture operText;
+		std::vector<Cell*> cellsOnScreen;
+		std::vector<Creature*> creaturesOnScreen;
+		std::vector<Item*> itemsOnScreen;
 		
 		int getIntFromWindow(int amount);
 		void redrawWindow();

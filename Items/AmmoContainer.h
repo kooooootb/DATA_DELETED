@@ -74,11 +74,6 @@ namespace nodata{
 		 * @return ERROR при ошибке, TODELETE при опустошении контейнера поссле использования, OK при успешной операции
 		 */
 		ErrorCodes use(Creature *creature) override;
-		
-		/*!
-		 * Метод для отображения выпавшего контейнера на экране
-		 */
-		void drawCell(sf::RectangleShape &shape) override;
 	};
 
 /*! @} */

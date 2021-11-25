@@ -49,11 +49,6 @@ namespace nodata{
 		 *	Убивает существо и выбрасывает его активное оружие
 		 */
 		void kill() override;
-		
-		/*!
-		 * Метод для отображения разумного существа на экране
-		 */
-		void drawCell(sf::RectangleShape &shape) override;
 	};
 
 /*! @} */

@@ -22,8 +22,4 @@ namespace nodata{
 	void Wild::kill() {
 		level_.killWild(this);
 	}
-	
-	void Wild::drawCell(sf::RectangleShape &shape) {
-	
-	}
 }

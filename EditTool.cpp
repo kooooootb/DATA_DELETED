@@ -7,16 +7,6 @@ namespace edittool{
 	{
 		window.setFramerateLimit(60);
 		
-		sf::Vector2f cellSize(CELLSIZE, CELLSIZE);
-		wCells = new sf::RectangleShape*[WINDOWWIDTH_AMOUNT];
-		for(int i = 0;i < WINDOWWIDTH_AMOUNT;++i){
-			wCells[i] = new sf::RectangleShape[WINDOWHEIGHT_AMOUNT];
-			for(int j = 0;j < WINDOWHEIGHT_AMOUNT;++j){
-				wCells[i][j].setSize(cellSize);
-				wCells[i][j].setPosition((float)i * CELLSIZE, (float)j * CELLSIZE);
-			}
-		}
-		
 		if(!font.loadFromFile("arial.ttf")){
 			std::string fname;
 			while(!font.loadFromFile(fname)) {
@@ -149,57 +139,59 @@ namespace edittool{
 	}
 	
 	void EditTool::refreshMap(){
+		cellsOnScreen.clear();
+		creaturesOnScreen.clear();
+		itemsOnScreen.clear();
+		
 		for(int j = 0;j < WINDOWHEIGHT_AMOUNT;++j){
 			const std::vector<const std::vector<Item*>*> items = level.getItemMap().getLine(j + coord.y - YOFFSET, coord.x - XOFFSET, coord.x - XOFFSET + WINDOWWIDTH_AMOUNT);
 			const std::vector<const std::vector<Creature*>*> creatures = level.getCreatureMap().getLine(j + coord.y - YOFFSET, coord.x - XOFFSET, coord.x - XOFFSET + WINDOWWIDTH_AMOUNT);
 			
 			for(int i = 0;i < WINDOWWIDTH_AMOUNT;++i){
-				Cell cell;
+				Cell *cell;
 				ErrorCodes flag = level.getCell(coord.x - XOFFSET + i, coord.y - YOFFSET + j, cell);
+
 				if(flag == OK){
-					switch(cell.getType()){
-						case FLOOR:
-							wCells[i][j].setFillColor(sf::Color(25,25,25));
-							if(items[i] != nullptr){
-								for(auto it = (*items[i]).begin(), end = (*items[i]).end();it != end;++it)
-									(*it)->drawCell(wCells[i][j]);
+					cell->setDrawPosition((float)i, (float)j);
+					
+					if(cell->walkAble()) {
+						if (items[i] != nullptr) {
+							for (auto it = (*items[i]).begin(), end = (*items[i]).end(); it != end; ++it){
+								(*it)->setDrawPosition((float)i, (float)j);
+								itemsOnScreen.push_back(*it);
 							}
-							if(creatures[i] != nullptr){
-								for(auto it = (*creatures[i]).begin(), end = (*creatures[i]).end();it != end;++it)
-									(*it)->drawCell(wCells[i][j]);
+						}
+						if (creatures[i] != nullptr) {
+							for (auto it = (*creatures[i]).begin(), end = (*creatures[i]).end(); it != end; ++it){
+								(*it)->setDrawPosition((float)i, (float)j);
+								creaturesOnScreen.push_back(*it);
 							}
-							break;
-						case WALL:
-							wCells[i][j].setFillColor(sf::Color(55,55,55));
-							break;
-						case GLASS:
-							wCells[i][j].setFillColor(sf::Color(46,155,155));
-							break;
-						case PARTITION:
-							wCells[i][j].setFillColor(sf::Color(80,30,0));
-							break;
+						}
 					}
+					
+					cellsOnScreen.push_back(cell);
 				}
-				else if(flag == ERROR) wCells[i][j].setFillColor(sf::Color::Black);
 			}
 		}
 	}
 	
 	void EditTool::refreshInterface() {
-		std::string mes("1 for WALL, 2 for FLOOR, 3 for GLASS, 4 for PARTITION\nR to refresh circle radius\nE to build circle\nF to build line\nT to refresh line length\nV to build row\nY to refresh row length");
+		std::string mes("1 for WALL, 2 for FLOOR, 3 for GLASS, 4 for PARTITION, 5 for storage\nR to refresh circle radius\nE to build circle\nF to build line\nT to refresh line length\nV to build row\nY to refresh row length\nO to create Operative\nP to create Sentient\nL to create Wild\nK to create Forager\nJ to clear creatures");
 		mesTips[E_CELL].setString(mes);
 	}
 	
 	void EditTool::drawMap() {
-		for(int i = 0;i < WINDOWWIDTH_AMOUNT;++i)
-			for(int j = 0;j < WINDOWHEIGHT_AMOUNT;++j)
-				window.draw(wCells[i][j]);
-	}
-	
-	void EditTool::setCell(int x, int y){
-		if(x < 0 || y < 0 || x >= cellsHoriz || y >= cellsVert) return;
+		for(auto it = cellsOnScreen.begin(), endIt = cellsOnScreen.end();it != endIt;++it){
+			(*it)->drawCell(window);
+		}
 		
-		level.getCells()[x][y].setType(celltype);
+		for(auto it = itemsOnScreen.begin(), endIt = itemsOnScreen.end();it != endIt;++it){
+			(*it)->drawItem(window);
+		}
+		
+		for(auto it = creaturesOnScreen.begin(), endIt = creaturesOnScreen.end();it != endIt;++it){
+			(*it)->drawCreat(window);
+		}
 	}
 	
 	void EditTool::buildCircle() {
@@ -292,6 +284,7 @@ namespace edittool{
 				{
 					switch(event.key.code){
 						case sf::Keyboard::LControl:
+							saveLevel();
 							window.close();
 							break;
 						case sf::Keyboard::E:
@@ -330,6 +323,10 @@ namespace edittool{
 						case sf::Keyboard::Num4:
 							drawingCell = true;
 							celltype = PARTITION;
+							break;
+						case sf::Keyboard::Num5:
+							drawingCell = true;
+							celltype = STORAGE;
 							break;
 						case sf::Keyboard::O:
 							drawingCell = false;
@@ -371,6 +368,15 @@ namespace edittool{
 			
 			redrawWindow();
 		}
+	}
+	
+	void EditTool::saveLevel(){
+		mesTips[E_ERROR].setString("Input 1 to save changes");
+		refreshInterface();
+		redrawWindow();
+		int saveFlag = getIntFromWindow(INT_MAX);
+		if(saveFlag != 1) return;
+		
 		Cell **cells = level.getCells();
 		
 		std::ofstream fs(CELLS_CFG, std::ios::trunc);
@@ -389,11 +395,15 @@ namespace edittool{
 		fs.close();
 	}
 	
-	void EditTool::buildCell(){
-		int x = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, y = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
+	void EditTool::setCell(int x, int y){
 		if(x < 0 || y < 0 || x >= cellsHoriz || y >= cellsVert) return;
 		
-		level.getCells()[x][y].setType(celltype);
+		level.setCell(x, y, celltype);
+	}
+	
+	void EditTool::buildCell(){
+		int x = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, y = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
+		setCell(x, y);
 	}
 	
 	void EditTool::buildCreature(){
@@ -414,7 +424,7 @@ namespace edittool{
 				buildForager();
 				break;
 			default:
-				clearCell();
+				clearCreatures();
 				break;
 		}
 	}
@@ -431,15 +441,78 @@ namespace edittool{
 		float reloadTime = getFloat("input reload coefficient and Enter to confirm", 100);
 		int force = getInt("input force and Enter to confirm", INT_MAX);
 		float accuracy = getFloat("input accuracy coefficient and Enter to confirm", 100);
+		clearError();
 		Point point(x, y);
 		
 		level.spawnOperator(name, point, healthMax, timeMax, walkTime, viewRadius, reloadTime, force, accuracy);
 	}
 	
-	void EditTool::buildSentient() {}
-	void EditTool::buildWild() {}
-	void EditTool::buildForager() {}
-	void EditTool::clearCell() {}
+	void EditTool::buildSentient() {
+//		std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, float accuracy
+		int x = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, y = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
+		
+		std::string name = getString("input name and Enter to confirm");
+		int healthMax = getInt("input health max and Enter to confirm", INT_MAX);
+		int timeMax = getInt("input time max and Enter to confirm", INT_MAX);
+		int walkTime = getInt("input walk max and Enter to confirm", INT_MAX);
+		int viewRadius = getInt("input view radius and Enter to confirm", (int)sqrt(pow(level.getVertCells(), 2) + pow(level.getHorizCells(), 2)));
+		float accuracy = getFloat("input accuracy coefficient and Enter to confirm", 100);
+		clearError();
+		Point point(x, y);
+		
+		level.spawnSentient(name, point, healthMax, timeMax, walkTime, viewRadius, accuracy);
+	}
+	void EditTool::buildWild() {
+//		std::string &name, Point coord, int healthMax, int timeMax, int walkTime, int viewRadius, int accuracy, int damage
+		int x = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, y = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
+		
+		std::string name = getString("input name and Enter to confirm");
+		int healthMax = getInt("input health max and Enter to confirm", INT_MAX);
+		int timeMax = getInt("input time max and Enter to confirm", INT_MAX);
+		int walkTime = getInt("input walk max and Enter to confirm", INT_MAX);
+		int viewRadius = getInt("input view radius and Enter to confirm", (int)sqrt(pow(level.getVertCells(), 2) + pow(level.getHorizCells(), 2)));
+		int accuracy = getInt("input accuracy coefficient and Enter to confirm", 100);
+		int damage = getInt("input damage and Enter to confirm", INT_MAX);
+		clearError();
+		Point point(x, y);
+		
+		level.spawnWild(name, point, healthMax, timeMax, walkTime, viewRadius, accuracy, damage);
+	}
+	void EditTool::buildForager() {
+//		std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, int force
+		int x = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, y = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
+		
+		std::string name = getString("input name and Enter to confirm");
+		int healthMax = getInt("input health max and Enter to confirm", INT_MAX);
+		int timeMax = getInt("input time max and Enter to confirm", INT_MAX);
+		int walkTime = getInt("input walk max and Enter to confirm", INT_MAX);
+		int viewRadius = getInt("input view radius and Enter to confirm", (int)sqrt(pow(level.getVertCells(), 2) + pow(level.getHorizCells(), 2)));
+		int force = getInt("input force and Enter to confirm", INT_MAX);
+		clearError();
+		Point point(x, y);
+		
+		level.spawnForager(name, point, healthMax, timeMax, walkTime, viewRadius, force);
+	}
+	
+	void EditTool::clearCreatures() {
+		int x = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, y = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
+		Point point(x, y);
+		const std::vector<Creature*> *creatures = level.getCreatureMap()[point];
+		while(creatures != nullptr){
+			(*creatures)[0]->kill();
+			creatures = level.getCreatureMap()[point];
+		}
+	}
+	
+	void EditTool::clearItems() {
+		int x = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, y = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
+		Point point(x, y);
+		const std::vector<Creature*> *creatures = level.getCreatureMap()[point];
+		while(creatures != nullptr){
+			(*creatures)[0]->kill();
+			creatures = level.getCreatureMap()[point];
+		}
+	}
 	
 	void EditTool::redrawWindow() {
 		window.clear();
@@ -481,9 +554,5 @@ namespace edittool{
 	}
 	
 	EditTool::~EditTool() {
-		for(int i = 0;i < WINDOWWIDTH_AMOUNT;++i){
-			delete [] wCells[i];
-		}
-		delete [] wCells;
 	}
 }

@@ -22,8 +22,6 @@ namespace edittool{
 		Level level;
 		Point coord;
 		sf::RenderWindow window;
-//	std::array<std::array<sf::RectangleShape, WINDOWHEIGHT_AMOUNT>, WINDOWWIDTH_AMOUNT> wCells;
-		sf::RectangleShape **wCells;
 		sf::Font font;
 		
 		std::vector<sf::Text> mesTips;
@@ -38,6 +36,10 @@ namespace edittool{
 		bool drawingCell = true;
 		bool mousePressed = false;
 		
+		std::vector<Cell*> cellsOnScreen;
+		std::vector<Creature*> creaturesOnScreen;
+		std::vector<Item*> itemsOnScreen;
+		
 		void buildCell();
 		void buildCreature();
 		
@@ -45,7 +47,8 @@ namespace edittool{
 		void buildSentient();
 		void buildWild();
 		void buildForager();
-		void clearCell();
+		void clearCreatures();
+		void clearItems();
 		
 		std::string getString(const char *mes);
 		float getFloat(const char * mes, float amount);
@@ -56,6 +59,8 @@ namespace edittool{
 		float getFloatFromWindow(float amount);
 		std::string getStringFromWindow();
 		void redrawWindow();
+		
+		void saveLevel();
 	public:
 		EditTool();
 		

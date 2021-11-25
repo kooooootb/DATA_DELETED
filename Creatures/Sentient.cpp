@@ -34,8 +34,4 @@ namespace nodata{
 		activeGun_ = nullptr;
 		level_.killSentient(this);
 	}
-	
-	void Sentient::drawCell(sf::RectangleShape &shape) {
-		shape.setFillColor(sf::Color(210,100,0));
-	}
 }

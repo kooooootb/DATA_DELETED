@@ -8,6 +8,8 @@ namespace nodata{
 		loadCells(CELLS_CFG);
 		activeCreature = nullptr;
 		
+		loadTextures();
+		
 		loadOperative(OPERS_CFG);
 		loadSentient(SENTS_CFG);
 		loadWild(WILDS_CFG);
@@ -64,6 +66,7 @@ namespace nodata{
 				continue;
 			
 			auto *operative = new Operative(this, name, coord, healthMax, timeMax, walkTime, viewRadius, reloadTime, force, accuracy);
+			operative->setTexture(creatText[OPERATIVE]);
 			
 			operativeAr_.push_back(operative);
 			creatureMap.addItem(coord, operative);
@@ -94,6 +97,7 @@ namespace nodata{
 				continue;
 			
 			auto *sentient = new Sentient(this, name, coord, healthMax, timeMax, walkTime, viewRadius, accuracy);
+			sentient->setTexture(creatText[SENTIENT]);
 			
 			sentientAr_.push_back(sentient);
 			creatureMap.addItem(coord, sentient);
@@ -123,6 +127,7 @@ namespace nodata{
 				continue;
 			
 			auto *wild = new Wild(this, name, coord, healthMax, timeMax, walkTime, viewRadius, accuracy, damage);
+			wild->setTexture(creatText[WILD]);
 			
 			wildAr_.push_back(wild);
 			creatureMap.addItem(coord, wild);
@@ -152,6 +157,7 @@ namespace nodata{
 				continue;
 			
 			auto *forager = new Forager(this, name, coord, healthMax, timeMax, walkTime, viewRadius, force);
+			forager->setTexture(creatText[SENTIENT]);
 			
 			foragerAr_.push_back(forager);
 			creatureMap.addItem(coord, forager);
@@ -183,6 +189,7 @@ namespace nodata{
 			auto ammoType = static_cast<Ammunition>(ammoTypeInt);
 			
 			auto *gun = new Gun(name, weight, damage, shootTime, reloadTime, ammoType, ammoMax, accuracy, switchTime);
+			gun->setTexture(itemText[GUN]);
 			
 			itemMap.addItem(coord, gun);
 		}
@@ -210,6 +217,7 @@ namespace nodata{
 				continue;
 			
 			auto *hkit = new HealthKit(name, weight, healAmount, healTime);
+			hkit->setTexture(itemText[HKIT]);
 			
 			itemMap.addItem(coord, hkit);
 		}
@@ -253,6 +261,7 @@ namespace nodata{
 			}
 			
 			auto *acont = new AmmoContainer(name, weight, ammoType, ammoMax);
+			acont->setTexture(itemText[ACONT]);
 			
 			itemMap.addItem(coord, acont);
 		}
@@ -261,28 +270,32 @@ namespace nodata{
 	}
 	
 	void Level::setCell(int x, int y, CellType type) {
-		cells_[x][y].setType(type);
+		cells_[x][y].setType(type, cellText);
 	}
 	
 	void Level::setCell(const Point &point, CellType type) {
-		cells_[point.x][point.y].setType(type);
+		cells_[point.x][point.y].setType(type, cellText);
 	}
 	
 	void Level::killOperative(Creature *cr) {
 		operativeAr_.erase(std::find(operativeAr_.begin(), operativeAr_.end(), cr));
 		creatureMap.removeItem(cr->getPosition(), cr);
+		delete cr;
 	}
 	void Level::killSentient(Creature *cr) {
 		sentientAr_.erase(std::find(sentientAr_.begin(), sentientAr_.end(), cr));
 		creatureMap.removeItem(cr->getPosition(), cr);
+		delete cr;
 	}
 	void Level::killWild(Creature *cr) {
 		wildAr_.erase(std::find(wildAr_.begin(), wildAr_.end(), cr));
 		creatureMap.removeItem(cr->getPosition(), cr);
+		delete cr;
 	}
 	void Level::killForager(Creature *cr) {
 		foragerAr_.erase(std::find(foragerAr_.begin(), foragerAr_.end(), cr));
 		creatureMap.removeItem(cr->getPosition(), cr);
+		delete cr;
 	}
 	
 	void Level::dropItem(Point &point, Item *item) {
@@ -301,40 +314,43 @@ namespace nodata{
 		
 		for(int i = 0;i < horizCells;++i){
 			cells_[i] = new Cell[vertCells];
+			for(int j = 0;j < vertCells;++j){
+				cells_[i][j].setTexture(cellText[FLOOR]);
+			}
 		}
 		
 		int type;
 		int x,y;
 		while(fs >> type){
 			fs >> x >> y;
-			cells_[x][y].setType(static_cast<CellType>(type));
+			cells_[x][y].setType(static_cast<CellType>(type), cellText);
 		}
 		
 		//goes after initialization to avoid retyping by save file
 		for(int i = 0;i < horizCells;++i){
-			cells_[i][0].setType(WALL);
-			cells_[i][vertCells - 1].setType(WALL);
+			cells_[i][0].setType(WALL, cellText);
+			cells_[i][vertCells - 1].setType(WALL, cellText);
 		}
 		for(int i = 0;i < vertCells;++i){
-			cells_[0][i].setType(WALL);
-			cells_[vertCells - 1][i].setType(WALL);
+			cells_[0][i].setType(WALL, cellText);
+			cells_[vertCells - 1][i].setType(WALL, cellText);
 		}
 		
 		fs.close();
 	}
 	
-	ErrorCodes Level::getCell(int x, int y, Cell &cell) const {
+	ErrorCodes Level::getCell(int x, int y, Cell *&cell) const {
 		if(x < 0 || x >= horizCells || y < 0 || y >= vertCells)
 			return ERROR;
-		cell = cells_[x][y];
+		cell = &cells_[x][y];
 		return OK;
 	}
 	
-	ErrorCodes Level::getCell(const Point &point, Cell &cell) const {
+	ErrorCodes Level::getCell(const Point &point, Cell *&cell) const {
 		int x = point.x, y = point.y;
 		if(x < 0 || x >= horizCells || y < 0 || y >= vertCells)
 			return ERROR;
-		cell = cells_[x][y];
+		cell = &cells_[x][y];
 		return OK;
 	}
 	
@@ -413,6 +429,7 @@ namespace nodata{
 			return;
 		
 		auto *operative = new Operative(this, name, coord, healthMax, timeMax, walkTime, viewRadius, reloadTime, force, accuracy);
+		operative->setTexture(creatText[OPERATIVE]);
 		
 		operativeAr_.push_back(operative);
 		creatureMap.addItem(coord, operative);
@@ -423,6 +440,7 @@ namespace nodata{
 			return;
 		
 		auto *sentient = new Sentient(this, name, coord, healthMax, timeMax, walkTime, viewRadius, accuracy);
+		sentient->setTexture(creatText[SENTIENT]);
 		
 		sentientAr_.push_back(sentient);
 		creatureMap.addItem(coord, sentient);
@@ -433,6 +451,7 @@ namespace nodata{
 			return;
 		
 		auto *wild = new Wild(this, name, coord, healthMax, timeMax, walkTime, viewRadius, accuracy, damage);
+		wild->setTexture(creatText[WILD]);
 		
 		wildAr_.push_back(wild);
 		creatureMap.addItem(coord, wild);
@@ -443,6 +462,7 @@ namespace nodata{
 			return;
 		
 		auto *forager = new Forager(this, name, coord, healthMax, timeMax, walkTime, viewRadius, force);
+		forager->setTexture(creatText[FORAGER]);
 		
 		foragerAr_.push_back(forager);
 		creatureMap.addItem(coord, forager);
@@ -484,5 +504,29 @@ namespace nodata{
 	
 	void Level::moveSentients(){
 	
+	}
+	
+	void Level::loadTextures() {
+		for(int i = FLOOR;i != CELLSTYPE_COUNT;++i){
+			if(!cellText[i].loadFromFile(CELLS_TEXTURES[i])){
+				throw std::runtime_error("Can't find texture for cell");
+			}
+		}
+		
+		for(int i = OPERATIVE;i != CREATURES_COUNT;++i){
+			if(!creatText[i].loadFromFile(CREATURES_TEXTURES[i])){
+				throw std::runtime_error("Can't find texture for creature");
+			}
+		}
+		
+		for(int i = HKIT;i != ITEMS_COUNT;++i){
+			if(!itemText[i].loadFromFile(ITEMS_TEXTURES[i])){
+				throw std::runtime_error("Can't find texture for item");
+			}
+		}
+	}
+	
+	Cell *Level::operator[](const Point &point){
+		return cells_[point.x] + point.y;
 	}
 }

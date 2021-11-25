@@ -2,7 +2,7 @@
 #include "Level.h"
 
 namespace nodata{
-	CellIt::CellIt(const Point &Begin, const Point &End, const Level &level) : cells(level.getCells()) , begin(Begin) , end(End){//init algorithm
+	CellIt::CellIt(const Point &Begin, const Point &End, const Level &Level) : level(Level) , cells(Level.getCells()) , begin(Begin) , end(End){//init algorithm
 		vertCells = level.getVertCells();
 		horizCells = level.getHorizCells();
 		
@@ -28,7 +28,7 @@ namespace nodata{
 		cur = cells[point.x] + point.y;
 	}
 	
-	CellIt::CellIt(const Level &level, const Point &Begin, const Point &End) : cells(level.getCells()) , begin(Begin) , end(End){//init end
+	CellIt::CellIt(const Level &Level, const Point &Begin, const Point &End) : level(Level) , cells(Level.getCells()) , begin(Begin) , end(End){//init end
 		vertCells = level.getVertCells();
 		horizCells = level.getHorizCells();
 		
@@ -64,6 +64,22 @@ namespace nodata{
 		index += 1;
 		
 		return *this;
+	}
+	
+	CellIt CellIt::operator++(int) {
+		CellIt res(begin, end, level);
+		res.point = point;
+		res.cur = cur;
+		
+		point.x = begin.x + (steep ? (index * dx) / dy : index) * signX;
+		point.y = begin.y + (steep ? index : (index * dy) / dx) * signY;
+		
+		if(point.x < 0 || point.y < 0 || point.x >= horizCells || point.y >= vertCells) point = end;
+		
+		cur = cells[point.x] + point.y;
+		index += 1;
+		
+		return res;
 	}
 	
 	Cell &CellIt::operator*() const {

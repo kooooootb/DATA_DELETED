@@ -86,9 +86,8 @@ namespace nodata{
 		//make ray
 		level.setRay(shooter->getPosition(), coord);
 		for (Level::Iterator it = level.begin(), endIt = level.end(); it != endIt; ++it) {
-			CellType type = (*it).getType();
 			Point curPoint = it.getPoint();
-			if (type != FLOOR || level.getCreatureMap()[curPoint] != nullptr) {
+			if (!(*it).walkAble() || level.getCreatureMap()[curPoint] != nullptr) {
 				coord = curPoint;
 				break;
 			}
@@ -96,14 +95,14 @@ namespace nodata{
 		
 		//shoot
 		const std::vector<Creature *> *creatures = level.getCreatureMap()[coord];
-		Cell cell;
+		Cell *cell;
 		ErrorCodes status = level.getCell(coord, cell);
 		if (creatures != nullptr) {//shoot creature
 			int amount = (int) (*creatures).size();
 			srand(time(nullptr));
 			shoot((*creatures)[rand() % amount], shooter);
 		} else if (status != ERROR) {//shoot cell
-			if ((cell.getType() == GLASS || cell.getType() == PARTITION)) level.setCell(coord, FLOOR);
+			if ((cell->getType() == GLASS || cell->getType() == PARTITION)) level.setCell(coord, FLOOR);
 		}
 		
 		ammoCurrent_ -= 1;
@@ -116,9 +115,5 @@ namespace nodata{
 		if(res < 0) res = 0;
 		res = sqrt(res);
 		return (int)res;
-	}
-	
-	void Gun::drawCell(sf::RectangleShape &shape) {
-		shape.setFillColor(sf::Color(0,100,5));
 	}
 }

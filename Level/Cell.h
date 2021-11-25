@@ -23,11 +23,13 @@ namespace nodata{
 	class Cell {
 	private:
 		CellType type_; ///< Тип клетки
+		
+		sf::Sprite sprite;
 	public:
 		/*!
 		 * Конструктор класса Cell преобразует ее тип в Пол.
 		 */
-		Cell() : type_(FLOOR) {}
+		Cell();
 		
 		/*!
 		 * Возвращает тип клетки
@@ -35,9 +37,32 @@ namespace nodata{
 		CellType getType() const { return type_; }
 		
 		/*!
+		 * Устанавливает тип клетки и текстуру
+		 */
+		void setType(CellType type, sf::Texture *textures);
+		/*!
 		 * Устанавливает тип клетки
 		 */
 		void setType(CellType type);
+		
+		/*!
+		 * Определяет, можно ли по клетке ходить
+		 */
+		bool walkAble() const;
+		
+		/*!
+		 * Устанавливает позицию спрайта клетки
+		 * @param x, y координаты
+		 */
+		void setDrawPosition(float x, float y);
+		/*!
+		 * Рисует клетку
+		 */
+		void drawCell(sf::RenderWindow &window);
+		/*!
+		 * Устанавливает текстуру клетки
+		 */
+		void setTexture(sf::Texture &texture);
 	};
 
 	/*! @} */

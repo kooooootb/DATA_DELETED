@@ -74,8 +74,4 @@ namespace nodata{AmmoContainer::AmmoContainer(std::string &name, int weight, Amm
 		}
 	}
 	
-	void AmmoContainer::drawCell(sf::RectangleShape &shape) {
-		shape.setFillColor(sf::Color(50,255,50));
-	}
-	
 }

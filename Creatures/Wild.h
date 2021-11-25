@@ -42,11 +42,6 @@ namespace nodata{
 		 *	Убивает существо
 		 */
 		void kill() override;
-		
-		/*!
-		 * Метод для отображения дикого существа на экране
-		 */
-		void drawCell(sf::RectangleShape &shape) override;
 	};
 
 /*! @} */

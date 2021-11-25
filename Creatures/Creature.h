@@ -36,6 +36,8 @@ namespace nodata{
 		int viewRadius_; ///< Радиус обзора
 		Point coord_; ///< Его координаты во время создания
 		Level &level_; ///< Ссылка на уровень, содержащий существо
+		
+		sf::Sprite sprite;
 	public:
 		/*!
 		 * Конструктор класса, инициализирующий его параметры
@@ -127,7 +129,9 @@ namespace nodata{
 		/*!
 		 * Виртуальный метод для отображения существа на экране
 		 */
-		virtual void drawCell(sf::RectangleShape &shape) = 0;
+		void drawCreat(sf::RenderWindow &window);
+		void setDrawPosition(float x, float y);
+		void setTexture(sf::Texture &texture);
 	};
 
 /*! @} */

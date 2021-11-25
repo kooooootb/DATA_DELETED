@@ -34,8 +34,4 @@ namespace nodata{
 	void Forager::dropAllItems() {
 		itemTable_.dropAll(level_, coord_);
 	}
-	
-	void Forager::drawCell(sf::RectangleShape &shape) {
-	
-	}
 }

@@ -47,6 +47,8 @@ namespace nodata{
 		friend class CellIt;
 		Point rayBegin, rayEnd;
 		
+		sf::Texture cellText[CELLSTYPE_COUNT], creatText[CREATURES_COUNT], itemText[ITEMS_COUNT];
+		
 		/*!
 		 * Проверяет корректность введенных координат
 		 * @return true если коодинаты корректны, false в другом случае
@@ -94,12 +96,12 @@ namespace nodata{
 		 * Передает тип клетки, находящейся на данных координатах, по ссылке cell.
 		 * Если клетка не может находиться на данных координатах, возвращает ERROR
 		 */
-		ErrorCodes getCell(int x, int y, Cell &cell) const;
+		ErrorCodes getCell(int x, int y, Cell *&cell) const;
 		/*!
 		 * Передает тип клетки, находящейся на данных координатах, по ссылке cell.
 		 * Если клетка не может находиться на данных координатах, возвращает ERROR
 		 */
-		ErrorCodes getCell(const Point &point, Cell &cell) const;
+		ErrorCodes getCell(const Point &point, Cell *&cell) const;
 		/*!
 		 * Возвращает ссылку на карту предметов
 		 */
@@ -132,6 +134,10 @@ namespace nodata{
 		 * Возвращает ссылку на массив существ команды, совершающей текущий ход
 		 */
 		std::vector<Creature *> &getCurrentTeam();
+		/*!
+		 * Возвращает указатель на клетку по данной координате
+		 */
+		 Cell *operator[](const Point &point);
 		
 		/*!
 		 * Устанавливает тип type для клетки, находящейся на данных координатах x и y
@@ -219,6 +225,7 @@ namespace nodata{
 		 * @param fname название файла для загрузки
 		 */
 		void loadGuns(const char *);
+		void loadTextures();
 		
 		/*!
 		 * Убирает данного оперативника из карты существ и вектора оперативников

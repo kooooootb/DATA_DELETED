@@ -27,6 +27,8 @@ namespace nodata{
 	protected:
 		std::string name_; ///< Название предмета
 		int weight_; ///< Вес предмета
+		
+		sf::Sprite sprite;
 	public:
 		/*!
 		 * Конструктор класса, инициализирующий его параметры
@@ -58,7 +60,9 @@ namespace nodata{
 		/*!
 		 * Виртуальный метод для отображения предмета на экране
 		 */
-		virtual void drawCell(sf::RectangleShape &shape) = 0;
+		void drawItem(sf::RenderWindow &window);
+		void setDrawPosition(float x, float y);
+		void setTexture(sf::Texture &texture);
 	};
 
 	/*! @} */

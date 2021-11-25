@@ -11,6 +11,8 @@
 #include <stack>
 #include <cmath>
 
+#include "SFML/Graphics.hpp"
+
 /*!
 * \file
 * \brief Заголовочный файл с перечислениями, структурами и прототипами классов.
@@ -30,10 +32,18 @@ enum CreatType{
 /// Типы клeток
 enum CellType{
 	FLOOR = 0, ///< Пол
-	WALL = 1, ///< Стена
-	GLASS = 2, ///< Стекло
-	PARTITION = 3, ///< Перегородка
+	WALL, ///< Стена
+	GLASS, ///< Стекло
+	PARTITION, ///< Перегородка
+	STORAGE, ///< Складская точка
 	CELLSTYPE_COUNT ///< Количество типов клеток, оставлять последним
+};
+
+enum ItemType{
+	HKIT = 0,
+	ACONT,
+	GUN,
+	ITEMS_COUNT
 };
 
 /// Типы патронов

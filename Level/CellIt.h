@@ -7,6 +7,7 @@ namespace nodata{
 	class CellIt {
 	private:
 		Cell *cur, **cells;
+		const Level &level;
 		Point begin, end, point;
 		int index;
 		bool steep;
@@ -21,6 +22,8 @@ namespace nodata{
 		const Point &getPoint(){ return point; }
 		
 		CellIt & operator++();
+		CellIt operator++(int);
+		
 		Cell & operator*() const;
 		bool operator!=(const CellIt &it) const;
 	};

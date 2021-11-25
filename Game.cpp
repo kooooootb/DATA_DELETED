@@ -15,16 +15,6 @@ namespace nodata{
 		invWindow.setFillColor(sf::Color(50,50,50,50));
 		invWindow.setPosition(0, 0);
 		
-		sf::Vector2f cellSize(CELLSIZE, CELLSIZE);
-		wCells = new sf::RectangleShape*[WINDOWWIDTH_AMOUNT];
-		for(int i = 0;i < WINDOWWIDTH_AMOUNT;++i){
-			wCells[i] = new sf::RectangleShape[WINDOWHEIGHT_AMOUNT];
-			for(int j = 0;j < WINDOWHEIGHT_AMOUNT;++j){
-				wCells[i][j].setSize(cellSize);
-				wCells[i][j].setPosition((float)i * CELLSIZE, (float)j * CELLSIZE);
-			}
-		}
-		
 		if(!font.loadFromFile("arial.ttf")){
 			std::string fname;
 			while(!font.loadFromFile(fname)) {
@@ -51,8 +41,6 @@ namespace nodata{
 		mesStats[S_HEALTH].setPosition((float)WINDOWWIDTH * 3 / 4, WINDOWHEIGHT - 2 * FONTSIZE);
 		mesStats[S_AMMO].setPosition((float)WINDOWWIDTH * 3 / 4, WINDOWHEIGHT - 3 * FONTSIZE);
 		mesStats[S_WEIGHT].setPosition((float)WINDOWWIDTH * 3 / 4, WINDOWHEIGHT - 4 * FONTSIZE);
-		
-//		if(!operText.loadFromFile())
 		
 		refreshMap();
 		refreshInterface();
@@ -103,7 +91,7 @@ namespace nodata{
 	}
 
 	void Game::drawCell(int xR, int yR) {
-		Cell cell;
+		Cell *cell;
 		const Point &coord = cr->getPosition();
 		Point pointR(xR, yR);//on the map
 		int x = xR - coord.x + XOFFSET, y = yR - coord.y + YOFFSET;//on the screen
@@ -115,29 +103,25 @@ namespace nodata{
 		
 		ErrorCodes flag = level.getCell(pointR, cell);
 		if (flag == OK) {
-			switch (cell.getType()) {
-				case FLOOR:
-					wCells[x][y].setFillColor(sf::Color(25, 25, 25));
-					if (item != nullptr) {
-						for (auto it = (*item).begin(), end = (*item).end(); it != end; ++it)
-							(*it)->drawCell(wCells[x][y]);
+			cell->setDrawPosition((float)x, (float)y);
+			
+			if(cell->walkAble()) {
+				if (item != nullptr) {
+					for (auto it = (*item).begin(), end = (*item).end(); it != end; ++it){
+						(*it)->setDrawPosition((float)x, (float)y);
+						itemsOnScreen.push_back(*it);
 					}
-					if (creature != nullptr) {
-						for (auto it = (*creature).begin(), end = (*creature).end(); it != end; ++it)
-							(*it)->drawCell(wCells[x][y]);
+				}
+				if (creature != nullptr) {
+					for (auto it = (*creature).begin(), end = (*creature).end(); it != end; ++it){
+						(*it)->setDrawPosition((float)x, (float)y);
+						creaturesOnScreen.push_back(*it);
 					}
-					break;
-				case WALL:
-					wCells[x][y].setFillColor(sf::Color(55, 55, 55));
-					break;
-				case GLASS:
-					wCells[x][y].setFillColor(sf::Color(46, 155, 155));
-					break;
-				case PARTITION:
-					wCells[x][y].setFillColor(sf::Color(80, 30, 0));
-					break;
+				}
 			}
-		} else if (flag == ERROR) wCells[x][y].setFillColor(sf::Color::Black);
+		}
+
+		cellsOnScreen.push_back(cell);
 	}
 	
 	void Game::drawRay(int x, int y) {
@@ -153,13 +137,31 @@ namespace nodata{
 	}
 	
 	void Game::refreshMap(){
-		for(int i = 0;i < WINDOWWIDTH_AMOUNT;++i){
-			for(int j = 0;j < WINDOWHEIGHT_AMOUNT;++j){
-				wCells[i][j].setFillColor(sf::Color::Black);
+		cellsOnScreen.clear();
+		creaturesOnScreen.clear();
+		itemsOnScreen.clear();
+		const Point &coord = cr->getPosition();
+		
+		level.getActiveCreature()->setDrawPosition(XOFFSET, YOFFSET);
+		creaturesOnScreen.push_back(level.getActiveCreature());
+		level[coord]->setDrawPosition(XOFFSET, YOFFSET);
+		cellsOnScreen.push_back(level[coord]);
+		
+		const std::vector<Item*> *item = level.getItemMap()[coord];
+		const std::vector<Creature*> *creature = level.getCreatureMap()[coord];
+		
+		if (item != nullptr) {
+			for (auto it = (*item).begin(), end = (*item).end(); it != end; ++it){
+				(*it)->setDrawPosition(XOFFSET, YOFFSET);
+				itemsOnScreen.push_back(*it);
 			}
 		}
-		
-		(*(level.getCreatureMap()[cr->getPosition()]))[0]->drawCell(wCells[XOFFSET][YOFFSET]);
+		if (creature != nullptr) {
+			for (auto it = (*creature).begin(), end = (*creature).end(); it != end; ++it){
+				(*it)->setDrawPosition(XOFFSET, YOFFSET);
+				creaturesOnScreen.push_back(*it);
+			}
+		}
 		
 		int r = cr->getViewRadius();
 		int d = 3 - 2 * r;
@@ -276,9 +278,17 @@ namespace nodata{
 	}
 	
 	void Game::drawMap() {
-		for(int i = 0;i < WINDOWWIDTH_AMOUNT;++i)
-			for(int j = 0;j < WINDOWHEIGHT_AMOUNT;++j)
-				window.draw(wCells[i][j]);
+		for(auto it = cellsOnScreen.begin(), endIt = cellsOnScreen.end();it != endIt;++it){
+			(*it)->drawCell(window);
+		}
+		
+		for(auto it = itemsOnScreen.begin(), endIt = itemsOnScreen.end();it != endIt;++it){
+			(*it)->drawItem(window);
+		}
+		
+		for(auto it = creaturesOnScreen.begin(), endIt = creaturesOnScreen.end();it != endIt;++it){
+			(*it)->drawCreat(window);
+		}
 	}
 	
 	void Game::drawInterface() {
@@ -558,7 +568,7 @@ namespace nodata{
 			return ERROR;
 		}
 		if(level.enemyDied()){
-			std::cout << "You win!" << std::endl;
+			std::cout << "You won!" << std::endl;
 			return SUCCESS;
 		}
 		level.resetTime();
@@ -578,12 +588,9 @@ namespace nodata{
 		window.clear();
 		drawMap();
 		drawInterface();
-		window.draw(line, 2, sf::Lines);
 		
-		if(clock.getElapsedTime() > period){
-			line[0].position = sf::Vector2f(0,0);
-			line[1].position = sf::Vector2f(0,0);
-			period = sf::seconds(1000000);
+		if(clock.getElapsedTime() < period){
+			window.draw(line, 2, sf::Lines);
 		}
 		
 		window.display();
@@ -596,9 +603,5 @@ namespace nodata{
 	}
 	
 	Game::~Game() {
-		for(int i = 0;i < WINDOWWIDTH_AMOUNT;++i){
-			delete [] wCells[i];
-		}
-		delete [] wCells;
 	}
 }

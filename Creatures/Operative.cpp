@@ -98,10 +98,6 @@ namespace nodata{
 		activeGun_ = nullptr;
 	}
 	
-	void Operative::drawCell(sf::RectangleShape &shape) {
-		shape.setFillColor(sf::Color(10,0,115));
-	}
-	
 	int Operative::getWeight() const {
 		return itemTable_.getWeight() + (activeGun_ == nullptr ? 0 : activeGun_->getWeight());
 	}

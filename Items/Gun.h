@@ -104,11 +104,6 @@ namespace nodata{
 		 * @return вес патронов
 		 */
 		static int calcAmmoWeightByType(int amount, Ammunition ammoType);
-		
-		/*!
-		 * Метод для отображения выпавшего оружия на экране
-		 */
-		void drawCell(sf::RectangleShape &shape) override;
 	};
 
 /*! @} */

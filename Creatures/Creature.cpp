@@ -2,6 +2,8 @@
 #include "Creature.h"
 #include "Level.h"
 
+#include "../Parameters.h"
+
 namespace nodata{
 	Creature::Creature(Level *level, std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius) :
 			name_(name) , coord_(coord) , healthMax_(healthMax) , timeMax_(timeMax) , walkTime_(walkTime) , viewRadius_(viewRadius) , level_(*level){
@@ -17,25 +19,25 @@ namespace nodata{
 		switch (direction) {
 			case LEFT:
 				if (coord_.x == 0) return;
-				if (cells[coord_.x - 1][coord_.y].getType() != FLOOR) return;
+				if (!cells[coord_.x - 1][coord_.y].walkAble()) return;
 				level_.moveCreature(coord_.x, coord_.y, this, LEFT);
 				coord_.x--;
 				break;
 			case UP:
 				if (coord_.y == 0) return;
-				if (cells[coord_.x][coord_.y - 1].getType() != FLOOR) return;
+				if (!cells[coord_.x][coord_.y - 1].walkAble()) return;
 				level_.moveCreature(coord_.x, coord_.y, this, UP);
 				coord_.y--;
 				break;
 			case RIGHT:
 				if (coord_.x == level_.getHorizCells() - 1) return;
-				if (cells[coord_.x + 1][coord_.y].getType() != FLOOR) return;
+				if (!cells[coord_.x + 1][coord_.y].walkAble()) return;
 				level_.moveCreature(coord_.x, coord_.y, this, RIGHT);
 				coord_.x++;
 				break;
 			case DOWN:
 				if (coord_.y == level_.getVertCells() - 1) return;
-				if (cells[coord_.x][coord_.y + 1].getType() != FLOOR) return;
+				if (!cells[coord_.x][coord_.y + 1].walkAble()) return;
 				level_.moveCreature(coord_.x, coord_.y, this, DOWN);
 				coord_.y++;
 				break;
@@ -81,5 +83,18 @@ namespace nodata{
 	
 	void Creature::resetTime() {
 		timeCurrent_ = timeMax_;
+	}
+	
+	void Creature::drawCreat(sf::RenderWindow &window) {
+		window.draw(sprite);
+	}
+	
+	void Creature::setDrawPosition(float x, float y) {
+		sprite.setPosition(x * CELLSIZEX, y * CELLSIZEY);
+	}
+	
+	void Creature::setTexture(sf::Texture &texture) {
+		sprite.setTexture(texture);
+		sprite.setScale(CELLSIZEX/sprite.getLocalBounds().width, CELLSIZEY/sprite.getLocalBounds().height);
 	}
 }

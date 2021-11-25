@@ -57,11 +57,6 @@ namespace nodata{
 		 * Выбрасывает все предметы из инвентаря фуражира
 		 */
 		void dropAllItems();
-		
-		/*!
-		 * Метод для отображения фуражира на экране
-		 */
-		void drawCell(sf::RectangleShape &shape) override;
 	};
 
 /*! @} */
