@@ -26,7 +26,7 @@ namespace nodata{
 	void Sentient::shoot(Creature *victim) {
 		if(activeGun_ == nullptr) return;
 		
-		activeGun_->shoot(victim, this);
+		activeGun_->shoot(victim);
 	}
 	
 	void Sentient::kill() {

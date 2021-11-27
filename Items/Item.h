@@ -27,13 +27,14 @@ namespace nodata{
 	protected:
 		std::string name_; ///< Название предмета
 		int weight_; ///< Вес предмета
+		Point coord_;
 		
 		sf::Sprite sprite;
 	public:
 		/*!
 		 * Конструктор класса, инициализирующий его параметры
 		 */
-		explicit Item(std::string &name, int weight = 10);
+		explicit Item(std::string &name, int weight, const Point &point);
 		
 		virtual ~Item() = default;
 		
@@ -63,6 +64,8 @@ namespace nodata{
 		void drawItem(sf::RenderWindow &window);
 		void setDrawPosition(float x, float y);
 		void setTexture(sf::Texture &texture);
+		
+		virtual void saveFile(std::ofstream&) = 0;
 	};
 
 	/*! @} */

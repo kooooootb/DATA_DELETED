@@ -3,7 +3,8 @@
 #include "Creature.h"
 #include "../Parameters.h"
 
-namespace nodata{AmmoContainer::AmmoContainer(std::string &name, int weight, Ammunition ammoType, int ammoMax) : ammoType_(ammoType), Item(name, 0) , ammoMax_(ammoMax) {
+namespace nodata{
+	AmmoContainer::AmmoContainer(std::string &name, int weight, const Point &point, Ammunition ammoType, int ammoMax) : ammoType_(ammoType), Item(name, 0, point) , ammoMax_(ammoMax) {
 		setWeight(weight + calcAmmoWeightByType(ammoMax));
 		ammoCurrent_ = ammoMax_;
 	}
@@ -74,4 +75,8 @@ namespace nodata{AmmoContainer::AmmoContainer(std::string &name, int weight, Amm
 		}
 	}
 	
+	void AmmoContainer::saveFile(std::ofstream &fs) {
+		fs << name_ << std::endl;
+		fs << ACONT << ' ' << coord_.x << ' ' << coord_.y << ' ' << weight_ << ' ' << ammoType_ << ' ' << ammoMax_ << std::endl;
+	}
 }

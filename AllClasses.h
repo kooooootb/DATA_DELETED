@@ -71,6 +71,12 @@ enum Direction{
 	DOWN ///< Вниз
 };
 
+template<class T>
+struct Ptr{
+	T *ptr;
+	int amount;
+};
+
 ///Структура точки или вектора
 struct Point{
 	int x,y; ///< координаты

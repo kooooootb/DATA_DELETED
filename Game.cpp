@@ -4,7 +4,7 @@
 namespace nodata{
 	Game::Game() : window(sf::VideoMode(WINDOWWIDTH, WINDOWHEIGHT), "test") , interfaceWindow(sf::Vector2f((float)WINDOWWIDTH / 4, (float)WINDOWHEIGHT / 3)) , invWindow(sf::Vector2f((float)WINDOWWIDTH / 4, (float)WINDOWHEIGHT / 2))
 	{
-		nearItems = nullptr;
+		nearItems.ptr = nullptr;
 		cr = level.getActiveCreature();
 		const Point &coord = cr->getPosition();
 		
@@ -98,24 +98,24 @@ namespace nodata{
 		if(x < 0 || y < 0 || x >= WINDOWWIDTH_AMOUNT || y >= WINDOWHEIGHT_AMOUNT){
 			return;
 		}
-		const std::vector<Item*> *item = level.getItemMap()[pointR];
-		const std::vector<Creature*> *creature = level.getCreatureMap()[pointR];
+		Ptr<Item*> item = level.getItemMap()[pointR];
+		Ptr<Creature*> creature = level.getCreatureMap()[pointR];
 		
 		ErrorCodes flag = level.getCell(pointR, cell);
 		if (flag == OK) {
 			cell->setDrawPosition((float)x, (float)y);
 			
 			if(cell->walkAble()) {
-				if (item != nullptr) {
-					for (auto it = (*item).begin(), end = (*item).end(); it != end; ++it){
-						(*it)->setDrawPosition((float)x, (float)y);
-						itemsOnScreen.push_back(*it);
+				if (item.ptr != nullptr) {
+					for (int i = 0;i < item.amount;++i){
+						item.ptr[i]->setDrawPosition((float)x, (float)y);
+						itemsOnScreen.push_back(item.ptr[i]);
 					}
 				}
-				if (creature != nullptr) {
-					for (auto it = (*creature).begin(), end = (*creature).end(); it != end; ++it){
-						(*it)->setDrawPosition((float)x, (float)y);
-						creaturesOnScreen.push_back(*it);
+				if (creature.ptr != nullptr) {
+					for (int i = 0;i < creature.amount;++i){
+						(creature.ptr[i])->setDrawPosition((float)x, (float)y);
+						creaturesOnScreen.push_back(creature.ptr[i]);
 					}
 				}
 			}
@@ -128,9 +128,10 @@ namespace nodata{
 		const Point &coord = cr->getPosition();
 		Point endP(coord.x + x, coord.y - y);
 		level.setRay(coord, endP);
-		for (Level::Iterator it = level.begin(), endIt = level.end(); it != endIt; ++it) {
+//		for (Level::Iterator it = level.begin(), endIt = level.end(); it != endIt; ++it) {
+		for (const CellIt &it : level) {
 			drawCell(it.getPoint().x, it.getPoint().y);
-			if((*it).getType() == WALL || (*it).getType() == PARTITION){
+			if(it.getCell()->getType() == WALL || it.getCell()->getType() == PARTITION){
 				break;
 			}
 		}
@@ -147,19 +148,19 @@ namespace nodata{
 		level[coord]->setDrawPosition(XOFFSET, YOFFSET);
 		cellsOnScreen.push_back(level[coord]);
 		
-		const std::vector<Item*> *item = level.getItemMap()[coord];
-		const std::vector<Creature*> *creature = level.getCreatureMap()[coord];
+		Ptr<Item*> item = level.getItemMap()[coord];
+		Ptr<Creature*> creature = level.getCreatureMap()[coord];
 		
-		if (item != nullptr) {
-			for (auto it = (*item).begin(), end = (*item).end(); it != end; ++it){
-				(*it)->setDrawPosition(XOFFSET, YOFFSET);
-				itemsOnScreen.push_back(*it);
+		if (item.ptr != nullptr) {
+			for (int i = 0;i < item.amount;++i){
+				(item.ptr[i])->setDrawPosition(XOFFSET, YOFFSET);
+				itemsOnScreen.push_back(item.ptr[i]);
 			}
 		}
-		if (creature != nullptr) {
-			for (auto it = (*creature).begin(), end = (*creature).end(); it != end; ++it){
-				(*it)->setDrawPosition(XOFFSET, YOFFSET);
-				creaturesOnScreen.push_back(*it);
+		if (creature.ptr != nullptr) {
+			for (int i = 0;i < creature.amount;++i){
+				(creature.ptr[i])->setDrawPosition(XOFFSET, YOFFSET);
+				creaturesOnScreen.push_back(creature.ptr[i]);
 			}
 		}
 		
@@ -203,7 +204,7 @@ namespace nodata{
 	
 	void Game::refreshTake() {
 		nearItems = level.getItemMap()[cr->getPosition()];
-		if(nearItems == nullptr){
+		if(nearItems.ptr == nullptr){
 			mesTips[T_TAKE].setString("No items available");
 		}else{
 			mesTips[T_TAKE].setString("Press F to take items");
@@ -430,23 +431,23 @@ namespace nodata{
 	}
 	
 	void Game::takeInt() {
-		if(nearItems == nullptr) return;
+		if(nearItems.ptr == nullptr) return;
 		
-		if(nearItems->size() == 1){
+		if(nearItems.amount == 1){
 			auto *op = dynamic_cast<Operative*>(cr);
-			if(op->receiveItem((*nearItems)[0]) == ERROR) {
+			if(op->receiveItem(*nearItems.ptr) == ERROR) {
 				showError("Too heavy!");
 			}
-			else level.getItemMap().removeItem(cr->getPosition(), (*nearItems)[0]);
-			nearItems = nullptr;
+			else level.getItemMap().removeItem(cr->getPosition(), *nearItems.ptr);
+			nearItems.ptr = nullptr;
 		}
 		else{
 			int amount = -1;
 			
-			for(auto it = nearItems->begin(), end = nearItems->end();it != end;++it){
+			for(int i = 0;i < nearItems.amount;++i){
 				amount++;
 				
-				mesTips.emplace_back(std::to_string(amount) + (*it)->getName(), font, FONTSIZE);
+				mesTips.emplace_back(std::to_string(amount) + nearItems.ptr[i]->getName(), font, FONTSIZE);
 				mesTips.back().setPosition((float)WINDOWWIDTH * 3 / 4, (float)(CHOOSEOFFSET + amount * FONTSIZE));
 			}
 			redrawWindow();
@@ -457,10 +458,10 @@ namespace nodata{
 			}
 			
 			auto *op = dynamic_cast<Operative*>(cr);
-			if(op->receiveItem((*nearItems)[choice]) == ERROR) {
+			if(op->receiveItem(nearItems.ptr[choice]) == ERROR) {
 				showError("Too heavy!");
 			}
-			else level.getItemMap().removeItem(cr->getPosition(), (*nearItems)[choice]);
+			else level.getItemMap().removeItem(cr->getPosition(), nearItems.ptr[choice]);
 			
 			for(int i = 0;i < amount + 1;i++){
 				mesTips.pop_back();

@@ -19,12 +19,13 @@ namespace nodata{
 		CellIt(const Point &Begin, const Point &End, const Level &level);
 		CellIt(const Level &level, const Point &Begin, const Point &End);
 		
-		const Point &getPoint(){ return point; }
+		const Point &getPoint() const { return point; }
+		Cell *getCell() const { return cur; }
 		
 		CellIt & operator++();
 		CellIt operator++(int);
 		
-		Cell & operator*() const;
+		const CellIt &operator*() const;
 		bool operator!=(const CellIt &it) const;
 	};
 }

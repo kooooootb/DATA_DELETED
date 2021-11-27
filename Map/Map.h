@@ -3,13 +3,19 @@
 
 namespace nodata{
 #include "../AllClasses.h"
+	template<class T>
+	class Map;
+	template<class T>
+	class MapIt;
 	
 	template<class T>
 	class Map {
 	private:
+		friend class MapIt<T>;
 		struct HorCell{
-			int x;
-			std::vector<T> items;
+			int x = 0;
+			int amount = 0;
+			T *items = nullptr;
 		};
 		struct VertCell{
 			int y;
@@ -23,10 +29,21 @@ namespace nodata{
 		CellT *createCell(int index, CellT *&ar, int &amount);
 		template<class CellT>
 		CellT *removeCell(int index, CellT *&ar, int &amount);
+		
+		void insert(HorCell &hcell, T item);
+		void extract(HorCell &hcell, T item);
 	public:
 		Map() : vertAr(nullptr) , amountY(0) {}
 		
 		~Map();
+		
+		typedef MapIt<T> iterator;//goes through all items
+		iterator begin() const{
+			return iterator(vertAr, amountY);
+		}
+		iterator end() const{
+			return iterator(vertAr + amountY);
+		}
 		
 		void addItem(const Point &point, T item);
 		void addItem(int x, int y, T item);
@@ -34,27 +51,118 @@ namespace nodata{
 		void removeItem(const Point &point, T item);
 		void removeItem(int x, int y, T item);
 		
-		std::vector<const std::vector<T>*> getLine(int y, int begin, int end) const;
+		const Ptr<T>* getLine(int y, int begin, int end) const;
+		const Ptr<T>* getAll() const{}
 		
-		const std::vector<T>* operator[](const Point &point) const;
+		Ptr<T> operator[](const Point &point) const;
 		
 		void print(std::ostream &s);
 	};
+	
+	template<class T>
+	class MapIt{
+	private:
+		typename Map<T>::VertCell *vCell;
+		typename Map<T>::HorCell *hCell;
+		T *item;
+		
+		int curX, curItem, yAmount;
+	public:
+		explicit MapIt(typename Map<T>::VertCell *vertcell, int amount) {//init begin
+			vCell = vertcell;
+			yAmount = amount;
+			if(amount != 0){
+				hCell = vertcell->row;
+				item = hCell->items;
+			}
+			curX = 1;
+			curItem = 1;
+		}
+		
+		explicit MapIt(typename Map<T>::VertCell *vertcell){//init end
+			vCell = vertcell;
+			hCell = nullptr;
+			curX = 1;
+			curItem = 1;
+			yAmount = 0;
+		}
+		
+		void operator++(){
+			if(curItem == hCell->amount) {
+				if (curX == vCell->amountX) {
+					vCell++;
+					if(--yAmount == 0){
+						return;
+					}
+					hCell = vCell->row;
+					item = hCell->items;
+					curX = 1;
+					curItem = 1;
+				}
+				else{
+					hCell++;
+					curX++;
+					item = hCell->items;
+					curItem = 1;
+				}
+			}
+			else{
+				item++;
+				curItem++;
+			}
+		}
+		
+		T operator*(){
+			return *item;
+		}
+		
+		bool operator!=(const MapIt<T> &a) const{
+			return a.vCell != vCell;
+		}
+	};
+	
+	template<class T>
+	void Map<T>::insert(HorCell &hcell, T item){
+		T *newItems = new T[hcell.amount + 1];
+		for(int i = 0;i < hcell.amount;++i){
+			newItems[i] = hcell.items[i];
+		}
+		if(hcell.amount > 0) delete [] hcell.items;
+		newItems[hcell.amount] = item;
+		hcell.items = newItems;
+		hcell.amount++;
+	}
+	
+	template<class T>
+	void Map<T>::extract(HorCell &hcell, T item){
+		T *newItems = new T[hcell.amount - 1];
+		int diff = 0;
+		for(int i = 0;i < hcell.amount;++i){
+			if(hcell.items[i] == item){
+				i++;
+				if(i >= hcell.amount) break;
+				diff = -1;
+			}
+			newItems[i + diff] = hcell.items[i];
+		}
+		delete [] hcell.items;
+		hcell.items = newItems;
+		hcell.amount--;
+	}
 	
 	template<class T>
 	Map<T>::~Map() {
 		for(int i = 0;i < amountY;++i){
 			VertCell &vc = vertAr[i];
 			for(int j = 0;j < vc.amountX;++j){
-				std::vector<T> &v = vc.row[j].items;
-				for(int k = 0;k < v.size();++k){
+				T *v = vc.row[j].items;
+				for(int k = 0;k < vc.row[j].amount;++k){
 					delete v[k];
 				}
+				delete [] v;
 			}
-			
 			delete [] vc.row;
 		}
-		
 		delete [] vertAr;
 	}
 	
@@ -119,7 +227,7 @@ namespace nodata{
 			vCell->amountX = 1;
 			vCell->row = new HorCell[1];
 			vCell->row->x = x;
-			vCell->row->items.push_back(item);
+			insert(*(vCell->row), item);
 		}
 		else{
 			HorCell *hCell = nullptr, *&row = vCell->row;
@@ -136,7 +244,7 @@ namespace nodata{
 				hCell->x = x;
 			}
 			
-			hCell->items.push_back(item);
+			insert(*hCell, item);
 		}
 	}
 	
@@ -149,8 +257,7 @@ namespace nodata{
 	
 	template<class T>
 	void Map<T>::removeItem(int x, int y, T item) {
-		
-		VertCell *vCell = nullptr;//100% that item will be there
+		VertCell *vCell = nullptr;
 		int iV, iH;
 		for(iV = 0;iV < amountY;++iV){
 			if(vertAr[iV].y == y){
@@ -171,11 +278,10 @@ namespace nodata{
 		
 		if(hCell == nullptr) throw std::exception();
 		
-		std::vector<T> &items = hCell->items;
-		if(items.size() > 1){
-			items.erase(std::find(items.begin(), items.end(), item));
+		if(hCell->amount > 1){
+			extract(*hCell, item);
 		}
-		else if(items.size() == 1){
+		else if(hCell->amount == 1){
 			if(removeCell<HorCell>(iH, row, amountX) == nullptr){
 				removeCell<VertCell>(iV, vertAr, amountY);
 			}
@@ -190,9 +296,12 @@ namespace nodata{
 	}
 	
 	template<class T>
-	std::vector<const std::vector<T>*> Map<T>::getLine(int y, int begin, int end) const{
-		std::vector<const std::vector<T>*> res;
-		res.resize(end - begin + 1);
+	const Ptr<T>* Map<T>::getLine(int y, int begin, int end) const{
+		Ptr<T>* res;
+		res = new Ptr<T>[end - begin + 1];
+		for(int i = 0;i < end - begin + 1;++i){
+			res[i].ptr = nullptr;
+		}
 		
 		int i;
 		VertCell *vCell = nullptr;
@@ -211,7 +320,8 @@ namespace nodata{
 		}
 		for(;i < amountX;++i){
 			if(row[i].x > end) break;
-			res[row[i].x - begin] = &(row[i].items);
+			res[row[i].x - begin].ptr = row[i].items;
+			res[row[i].x - begin].amount = row[i].amount;
 		}
 		
 		return res;
@@ -221,12 +331,12 @@ namespace nodata{
 	void Map<T>::print(std::ostream &s){
 		for(int i = 0;i < amountY;++i){
 			VertCell &vc = vertAr[i];
-			s << "Y:" << vc.y;
+			s << "Y:" << vc.y << std::endl;
 			for(int j = 0;j < vc.amountX;++j){
 				s << "\tX:" << vc.row[j].x;
-				std::vector<T> &v = vc.row[j].items;
-				s << "\tsize:" << v.size();
-				for(int k = 0;k < v.size();++k){
+				T *v = vc.row[j].items;
+				s << "\tsize:" << vc.row[j].amount;
+				for(int k = 0;k < vc.row[j].amount;++k){
 					s << "\tItem" << k+1 << ":" << v[k];
 				}
 				s << std::endl;
@@ -235,8 +345,11 @@ namespace nodata{
 	}
 	
 	template<class T>
-	const std::vector<T> *Map<T>::operator[](const Point &point) const {
+	Ptr<T> Map<T>::operator[](const Point &point) const {
 		int x = point.x, y = point.y;
+		
+		Ptr<T> res;
+		res.ptr = nullptr;
 		
 		int i;
 		VertCell *vCell = nullptr;
@@ -246,15 +359,21 @@ namespace nodata{
 				break;
 			}
 		}
-		if(vCell == nullptr) return nullptr;
+		if(vCell == nullptr){
+			return res;
+		}
 		
 		HorCell *row = vCell->row;
 		int amountX = vCell->amountX;
 		for(i = 0;i < amountX;++i){
-			if(row[i].x == x) return &(row[i].items);
+			if(row[i].x == x){
+				res.ptr = row[i].items;
+				res.amount = row[i].amount;
+				return res;
+			}
 		}
 		
-		return nullptr;
+		return res;
 	}
 }
 

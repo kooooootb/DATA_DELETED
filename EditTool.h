@@ -14,7 +14,14 @@ namespace edittool{
 	enum EditTips{
 		E_CELL = 0,
 		E_ERROR = 1,
+		E_INPUT,
 		E_COUNT
+	};
+	
+	enum BuildType{
+		CELL,
+		CREATURE,
+		ITEM
 	};
 	
 	class EditTool {
@@ -32,8 +39,9 @@ namespace edittool{
 		int rowLength = 4;
 		
 		CreatType creatType = OPERATIVE;
-		CellType celltype = FLOOR;
-		bool drawingCell = true;
+		CellType cellType = FLOOR;
+		ItemType itemType = HKIT;
+		BuildType building = CELL;
 		bool mousePressed = false;
 		
 		std::vector<Cell*> cellsOnScreen;
@@ -42,11 +50,17 @@ namespace edittool{
 		
 		void buildCell();
 		void buildCreature();
+		void buildItem();
 		
 		void buildOperative();
 		void buildSentient();
 		void buildWild();
 		void buildForager();
+		
+		void buildGun();
+		void buildHKit();
+		void buildACont();
+		
 		void clearCreatures();
 		void clearItems();
 		
@@ -61,6 +75,16 @@ namespace edittool{
 		void redrawWindow();
 		
 		void saveLevel();
+		
+		void saveCells();
+		
+		void saveCreatures();
+		void saveOperatives();
+		void saveSentients();
+		void saveWilds();
+		void saveForagers();
+		
+		void saveItems();
 	public:
 		EditTool();
 		
@@ -79,7 +103,6 @@ namespace edittool{
 		void drawMap();
 		
 		void start();
-		
 	};
 }
 

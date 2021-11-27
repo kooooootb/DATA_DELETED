@@ -31,17 +31,11 @@ namespace nodata{
 		int ammoMax_; ///< Максимальное количество патронов в оружии
 		float accuracy_; ///< Точность стрельбы оружия
 		int switchTime_; ///< Время, затрачиваемое при смене оружия
-		
-		/*!
-		 * Вспомогательная функция для расчета количества выстрелов из оружия за один вызов функции shoot() в зависимости от типа патронов
-		 * @return количество выстрелов
-		 */
-		int calcAmountByType() const; ///<
 	public:
 		/*!
 		 * Конструктор класса, инициализирующий его параметры
 		 */
-		Gun(std::string &name, int weight, int damage, int shootTime, int reloadTime, Ammunition ammoType, int ammoMax, float accuracy, int switchTime);
+		Gun(std::string &name, int weight, const Point &point, int damage, int shootTime, int reloadTime, Ammunition ammoType, int ammoMax, float accuracy, int switchTime);
 		
 		~Gun() override = default;
 		
@@ -86,10 +80,9 @@ namespace nodata{
 		/*!
 		 * Производит несколько выстрелов из оружия по существу-жертве. Количество выстрелов зависит от типа патронов. Количество попаданий определяется коэффициентом hitsMultipl. При стрельбе вес оружия уменьшается.
 		 * @param victim существо-жертва
-		 * @param shooter существо-стрелок
 		 * @param hitsMultipl коэффициент попаданий
 		 */
-		void shoot(Creature *victim, Creature *shooter);
+		void shoot(Creature *victim) const;
 		void shoot(Level &level, Point &coord, Creature *shooter, int hitsMultipl);
 		/*!
 		 * Функция вычисляет коэффициент количества попаданий в зависимости от точности стрелявшего существа и точности оружия. Коэффициент не может быть больше единицы.
@@ -104,6 +97,8 @@ namespace nodata{
 		 * @return вес патронов
 		 */
 		static int calcAmmoWeightByType(int amount, Ammunition ammoType);
+		
+		void saveFile(std::ofstream&) override;
 	};
 
 /*! @} */

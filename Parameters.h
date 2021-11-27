@@ -9,7 +9,6 @@
 #include "AllClasses.h"
 
 const int WEIGHTLARGE = 3, WEIGHTMEDIUM = 2, WEIGHTSMALL = 1;//bullets' weight
-const int AMOUNTLARGE = 1, AMOUNTMEDIUM = 5, AMOUNTSMALL = 4;//bullets shot at 1 function's call
 
 //map parameters for graphic window
 const int CELLSIZE = 30;//even
@@ -43,13 +42,14 @@ static const char * CELLS_CFG = "c1.cfg";
 static const char * HKITS_CFG = "HKits.cfg";
 static const char * ACONTS_CFG = "AConts.cfg";
 static const char * GUNS_CFG = "Guns.cfg";
+static const char * ITEMS_CFG = "Items.cfg";
 
 //Textures
-#define TEXTDIR "Textures/"
-static const char * CREATURES_TEXTURES[CREATURES_COUNT] = { TEXTDIR"OperativeTexture.png" , TEXTDIR"SentientTexture.png" , TEXTDIR"WildTexture.png" , TEXTDIR"ForagerTexture.png" };
+#define TEXTURE_DIRECTORY "Textures/"
+static const char * CREATURES_TEXTURES[CREATURES_COUNT] = { TEXTURE_DIRECTORY"OperativeTexture.png" , TEXTURE_DIRECTORY"SentientTexture.png" , TEXTURE_DIRECTORY"WildTexture.png" , TEXTURE_DIRECTORY"ForagerTexture.png" };
 
-static const char * ITEMS_TEXTURES[ITEMS_COUNT] = { TEXTDIR"HealthKitTexture.png" , TEXTDIR"AContTexture.png" , TEXTDIR"GunTexture.png" };
+static const char * ITEMS_TEXTURES[ITEMS_COUNT] = { TEXTURE_DIRECTORY"HealthKitTexture.png" , TEXTURE_DIRECTORY"AContTexture.png" , TEXTURE_DIRECTORY"GunTexture.png" };
 
-static const char * CELLS_TEXTURES[CELLSTYPE_COUNT] = { TEXTDIR"FloorTexture.png" , TEXTDIR"WallTexture.png" , TEXTDIR"GlassTexture.png" , TEXTDIR"PartitionTexture.png" , TEXTDIR"StorageTexture.png" };
+static const char * CELLS_TEXTURES[CELLSTYPE_COUNT] = { TEXTURE_DIRECTORY"FloorTexture.png" , TEXTURE_DIRECTORY"WallTexture.png" , TEXTURE_DIRECTORY"GlassTexture.png" , TEXTURE_DIRECTORY"PartitionTexture.png" , TEXTURE_DIRECTORY"StorageTexture.png" };
 
 #endif //LAB4_PARAMETERS_H

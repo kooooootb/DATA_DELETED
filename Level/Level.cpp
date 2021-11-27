@@ -1,6 +1,5 @@
 #include "Level.h"
 #include "../Parameters.h"
-#include <iostream>
 
 namespace nodata{
 	Level::Level() {
@@ -15,9 +14,7 @@ namespace nodata{
 		loadWild(WILDS_CFG);
 		loadForager(FORAGS_CFG);
 		
-		loadHKits(HKITS_CFG);
-		loadAConts(ACONTS_CFG);
-		loadGuns(GUNS_CFG);
+		loadItems(ITEMS_CFG);
 		
 		activeCreature = operativeAr_[0];
 	}
@@ -157,7 +154,7 @@ namespace nodata{
 				continue;
 			
 			auto *forager = new Forager(this, name, coord, healthMax, timeMax, walkTime, viewRadius, force);
-			forager->setTexture(creatText[SENTIENT]);
+			forager->setTexture(creatText[FORAGER]);
 			
 			foragerAr_.push_back(forager);
 			creatureMap.addItem(coord, forager);
@@ -166,7 +163,7 @@ namespace nodata{
 		fs.close();
 	}
 	
-	void Level::loadGuns(const char *fname) {
+	void Level::loadItems(const char *fname) {
 		std::ifstream fs(fname);
 		if (!fs.is_open())
 			return;//no file
@@ -178,95 +175,88 @@ namespace nodata{
 			while(std::all_of(name.begin(), name.end(), isspace)){
 				if(std::getline(fs, name).eof()) return;
 			}
-			int x, y, weight, damage, shootTime, reloadTime, ammoTypeInt, ammoMax, switchTime;
-			float accuracy;
-			fs >> x >> y >> weight >> damage >> shootTime >> reloadTime >> ammoTypeInt >> ammoMax >> accuracy >> switchTime;
-			Point coord(x, y);
-			
-			if(invalidArgs(x, y) || weight < 0 || damage < 0 || shootTime < 0 || reloadTime < 0 || ammoTypeInt < 0 || ammoTypeInt >= AMMUNITION_COUNT || ammoMax < 0 || accuracy < 0 || accuracy > 100 || switchTime < 0 )
-				continue;
-			
-			auto ammoType = static_cast<Ammunition>(ammoTypeInt);
-			
-			auto *gun = new Gun(name, weight, damage, shootTime, reloadTime, ammoType, ammoMax, accuracy, switchTime);
-			gun->setTexture(itemText[GUN]);
-			
-			itemMap.addItem(coord, gun);
-		}
-		
-		fs.close();
-	}
-	
-	void Level::loadHKits(const char *fname) {
-		std::ifstream fs(fname);
-		if (!fs.is_open())
-			return;//no file
-		
-		skipComms(fs);
-		
-		std::string name;
-		while(std::getline(fs, name)){
-			while(std::all_of(name.begin(), name.end(), isspace)){
-				if(std::getline(fs, name).eof()) return;
-			}
-			int x, y, weight, healAmount, healTime;
-			fs >> x >> y >> weight >> healAmount >> healTime;
-			Point coord(x, y);
-			
-			if(invalidArgs(x, y) || weight < 0 || healTime < 0 || healAmount < 0)
-				continue;
-			
-			auto *hkit = new HealthKit(name, weight, healAmount, healTime);
-			hkit->setTexture(itemText[HKIT]);
-			
-			itemMap.addItem(coord, hkit);
-		}
-		
-		fs.close();
-	}
-	
-	void Level::loadAConts(const char *fname) {
-		std::ifstream fs(fname);
-		if (!fs.is_open())
-			return;//no file
-		
-		skipComms(fs);
-		
-		std::string name;
-		while(std::getline(fs, name)){
-			while(std::all_of(name.begin(), name.end(), isspace)){
-				if(std::getline(fs, name).eof()) return;
-			}
-			int x, y, weight, ammoTypeInt, ammoMax;
-			fs >> x >> y >> weight >> ammoTypeInt >> ammoMax;
-			Point coord(x, y);
-			
-			if(invalidArgs(x, y) || weight < 0 || ammoTypeInt < 0 || ammoTypeInt >= AMMUNITION_COUNT || ammoMax < 0 )
-				continue;
-			
-			auto ammoType = static_cast<Ammunition>(ammoTypeInt);
-			
-			switch(ammoType){
-				case LARGE_CALIBER:
-					name += "[LARGE CALIBER]";
+			int typeInt;
+			fs >> typeInt;
+			auto type = static_cast<ItemType>(typeInt);
+			switch (type) {
+				case HKIT:
+					loadHKits(fs, name);
 					break;
-				case MEDIUM_CALIBER:
-					name += "[MEDIUM CALIBER]";
+				case GUN:
+					loadGuns(fs, name);
 					break;
-				case SMALL_CALIBER:
-					name += "[SMALL CALIBER]";
+				case ACONT:
+					loadAConts(fs, name);
 					break;
 				default:
-					continue;
+					throw std::runtime_error("Invalid items save file");
 			}
-			
-			auto *acont = new AmmoContainer(name, weight, ammoType, ammoMax);
-			acont->setTexture(itemText[ACONT]);
-			
-			itemMap.addItem(coord, acont);
 		}
 		
 		fs.close();
+	}
+	
+	void Level::loadGuns(std::ifstream &fs, std::string &name) {
+		int x, y, weight, damage, shootTime, reloadTime, ammoTypeInt, ammoMax, switchTime;
+		float accuracy;
+		fs >> x >> y >> weight >> damage >> shootTime >> reloadTime >> ammoTypeInt >> ammoMax >> accuracy >> switchTime;
+		Point coord(x, y);
+		
+		if (invalidArgs(x, y) || weight < 0 || damage < 0 || shootTime < 0 || reloadTime < 0 || ammoTypeInt < 0 ||
+			ammoTypeInt >= AMMUNITION_COUNT || ammoMax < 0 || accuracy < 0 || accuracy > 100 || switchTime < 0)
+			return;
+		
+		auto ammoType = static_cast<Ammunition>(ammoTypeInt);
+		
+		auto *gun = new Gun(name, weight, coord, damage, shootTime, reloadTime, ammoType, ammoMax, accuracy,
+							switchTime);
+		gun->setTexture(itemText[GUN]);
+		
+		itemMap.addItem(coord, gun);
+	}
+	
+	void Level::loadHKits(std::ifstream &fs, std::string &name) {
+		int x, y, weight, healAmount, healTime;
+		fs >> x >> y >> weight >> healAmount >> healTime;
+		Point coord(x, y);
+		
+		if (invalidArgs(x, y) || weight < 0 || healTime < 0 || healAmount < 0)
+			return;
+		
+		auto *hkit = new HealthKit(name, weight, coord, healAmount, healTime);
+		hkit->setTexture(itemText[HKIT]);
+		
+		itemMap.addItem(coord, hkit);
+	}
+	
+	void Level::loadAConts(std::ifstream &fs, std::string &name) {
+		int x, y, weight, ammoTypeInt, ammoMax;
+		fs >> x >> y >> weight >> ammoTypeInt >> ammoMax;
+		Point coord(x, y);
+		
+		if (invalidArgs(x, y) || weight < 0 || ammoTypeInt < 0 || ammoTypeInt >= AMMUNITION_COUNT || ammoMax < 0)
+			return;
+		
+		auto ammoType = static_cast<Ammunition>(ammoTypeInt);
+		
+		switch (ammoType) {
+			case LARGE_CALIBER:
+				name += "[LARGE CALIBER]";
+				break;
+			case MEDIUM_CALIBER:
+				name += "[MEDIUM CALIBER]";
+				break;
+			case SMALL_CALIBER:
+				name += "[SMALL CALIBER]";
+				break;
+			default:
+				return;
+		}
+		
+		auto *acont = new AmmoContainer(name, weight, coord, ammoType, ammoMax);
+		acont->setTexture(itemText[ACONT]);
+		
+		itemMap.addItem(coord, acont);
 	}
 	
 	void Level::setCell(int x, int y, CellType type) {
@@ -370,6 +360,7 @@ namespace nodata{
 				creatureMap.addItem(x - 1, y, creature);
 				break;
 		}
+//		std::cout << "moved" << std::endl;
 	}
 	
 	void Level::setActive(int i) {
@@ -528,5 +519,44 @@ namespace nodata{
 	
 	Cell *Level::operator[](const Point &point){
 		return cells_[point.x] + point.y;
+	}
+	
+	void Level::spawnHKit(std::string &name, int weight, const Point &point, int healAmount, int healTime) {
+		auto *hkit = new HealthKit(name, weight, point, healAmount, healTime);
+		hkit->setTexture(itemText[HKIT]);
+		
+		itemMap.addItem(point, hkit);
+	}
+	
+	void Level::spawnACont(std::string &name, int weight, const Point &point, int ammoTypeInt, int ammoMax) {
+		auto ammoType = static_cast<Ammunition>(ammoTypeInt);
+		
+		switch (ammoType) {
+			case LARGE_CALIBER:
+				name += "[LARGE CALIBER]";
+				break;
+			case MEDIUM_CALIBER:
+				name += "[MEDIUM CALIBER]";
+				break;
+			case SMALL_CALIBER:
+				name += "[SMALL CALIBER]";
+				break;
+			default:
+				return;
+		}
+		
+		auto *acont = new AmmoContainer(name, weight, point, ammoType, ammoMax);
+		acont->setTexture(itemText[ACONT]);
+		
+		itemMap.addItem(point, acont);
+	}
+	
+	void Level::spawnGun(std::string &name, int weight, const Point &point, int damage, int shootTime, int reloadTime, int ammoTypeInt, int ammoMax, float accuracy, int switchTime) {
+		auto ammoType = static_cast<Ammunition>(ammoTypeInt);
+		
+		auto *gun = new Gun(name, weight, point, damage, shootTime, reloadTime, ammoType, ammoMax, accuracy, switchTime);
+		gun->setTexture(itemText[GUN]);
+		
+		itemMap.addItem(point, gun);
 	}
 }

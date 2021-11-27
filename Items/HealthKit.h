@@ -28,7 +28,7 @@ namespace nodata{
 		/*!
 		 * Конструктор класса, инициализирующий его параметры
 		 */
-		HealthKit(std::string &name, int weight, int healAmount, int healTime);
+		HealthKit(std::string &name, int weight, const Point &point, int healAmount, int healTime);
 		
 		~HealthKit() override = default;
 		
@@ -43,6 +43,8 @@ namespace nodata{
 		 * @return TODELETE для удаления аптечки после использования
 		 */
 		ErrorCodes use(Creature *creature) override;
+		
+		void saveFile(std::ofstream&) override;
 	};
 
 /*! @} */

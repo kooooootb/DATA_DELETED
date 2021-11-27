@@ -78,9 +78,9 @@ namespace nodata{
 		
 		~Level();
 		
-		typedef CellIt Iterator;
-		Iterator begin() const;
-		Iterator end() const;
+		typedef CellIt iterator;
+		iterator begin() const;
+		iterator end() const;
 		
 		void setRay(const Point &begin, const Point &end);
 		
@@ -210,21 +210,11 @@ namespace nodata{
 		 * @param fname название файла для загрузки
 		 */
 		void loadForager(const char *fname);
-		/*!
-		 * Загружает аптечки из данного файла
-		 * @param fname название файла для загрузки
-		 */
-		void loadHKits(const char *fname);
-		/*!
-		 * Загружает контейнеры для патронов из данного файла
-		 * @param fname название файла для загрузки
-		 */
-		void loadAConts(const char *fname);
-		/*!
-		 * Загружает оружия из данного файла
-		 * @param fname название файла для загрузки
-		 */
-		void loadGuns(const char *);
+		
+		void loadHKits(std::ifstream &fs, std::string &name);
+		void loadAConts(std::ifstream &fs, std::string &name);
+		void loadGuns(std::ifstream &fs, std::string &name);
+		void loadItems(const char *);
 		void loadTextures();
 		
 		/*!
@@ -248,6 +238,10 @@ namespace nodata{
 		void spawnSentient(std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, float accuracy);
 		void spawnWild(std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, int accuracy, int damage);
 		void spawnForager(std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, int force);
+		
+		void spawnHKit(std::string &name, int weight, const Point &point, int healAmount, int healTime);
+		void spawnACont(std::string &name, int weight, const Point &point, int ammoTypeInt, int ammoMax);
+		void spawnGun(std::string &name, int weight, const Point &point, int damage, int shootTime, int reloadTime, int ammoTypeInt, int ammoMax, float accuracy, int switchTime);
 	};
 
 	/*! @} */

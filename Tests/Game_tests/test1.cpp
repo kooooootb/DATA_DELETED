@@ -96,7 +96,9 @@ TEST(Creatures, spendTime) {
 	oper->receiveItem(gun);
 	oper->useItem(0);
 	time = oper->getTimeCurrent();
-	oper->shoot(victim);
+	victim->walk(RIGHT);
+	Point point = victim->getPosition();
+	oper->shoot(point);
 	ASSERT_EQ(oper->getTimeCurrent(), time - oper->getActiveGun()->getShootTime());
 	nodata::AmmoContainer *acont = initACont();
 	oper->receiveItem(acont);
@@ -176,12 +178,13 @@ TEST(Item, ACont_use){
 	nodata::Level level("testCells.cfg");
 	nodata::Operative *oper = initOperative(level);
 	nodata::Operative *victim = initOperative(level);
-	Point point(1,1);
 	
 	nodata::Gun *gun = initGun();
 	oper->receiveItem(gun);
 	oper->useItem(0);
-	oper->shoot(victim);
+	victim->walk(RIGHT);
+	Point point = victim->getPosition();
+	oper->shoot(point);
 	ASSERT_EQ(oper->getActiveGun()->getAmmoMax() - 1, oper->getActiveGun()->getAmmoCurrent());
 	nodata::AmmoContainer *acont = initACont();
 	oper->receiveItem(acont);

@@ -3,7 +3,7 @@
 #include "Creature.h"
 
 namespace nodata{
-	HealthKit::HealthKit(std::string &name, int weight, int healAmount, int healTime) : Item(name, weight) , healAmount_(healAmount) , healTime_(healTime) {
+	HealthKit::HealthKit(std::string &name, int weight, const Point &point, int healAmount, int healTime) : Item(name, weight, point) , healAmount_(healAmount) , healTime_(healTime) {
 		
 	}
 	
@@ -13,5 +13,10 @@ namespace nodata{
 		
 		creature->spendTime(healTime_);
 		return TODELETE;
+	}
+	
+	void HealthKit::saveFile(std::ofstream &fs) {
+		fs << name_ << std::endl;
+		fs << HKIT << ' ' << coord_.x << ' ' << coord_.y << ' ' << weight_ << ' ' << healAmount_ << ' ' << healTime_ << std::endl;
 	}
 }

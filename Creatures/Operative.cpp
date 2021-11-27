@@ -74,7 +74,7 @@ namespace nodata{
 	void Operative::shoot(Creature *victim) {
 		if(activeGun_ == nullptr || victim == this) return;
 		
-		activeGun_->shoot(victim, this);
+		activeGun_->shoot(victim);
 	}
 	
 	void Operative::shoot(Point &point) {

@@ -4,7 +4,7 @@ project(lab4)
 set(CMAKE_CXX_STANDARD 20)
 set(EXECUTABLE_OUTPUT_PATH ../files)
 
-add_executable(lab4 main.cpp Game.cpp Game.h dialog.cpp dialog.h EditTool.cpp EditTool.h Map/Map.h)
+add_executable(lab4 main.cpp Game.cpp Game.h dialog.cpp dialog.h EditTool.cpp EditTool.h Map/Map.h Map/MapIt.h)
 
 include_directories(Creatures)
 include_directories(Items)

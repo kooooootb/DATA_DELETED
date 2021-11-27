@@ -82,8 +82,8 @@ namespace nodata{
 		return res;
 	}
 	
-	Cell &CellIt::operator*() const {
-		return *cur;
+	const CellIt &CellIt::operator*() const {
+		return *this;
 	}
 	
 	bool CellIt::operator!=(const CellIt &it) const {

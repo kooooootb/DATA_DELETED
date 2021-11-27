@@ -38,7 +38,7 @@ namespace nodata{
 		 * Конструктор класса, инициализирующий его параметры
 		 * @param weight вес контейнера без патронов
 		 */
-		AmmoContainer(std::string &name, int weight, Ammunition ammoType = MEDIUM_CALIBER, int ammoMax = 120);
+		AmmoContainer(std::string &name, int weight, const Point &point, Ammunition ammoType, int ammoMax);
 		
 		~AmmoContainer() override = default;
 		
@@ -74,6 +74,8 @@ namespace nodata{
 		 * @return ERROR при ошибке, TODELETE при опустошении контейнера поссле использования, OK при успешной операции
 		 */
 		ErrorCodes use(Creature *creature) override;
+		
+		void saveFile(std::ofstream&) override;
 	};
 
 /*! @} */

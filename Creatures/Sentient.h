@@ -31,6 +31,8 @@ namespace nodata{
 		
 		~Sentient() override;
 		
+		float getAccuracy() const { return accuracyMultipl_; }
+		
 		/*!
 		 * Подбирает оружие и делает его активным оружием разумного существа
 		 * @param gun Указатель на подбираемое оружие

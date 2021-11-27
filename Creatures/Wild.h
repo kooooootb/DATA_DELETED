@@ -33,6 +33,9 @@ namespace nodata{
 		
 		~Wild() override = default;
 		
+		int getAccuracy() const { return accuracy_; }
+		int getDamage() const { return damage_; }
+		
 		/*!
 		 * Атакует жертву при условии, что существо и жертва находятся на соседних клетках
 		 * @param victim указатель на существо-жертву

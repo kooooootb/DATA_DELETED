@@ -7,9 +7,8 @@
 #include <iostream>
 
 namespace nodata{
-	Gun::Gun(std::string &name, int weight, int damage, int shootTime, int reloadTime, Ammunition ammoType, int ammoMax, float accuracy,
-			 int switchTime) :
-			Item(name, 0) , damage_(damage) , shootTime_(shootTime) , reloadTime_(reloadTime) , ammoType_(ammoType) ,
+	Gun::Gun(std::string &name, int weight, const Point &point, int damage, int shootTime, int reloadTime, Ammunition ammoType, int ammoMax, float accuracy, int switchTime) :
+			Item(name, 0, point) , damage_(damage) , shootTime_(shootTime) , reloadTime_(reloadTime) , ammoType_(ammoType) ,
 			ammoMax_(ammoMax) , accuracy_(accuracy) , switchTime_(switchTime) {
 		setWeight(weight + calcAmmoWeightByType(ammoMax, ammoType));
 		ammoCurrent_ = ammoMax_;
@@ -41,15 +40,6 @@ namespace nodata{
 		return TOREMOVE;
 	}
 	
-	int Gun::calcAmountByType() const{
-		switch(ammoType_){
-			case LARGE_CALIBER: return AMOUNTLARGE;
-			case MEDIUM_CALIBER: return AMOUNTMEDIUM;
-			case SMALL_CALIBER: return AMOUNTSMALL;
-			default: throw std::exception();
-		}
-	}
-	
 	int Gun::calcAmmoWeightByType(int amount, Ammunition ammoType) {
 		switch(ammoType){
 			case LARGE_CALIBER:
@@ -63,12 +53,8 @@ namespace nodata{
 		}
 	}
 	
-	void Gun::shoot(Creature *victim, Creature *shooter) {
+	void Gun::shoot(Creature *victim) const {
 		victim->receiveDamage(damage_);
-		
-//		ammoCurrent_ -= 1;
-//		shooter->spendTime(shootTime_);
-//		weight_ -= calcAmmoWeightByType(1, ammoType_);
 	}
 	
 	void Gun::shoot(Level &level, Point &coord, Creature *shooter, int hitsMultipl) {
@@ -85,22 +71,22 @@ namespace nodata{
 		
 		//make ray
 		level.setRay(shooter->getPosition(), coord);
-		for (Level::Iterator it = level.begin(), endIt = level.end(); it != endIt; ++it) {
+		for (const CellIt &it : level) {
 			Point curPoint = it.getPoint();
-			if (!(*it).walkAble() || level.getCreatureMap()[curPoint] != nullptr) {
+			if (!it.getCell()->walkAble() || level.getCreatureMap()[curPoint].ptr != nullptr) {
 				coord = curPoint;
 				break;
 			}
 		}
 		
 		//shoot
-		const std::vector<Creature *> *creatures = level.getCreatureMap()[coord];
+		Ptr<Creature *> creatures = level.getCreatureMap()[coord];
 		Cell *cell;
 		ErrorCodes status = level.getCell(coord, cell);
-		if (creatures != nullptr) {//shoot creature
-			int amount = (int) (*creatures).size();
+		if (creatures.ptr != nullptr) {//shoot creature
+			int amount = (int) creatures.amount;
 			srand(time(nullptr));
-			shoot((*creatures)[rand() % amount], shooter);
+			shoot(creatures.ptr[rand() % amount]);
 		} else if (status != ERROR) {//shoot cell
 			if ((cell->getType() == GLASS || cell->getType() == PARTITION)) level.setCell(coord, FLOOR);
 		}
@@ -115,5 +101,10 @@ namespace nodata{
 		if(res < 0) res = 0;
 		res = sqrt(res);
 		return (int)res;
+	}
+	
+	void Gun::saveFile(std::ofstream &fs) {
+		fs << name_ << std::endl;
+		fs << GUN << ' ' << coord_.x << ' ' << coord_.y << ' ' << weight_ << ' ' << damage_ << ' ' << shootTime_ << ' ' << reloadTime_ << ' ' << ammoType_ << ' ' << ammoMax_ << ' ' << accuracy_ << ' ' << switchTime_ << std::endl;
 	}
 }

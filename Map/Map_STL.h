@@ -4,7 +4,7 @@
 namespace nodata{
 	/*!
  * \file
- * \brief Заголовочный файл с описанием шаблона класса Map_STL
+ * \brief Заголовочный файл с описанием шаблона класса Map
  *
  * Данный файл содержит шаблон класс для хранения элементов на местности и быстрого доступа к этим элементам через их координаты
 */
@@ -25,13 +25,13 @@ namespace nodata{
  * При отсутствии элементов на координате место в двумерном массиве под эту координату не выделяется
 */
 	template<class T>
-	class Map_STL {
+	class Map {
 	private:
 		std::map<int, std::map<int, std::vector<T>>> vertAr; ///< Двумерный массив векторов
 	public:
-		Map_STL() = default;
+		Map() = default;
 		
-		~Map_STL();
+		~Map();
 		
 		/*!
 		 * Добавляет элемент в карту.
@@ -57,6 +57,7 @@ namespace nodata{
 		 * @param item удаляемый элемент
 		 */
 		void removeItem(const Point &point, T item);
+		
 		/*!
 		 * Удаляет данный предмет с карты.
 		 * Если в карте больше нет элементов с данными координатами, удаляет также ячейку в двумерном массиве. В противном случае удаляет элемент из вектора данной координаты
@@ -72,13 +73,13 @@ namespace nodata{
 		 * @param end вертикаль на которой заканчивается поиск элементов
 		 * @return созданный вектор указателей на вектора элементов
 		 */
-		std::vector<const std::vector<T>*> getLine(int y, int begin, int end) const;
+		const Ptr<T>* getLine(int y, int begin, int end) const;
 		/*!
 		 * Возвращает указатель на вектор элементов, лежащих на данных координатах или nullptr если элементов с данными координатами нет
 		 * @param point координаты
 		 * @return указатель на вектор элементов или nullptr если он отсутствует
 		 */
-		const std::vector<T>* operator[](const Point &point) const;
+		Ptr<T> operator[](const Point &point) const;
 		
 		/*!
 		 * Выводит данные о карте в поток вывода
@@ -90,7 +91,7 @@ namespace nodata{
 /*! @} */
 	
 	template<class T>
-	Map_STL<T>::~Map_STL() {
+	Map<T>::~Map() {
 		for(auto itY = vertAr.begin(), endY = vertAr.end();itY != endY;++itY){
 			std::map<int, std::vector<T>> &vCell = itY->second;
 			for(auto itX = vCell.begin(), endX = vCell.end();itX != endX;++itX){
@@ -103,18 +104,18 @@ namespace nodata{
 	}
 	
 	template<class T>
-	void Map_STL<T>::addItem(int x, int y, T item) {
+	void Map<T>::addItem(int x, int y, T item) {
 		vertAr[y][x].push_back(item);
 	}
 	
 	template<class T>
-	void Map_STL<T>::addItem(const Point &point, T item){
+	void Map<T>::addItem(const Point &point, T item){
 		int x = point.x, y = point.y;
 		vertAr[y][x].push_back(item);
 	}
 	
 	template<class T>
-	void Map_STL<T>::removeItem(int x, int y, T item) {
+	void Map<T>::removeItem(int x, int y, T item) {
 		std::vector<T> &v = vertAr[y][x];
 		if(v.size() == 1){
 			vertAr[y].erase(x);
@@ -126,7 +127,7 @@ namespace nodata{
 	}
 	
 	template<class T>
-	void Map_STL<T>::removeItem(const Point &point, T item){
+	void Map<T>::removeItem(const Point &point, T item){
 		int x = point.x, y = point.y;
 		std::vector<T> &v = vertAr[y][x];
 		if(v.size() == 1){
@@ -139,24 +140,29 @@ namespace nodata{
 	}
 	
 	template<class T>
-	std::vector<const std::vector<T>*> Map_STL<T>::getLine(int y, int begin, int end) const{
-		std::vector<const std::vector<T>*> res;
-		res.resize(end - begin + 1);
-		
-		if(vertAr.count(y) == 0) return res;
-		const std::map<int, std::vector<T>> &vCell = vertAr.at(y);
-		
-		for(auto it = vCell.begin(), itEnd = vCell.end();it != itEnd;++it){
-			if(it->first >= begin && it->first <= end){
-				res[it->first - begin] = &(it->second);
-			}
-		}
-		
-		return res;
+	const Ptr<T> *Map<T>::getLine(int y, int begin, int end) const{
+		return nullptr;
+//		Ptr<T>* res;
+//		res = new Ptr<T>[end - begin + 1];
+//		for(int i = 0;i < end - begin + 1;++i){
+//			res[i].ptr = nullptr;
+//		}
+//
+//		if(vertAr.count(y) == 0) return res;
+//		const std::map<int, std::vector<T>> &vCell = vertAr.at(y);
+//
+//		for(auto it = vCell.begin(), itEnd = vCell.end();it != itEnd;++it){
+//			if(it->first >= begin && it->first <= end){
+//
+//				res[it->first - begin].ptr = &(it->second);
+//			}
+//		}
+//
+//		return res;
 	}
 	
 	template<class T>
-	void Map_STL<T>::print(std::ostream &s){
+	void Map<T>::print(std::ostream &s){
 		for(auto itY = vertAr.begin(), endY = vertAr.end();itY != endY;++itY){
 			s << "Y:" << itY->first << ':' << std::endl;
 			std::map<int, std::vector<T>> &vCell = itY->second;
@@ -171,12 +177,21 @@ namespace nodata{
 	}
 	
 	template<class T>
-	const std::vector<T> *Map_STL<T>::operator[](const Point &point) const{
+	Ptr<T> Map<T>::operator[](const Point &point) const{
 		int x = point.x, y = point.y;
-		if(vertAr.count(y) == 0) return nullptr;
-		if(vertAr.at(y).count(x) == 0) return nullptr;
+		Ptr<T> res;
+		res.ptr = nullptr;
 		
-		return &vertAr.at(y).at(x);
+		if(vertAr.count(y) == 0) return res;
+		if(vertAr.at(y).count(x) == 0) return res;
+		
+		res.ptr = new T[vertAr.at(y).at(x).size()];
+		res.amount = vertAr.at(y).at(x).size();
+		for(int i = 0;i < vertAr.at(y).at(x).size();++i){
+			res.ptr[i] = vertAr.at(y).at(x)[i];
+		}
+		
+		return res;
 	}
 }
 

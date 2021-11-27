@@ -22,7 +22,8 @@ namespace edittool{
 			mesTips.emplace_back("", font, FONTSIZE);
 		}
 		mesTips[E_CELL].setPosition((float)WINDOWWIDTH * 3 / 4, 0);
-		mesTips[E_ERROR].setPosition((float)WINDOWWIDTH / 2, 0);
+		mesTips[E_ERROR].setPosition((float)WINDOWWIDTH / 2, FONTSIZE);
+		mesTips[E_INPUT].setPosition((float)WINDOWWIDTH / 2, 0);
 		
 		refreshMap();
 		refreshInterface();
@@ -39,7 +40,13 @@ namespace edittool{
 				if (event.type == sf::Event::Closed)
 					window.close();
 				if (event.type == sf::Event::TextEntered){
-					sfInput += event.text.unicode;
+					if(event.text.unicode == '\b'){
+						if(sfInput.getSize() > 0) sfInput.erase(sfInput.getSize() - 1, 1);
+					}else{
+						sfInput += event.text.unicode;
+					}
+					mesTips[E_INPUT].setString(sfInput.toAnsiString());
+					redrawWindow();
 				}
 				if (event.type == sf::Event::KeyPressed){
 					if (event.key.code == sf::Keyboard::Enter) {
@@ -51,6 +58,8 @@ namespace edittool{
 						}
 						if (choice < 0 || choice > amount) correct = false;
 						if (!correct) {
+							mesTips[E_INPUT].setString("");
+							redrawWindow();
 							sfInput = "";
 							break;
 						}
@@ -64,6 +73,8 @@ namespace edittool{
 			}
 			if(flag) break;
 		}
+		mesTips[E_INPUT].setString("");
+		redrawWindow();
 		
 		return choice;
 	}
@@ -79,7 +90,13 @@ namespace edittool{
 				if (event.type == sf::Event::Closed)
 					window.close();
 				if (event.type == sf::Event::TextEntered){
-					sfInput += event.text.unicode;
+					if(event.text.unicode == '\b'){
+						if(sfInput.getSize() > 0) sfInput.erase(sfInput.getSize() - 1, 1);
+					}else{
+						sfInput += event.text.unicode;
+					}
+					mesTips[E_INPUT].setString(sfInput.toAnsiString());
+					redrawWindow();
 				}
 				if (event.type == sf::Event::KeyPressed){
 					if (event.key.code == sf::Keyboard::Enter) {
@@ -91,6 +108,8 @@ namespace edittool{
 						}
 						if (choice < 0 || choice > amount) correct = false;
 						if (!correct) {
+							mesTips[E_INPUT].setString("");
+							redrawWindow();
 							sfInput = "";
 							break;
 						}
@@ -104,6 +123,8 @@ namespace edittool{
 			}
 			if(flag) break;
 		}
+		mesTips[E_INPUT].setString("");
+		redrawWindow();
 		
 		return choice;
 	}
@@ -119,12 +140,20 @@ namespace edittool{
 				if (event.type == sf::Event::Closed)
 					window.close();
 				if (event.type == sf::Event::TextEntered){
-					sfInput += event.text.unicode;
+					if(event.text.unicode == '\b'){
+						if(sfInput.getSize() > 0) sfInput.erase(sfInput.getSize() - 1, 1);
+					}else{
+						sfInput += event.text.unicode;
+					}
+					mesTips[E_INPUT].setString(sfInput.toAnsiString());
+					redrawWindow();
 				}
 				if (event.type == sf::Event::KeyPressed){
 					if (event.key.code == sf::Keyboard::Enter) {
 						str = sfInput.toAnsiString();
 						if(str.empty()){
+							mesTips[E_INPUT].setString("");
+							redrawWindow();
 							sfInput = "";
 							break;
 						}
@@ -134,6 +163,8 @@ namespace edittool{
 			}
 			if(flag) break;
 		}
+		mesTips[E_INPUT].setString("");
+		redrawWindow();
 		
 		return str;
 	}
@@ -144,8 +175,8 @@ namespace edittool{
 		itemsOnScreen.clear();
 		
 		for(int j = 0;j < WINDOWHEIGHT_AMOUNT;++j){
-			const std::vector<const std::vector<Item*>*> items = level.getItemMap().getLine(j + coord.y - YOFFSET, coord.x - XOFFSET, coord.x - XOFFSET + WINDOWWIDTH_AMOUNT);
-			const std::vector<const std::vector<Creature*>*> creatures = level.getCreatureMap().getLine(j + coord.y - YOFFSET, coord.x - XOFFSET, coord.x - XOFFSET + WINDOWWIDTH_AMOUNT);
+			const Ptr<Item*>* items = level.getItemMap().getLine(j + coord.y - YOFFSET, coord.x - XOFFSET, coord.x - XOFFSET + WINDOWWIDTH_AMOUNT);
+			const Ptr<Creature*>* creatures = level.getCreatureMap().getLine(j + coord.y - YOFFSET, coord.x - XOFFSET, coord.x - XOFFSET + WINDOWWIDTH_AMOUNT);
 			
 			for(int i = 0;i < WINDOWWIDTH_AMOUNT;++i){
 				Cell *cell;
@@ -155,28 +186,29 @@ namespace edittool{
 					cell->setDrawPosition((float)i, (float)j);
 					
 					if(cell->walkAble()) {
-						if (items[i] != nullptr) {
-							for (auto it = (*items[i]).begin(), end = (*items[i]).end(); it != end; ++it){
-								(*it)->setDrawPosition((float)i, (float)j);
-								itemsOnScreen.push_back(*it);
+						if (items[i].ptr != nullptr) {
+							for (int k = 0;k < items[i].amount;++k){
+								items[i].ptr[k]->setDrawPosition((float)i, (float)j);
+								itemsOnScreen.push_back(items[i].ptr[k]);
 							}
 						}
-						if (creatures[i] != nullptr) {
-							for (auto it = (*creatures[i]).begin(), end = (*creatures[i]).end(); it != end; ++it){
-								(*it)->setDrawPosition((float)i, (float)j);
-								creaturesOnScreen.push_back(*it);
+						if (creatures[i].ptr != nullptr) {
+							for (int k = 0;k < creatures[i].amount;++k){
+								creatures[i].ptr[k]->setDrawPosition((float)i, (float)j);
+								creaturesOnScreen.push_back(creatures[i].ptr[k]);
 							}
 						}
 					}
-					
 					cellsOnScreen.push_back(cell);
 				}
 			}
+			delete [] items;
+			delete [] creatures;
 		}
 	}
 	
 	void EditTool::refreshInterface() {
-		std::string mes("1 for WALL, 2 for FLOOR, 3 for GLASS, 4 for PARTITION, 5 for storage\nR to refresh circle radius\nE to build circle\nF to build line\nT to refresh line length\nV to build row\nY to refresh row length\nO to create Operative\nP to create Sentient\nL to create Wild\nK to create Forager\nJ to clear creatures");
+		std::string mes("1 for WALL, 2 for FLOOR, 3 for GLASS, 4 for PARTITION, 5 for storage\nR to refresh circle radius\nE to build circle\nF to build line\nT to refresh line length\nV to build row\nY to refresh row length\nO to create Operative\nP to create Sentient\nL to create Wild\nK to create Forager\nJ to clear creatures\nM to build HealthKit\nN to build AmmoContainer\nB to build Gun\nC to clear Items");
 		mesTips[E_CELL].setString(mes);
 	}
 	
@@ -257,12 +289,17 @@ namespace edittool{
 				if (event.type == sf::Event::Closed)
 					window.close();
 				if (event.type == sf::Event::MouseButtonPressed){
-					if(drawingCell){
-						buildCell();
-						mousePressed = true;
-					}
-					else{
-						buildCreature();
+					switch(building){
+						case CREATURE:
+							buildCreature();
+							break;
+						case CELL:
+							buildCell();
+							mousePressed = true;
+							break;
+						case ITEM:
+							buildItem();
+							break;
 					}
 					refreshMap();
 					redrawWindow();
@@ -271,11 +308,16 @@ namespace edittool{
 					mousePressed = false;
 				}
 				if (event.type == sf::Event::MouseMoved && mousePressed){
-					if(drawingCell){
-						buildCell();
-					}
-					else{
-						buildCreature();
+					switch(building){
+						case CREATURE:
+							buildCreature();
+							break;
+						case CELL:
+							buildCell();
+							break;
+						case ITEM:
+							buildItem();
+							break;
 					}
 					refreshMap();
 					redrawWindow();
@@ -309,52 +351,71 @@ namespace edittool{
 							coord.x+=VIEWSTEP;
 							break;
 						case sf::Keyboard::Num1:
-							drawingCell = true;
-							celltype = WALL;
+							building = CELL;
+							cellType = WALL;
 							break;
 						case sf::Keyboard::Num2:
-							drawingCell = true;
-							celltype = FLOOR;
+							building = CELL;
+							cellType = FLOOR;
 							break;
 						case sf::Keyboard::Num3:
-							drawingCell = true;
-							celltype = GLASS;
+							building = CELL;
+							cellType = GLASS;
 							break;
 						case sf::Keyboard::Num4:
-							drawingCell = true;
-							celltype = PARTITION;
+							building = CELL;
+							cellType = PARTITION;
 							break;
 						case sf::Keyboard::Num5:
-							drawingCell = true;
-							celltype = STORAGE;
+							building = CELL;
+							cellType = STORAGE;
 							break;
 						case sf::Keyboard::O:
-							drawingCell = false;
+							building = CREATURE;
 							creatType = OPERATIVE;
 							break;
 						case sf::Keyboard::P:
-							drawingCell = false;
+							building = CREATURE;
 							creatType = SENTIENT;
 							break;
 						case sf::Keyboard::L:
-							drawingCell = false;
+							building = CREATURE;
 							creatType = WILD;
 							break;
 						case sf::Keyboard::K:
-							drawingCell = false;
+							building = CREATURE;
 							creatType = FORAGER;
 							break;
 						case sf::Keyboard::J:
-							drawingCell = false;
+							building = CREATURE;
 							creatType = CREATURES_COUNT;
 							break;
+						case sf::Keyboard::M:
+							building = ITEM;
+							itemType = HKIT;
+							break;
+						case sf::Keyboard::N:
+							building = ITEM;
+							itemType = ACONT;
+							break;
+						case sf::Keyboard::B:
+							building = ITEM;
+							itemType = GUN;
+							break;
+						case sf::Keyboard::C:
+							building = ITEM;
+							itemType = ITEMS_COUNT;
+							break;
 						case sf::Keyboard::R:
+							window.pollEvent(event);
 							Rad = getIntFromWindow(100);
 							break;
 						case sf::Keyboard::T:
+							window.pollEvent(event);
 							colLength = getIntFromWindow(100);
 							break;
 						case sf::Keyboard::Y:
+							window.pollEvent(event);
 							rowLength = getIntFromWindow(100);
 							break;
 						default :
@@ -365,18 +426,11 @@ namespace edittool{
 					refreshInterface();
 				}
 			}
-			
 			redrawWindow();
 		}
 	}
 	
-	void EditTool::saveLevel(){
-		mesTips[E_ERROR].setString("Input 1 to save changes");
-		refreshInterface();
-		redrawWindow();
-		int saveFlag = getIntFromWindow(INT_MAX);
-		if(saveFlag != 1) return;
-		
+	void EditTool::saveCells(){
 		Cell **cells = level.getCells();
 		
 		std::ofstream fs(CELLS_CFG, std::ios::trunc);
@@ -395,10 +449,115 @@ namespace edittool{
 		fs.close();
 	}
 	
+	void EditTool::saveOperatives() {
+		level.setTurn(OPERATIVE);
+		
+		std::ofstream fs(OPERS_CFG, std::ios::trunc);
+		if (!fs.is_open()) {
+			throw std::runtime_error("Can't create files");
+		}
+		
+		const std::vector<Creature *> &creatures = level.getCurrentTeam();
+		for(auto it = creatures.begin(), endIt = creatures.end();it != endIt;++it){
+			auto operative = dynamic_cast<Operative*>(*it);
+			fs << (*it)->getName() << std::endl;
+			fs << (*it)->getPosition().x << ' ' <<  (*it)->getPosition().y << ' ' << (*it)->getHealthMax() << ' ' << (*it)->getTimeMax() << ' ' << (*it)->getWalkTime() << ' ' << (*it)->getViewRadius() << ' ' << operative->getReloadTimeMultipl() << ' ' << operative->getForce() << ' ' << operative->getAccuracy() << std::endl;
+			fs << std::endl;
+		}
+		
+		fs.close();
+	}
+	
+	void EditTool::saveSentients() {
+		level.setTurn(SENTIENT);
+		
+		std::ofstream fs(SENTS_CFG, std::ios::trunc);
+		if (!fs.is_open()) {
+			throw std::runtime_error("Can't create files");
+		}
+		
+		const std::vector<Creature *> &creatures = level.getCurrentTeam();
+		for(auto it = creatures.begin(), endIt = creatures.end();it != endIt;++it){
+			auto sentient = dynamic_cast<Sentient*>(*it);
+			fs << (*it)->getName() << std::endl;
+			fs << (*it)->getPosition().x << ' ' <<  (*it)->getPosition().y << ' ' << (*it)->getHealthMax() << ' ' << (*it)->getTimeMax() << ' ' << (*it)->getWalkTime() << ' ' << (*it)->getViewRadius() << ' ' << sentient->getAccuracy() << std::endl;
+			fs << std::endl;
+		}
+		
+		fs.close();
+	}
+	
+	void EditTool::saveWilds() {
+		level.setTurn(WILD);
+		
+		std::ofstream fs(WILDS_CFG, std::ios::trunc);
+		if (!fs.is_open()) {
+			throw std::runtime_error("Can't create files");
+		}
+		
+		const std::vector<Creature *> &creatures = level.getCurrentTeam();
+		for(auto it = creatures.begin(), endIt = creatures.end();it != endIt;++it){
+			auto wild = dynamic_cast<Wild*>(*it);
+			fs << (*it)->getName() << std::endl;
+			fs << (*it)->getPosition().x << ' ' <<  (*it)->getPosition().y << ' ' << (*it)->getHealthMax() << ' ' << (*it)->getTimeMax() << ' ' << (*it)->getWalkTime() << ' ' << (*it)->getViewRadius() << ' ' << wild->getAccuracy() << ' ' << wild->getDamage() << std::endl;
+			fs << std::endl;
+		}
+		
+		fs.close();
+	}
+	
+	void EditTool::saveForagers() {
+		level.setTurn(FORAGER);
+		
+		std::ofstream fs(FORAGS_CFG, std::ios::trunc);
+		if (!fs.is_open()) {
+			throw std::runtime_error("Can't create files");
+		}
+		
+		const std::vector<Creature *> &creatures = level.getCurrentTeam();
+		for(auto it = creatures.begin(), endIt = creatures.end();it != endIt;++it){
+			auto forager = dynamic_cast<Forager*>(*it);
+			fs << (*it)->getName() << std::endl;
+			fs << (*it)->getPosition().x << ' ' << (*it)->getPosition().y << ' ' << (*it)->getHealthMax() << ' ' << (*it)->getTimeMax() << ' ' << (*it)->getWalkTime() << ' ' << (*it)->getViewRadius() << ' ' << forager->getForce() << std::endl;
+			fs << std::endl;
+		}
+		
+		fs.close();
+	}
+	
+	void EditTool::saveCreatures(){
+		saveOperatives();
+		saveSentients();
+		saveWilds();
+		saveForagers();
+	}
+	
+	void EditTool::saveItems(){
+		std::ofstream fs(ITEMS_CFG, std::ios::trunc);
+		if (!fs.is_open()) {
+			throw std::runtime_error("Can't create files");
+		}
+		
+		for(Item *it : level.getItemMap()){
+			it->saveFile(fs);
+		}
+		
+		fs.close();
+	}
+	
+	void EditTool::saveLevel(){
+		int saveFlag = getInt("Input 1 to save changes", INT_MAX);
+		if(saveFlag != 1) return;
+		
+		saveCells();
+		saveCreatures();
+		saveItems();
+	}
+	
 	void EditTool::setCell(int x, int y){
 		if(x < 0 || y < 0 || x >= cellsHoriz || y >= cellsVert) return;
 		
-		level.setCell(x, y, celltype);
+		level.setCell(x, y, cellType);
 	}
 	
 	void EditTool::buildCell(){
@@ -494,12 +653,87 @@ namespace edittool{
 		level.spawnForager(name, point, healthMax, timeMax, walkTime, viewRadius, force);
 	}
 	
+	void EditTool::buildItem(){
+		int x = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, y = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
+		if(x < 0 || y < 0 || x >= cellsHoriz || y >= cellsVert) return;
+		
+		switch(itemType){
+			case HKIT:
+				buildHKit();
+				break;
+			case ACONT:
+				buildACont();
+				break;
+			case GUN:
+				buildGun();
+				break;
+			default:
+				clearItems();
+				break;
+		}
+	}
+	
+	void EditTool::buildHKit() {
+//		std::string &name, int weight, const Point &point, int healAmount, int healTime
+		int x = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, y = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
+		
+		std::string name = getString("input name and Enter to confirm");
+		int weight = getInt("input weight and Enter to confirm", INT_MAX);
+		int healAmount = getInt("input heal amount and Enter to confirm", INT_MAX);
+		int healTime = getInt("input heal time and Enter to confirm", INT_MAX);
+		clearError();
+		Point point(x, y);
+		
+		level.spawnHKit(name, weight, point, healAmount, healTime);
+	}
+	void EditTool::buildACont() {
+//		std::string &name, int weight, const Point &point, Ammunition ammoType, int ammoMax
+		int x = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, y = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
+		
+		std::string name = getString("input name and Enter to confirm");
+		int weight = getInt("input weight and Enter to confirm", INT_MAX);
+		int ammoTypeInt = getInt("input ammo type (1 = LARGE_CALIBER, 2 = MEDIUM_CALIBER, 3 = SMALL_CALIBER)\n and Enter to confirm", INT_MAX);
+		int ammoMax = getInt("input ammo max and Enter to confirm", INT_MAX);
+		clearError();
+		Point point(x, y);
+		ammoTypeInt--;
+		if(ammoTypeInt < 0 || ammoTypeInt >= AMMUNITION_COUNT){
+			mesTips[E_ERROR].setString("wrong ammo type");
+			return;
+		}
+		
+		level.spawnACont(name, weight, point, ammoTypeInt, ammoMax);
+	}
+	void EditTool::buildGun() {
+//		std::string &name, int weight, const Point &point, int damage, int shootTime, int reloadTime, Ammunition ammoType, int ammoMax, float accuracy, int switchTime
+		int x = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, y = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
+		
+		std::string name = getString("input name and Enter to confirm");
+		int weight = getInt("input weight and Enter to confirm", INT_MAX);
+		int damage = getInt("input damage and Enter to confirm", INT_MAX);
+		int shootTime = getInt("input shoot time and Enter to confirm", INT_MAX);
+		int reloadTime = getInt("input reload time and Enter to confirm", INT_MAX);
+		int ammoTypeInt = getInt("input ammo type (1 = LARGE_CALIBER, 2 = MEDIUM_CALIBER, 3 = SMALL_CALIBER)\n and Enter to confirm", INT_MAX);
+		int ammoMax = getInt("input ammo max and Enter to confirm", INT_MAX);
+		float accuracy = getFloat("input accuracy and Enter to confirm", 100);
+		int switchTime = getInt("input switch time and Enter to confirm", INT_MAX);
+		clearError();
+		Point point(x, y);
+		ammoTypeInt--;
+		if(ammoTypeInt < 0 || ammoTypeInt >= AMMUNITION_COUNT){
+			mesTips[E_ERROR].setString("wrong ammo type");
+			return;
+		}
+		
+		level.spawnGun(name, weight, point, damage, shootTime, reloadTime, ammoTypeInt, ammoMax, accuracy, switchTime);
+	}
+	
 	void EditTool::clearCreatures() {
 		int x = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, y = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
 		Point point(x, y);
-		const std::vector<Creature*> *creatures = level.getCreatureMap()[point];
-		while(creatures != nullptr){
-			(*creatures)[0]->kill();
+		Ptr<Creature*> creatures = level.getCreatureMap()[point];
+		while(creatures.ptr != nullptr){
+			creatures.ptr[0]->kill();
 			creatures = level.getCreatureMap()[point];
 		}
 	}
@@ -507,17 +741,17 @@ namespace edittool{
 	void EditTool::clearItems() {
 		int x = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, y = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
 		Point point(x, y);
-		const std::vector<Creature*> *creatures = level.getCreatureMap()[point];
-		while(creatures != nullptr){
-			(*creatures)[0]->kill();
-			creatures = level.getCreatureMap()[point];
+		Ptr<Item*> items = level.getItemMap()[point];
+		while(items.ptr != nullptr){
+			delete *items.ptr;
+			level.getItemMap().removeItem(point, *items.ptr);
+			items = level.getItemMap()[point];
 		}
 	}
 	
 	void EditTool::redrawWindow() {
 		window.clear();
 		drawMap();
-		
 		
 		for(auto it = mesTips.begin();it != mesTips.end();++it){
 			window.draw(*it);
