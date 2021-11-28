@@ -65,10 +65,10 @@ enum ErrorCodes{
 
 /// Направления
 enum Direction{
-	LEFT, ///< Влево
 	UP, ///< Вверх
 	RIGHT, ///< Вправо
-	DOWN ///< Вниз
+	DOWN, ///< Вниз
+	LEFT ///< Влево
 };
 
 template<class T>

@@ -44,6 +44,7 @@ namespace nodata{
 		}
 		
 		spendTime(walkTime_);
+		sprite.setRotation(direction * 90);
 	}
 	
 	void Creature::heal(int healAmount) {
@@ -90,11 +91,13 @@ namespace nodata{
 	}
 	
 	void Creature::setDrawPosition(float x, float y) {
-		sprite.setPosition(x * CELLSIZEX, y * CELLSIZEY);
+		sprite.setPosition(x * CELLSIZEX + ((float)CELLSIZEX/2), y * CELLSIZEY + ((float)CELLSIZEY/2));
 	}
 	
 	void Creature::setTexture(sf::Texture &texture) {
 		sprite.setTexture(texture);
 		sprite.setScale(CELLSIZEX/sprite.getLocalBounds().width, CELLSIZEY/sprite.getLocalBounds().height);
+		
+		sprite.setOrigin(sprite.getLocalBounds().width/2, sprite.getLocalBounds().height/2);
 	}
 }
