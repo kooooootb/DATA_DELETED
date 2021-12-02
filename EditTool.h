@@ -79,10 +79,6 @@ namespace edittool{
 		void saveCells();
 		
 		void saveCreatures();
-		void saveOperatives();
-		void saveSentients();
-		void saveWilds();
-		void saveForagers();
 		
 		void saveItems();
 	public:

@@ -51,6 +51,13 @@ namespace nodata{
 		 *	Убивает существо и выбрасывает его активное оружие
 		 */
 		void kill() override;
+		
+		/*!
+		 * Осуществляет ход существа
+		 */
+		ErrorCodes move(int randVar) override;
+		
+		void saveFile(std::ofstream &) override;
 	};
 
 /*! @} */

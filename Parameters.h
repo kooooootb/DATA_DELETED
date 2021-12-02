@@ -32,16 +32,15 @@ const unsigned int FONTSIZE = 20;
 const unsigned int CHOOSEOFFSET = FONTSIZE * 5;
 
 //config files' names
-static const char * OPERS_CFG = "Opers.cfg";
-static const char * SENTS_CFG = "Sents.cfg";
-static const char * WILDS_CFG = "Wilds.cfg";
-static const char * FORAGS_CFG = "Forags.cfg";
-//static const char * CELLS_CFG = "Cells.cfg";
-static const char * CELLS_CFG = "c1.cfg";
+//static const char * OPERS_CFG = "Opers.cfg";
+//static const char * SENTS_CFG = "Sents.cfg";
+//static const char * WILDS_CFG = "Wilds.cfg";
+//static const char * FORAGS_CFG = "Forags.cfg";
+static const char * CREATURES_CFG = "Creatures.cfg";
 
-static const char * HKITS_CFG = "HKits.cfg";
-static const char * ACONTS_CFG = "AConts.cfg";
-static const char * GUNS_CFG = "Guns.cfg";
+static const char * CELLS_CFG = "Cells.cfg";
+//static const char * CELLS_CFG = "c1.cfg";
+
 static const char * ITEMS_CFG = "Items.cfg";
 
 //Textures

@@ -34,4 +34,15 @@ namespace nodata{
 		activeGun_ = nullptr;
 		level_.killSentient(this);
 	}
+	
+	ErrorCodes Sentient::move(int randVar){
+		
+		
+		return ERROR;
+	}
+	
+	void Sentient::saveFile(std::ofstream &fs){
+		fs << name_ << std::endl;
+		fs << SENTIENT << ' ' << coord_.x << ' ' << coord_.y << ' ' << healthMax_ << ' ' << timeMax_ << ' ' << walkTime_ << ' ' << viewRadius_ << ' ' << accuracyMultipl_ << std::endl;
+	}
 }

@@ -25,26 +25,37 @@ namespace nodata{
 		int accuracy_; ///< Точность атаки существа
 		int damage_; ///< Наносимый существом урон
 		int attackTime_; ///< Время, затрачиваемое при атаке
+		
+		int penaltyMoves_ = 0;
+		std::queue<Direction> path_;
 	public:
 		/*!
 		 * Конструктор класса, инициализирующий его параметры
 		 */
-		Wild(Level *level, std::string &name, Point coord, int healthMax, int timeMax, int walkTime, int viewRadius, int accuracy, int damage);
+		Wild(Level *level, std::string &name, Point coord, int healthMax, int timeMax, int walkTime, int viewRadius, int accuracy, int damage, int attackTime);
 		
 		~Wild() override = default;
 		
 		int getAccuracy() const { return accuracy_; }
 		int getDamage() const { return damage_; }
+		int getAttackTime() const { return attackTime_; }
 		
 		/*!
 		 * Атакует жертву при условии, что существо и жертва находятся на соседних клетках
 		 * @param victim указатель на существо-жертву
 		 */
-		void attack(Creature *victim);
+		ErrorCodes attack(Creature *victim);
 		/*!
 		 *	Убивает существо
 		 */
 		void kill() override;
+		
+		 /*!
+		  * Осуществляет ход существа
+		  */
+		ErrorCodes move(int randVar) override;
+		
+		void saveFile(std::ofstream &) override;
 	};
 
 /*! @} */

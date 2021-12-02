@@ -56,7 +56,7 @@ namespace edittool{
 						} catch (std::invalid_argument &ia) {
 							correct = false;
 						}
-						if (choice < 0 || choice > amount) correct = false;
+						if (choice < 0 || (amount > 0 && choice > amount)) correct = false;
 						if (!correct) {
 							mesTips[E_INPUT].setString("");
 							redrawWindow();
@@ -106,7 +106,7 @@ namespace edittool{
 						} catch (std::invalid_argument &ia) {
 							correct = false;
 						}
-						if (choice < 0 || choice > amount) correct = false;
+						if (choice < 0 || (amount > 0 && choice > amount)) correct = false;
 						if (!correct) {
 							mesTips[E_INPUT].setString("");
 							redrawWindow();
@@ -449,93 +449,23 @@ namespace edittool{
 		fs.close();
 	}
 	
-	void EditTool::saveOperatives() {
-		level.setTurn(OPERATIVE);
-		
-		std::ofstream fs(OPERS_CFG, std::ios::trunc);
-		if (!fs.is_open()) {
-			throw std::runtime_error("Can't create files");
-		}
-		
-		const std::vector<Creature *> &creatures = level.getCurrentTeam();
-		for(auto it = creatures.begin(), endIt = creatures.end();it != endIt;++it){
-			auto operative = dynamic_cast<Operative*>(*it);
-			fs << (*it)->getName() << std::endl;
-			fs << (*it)->getPosition().x << ' ' <<  (*it)->getPosition().y << ' ' << (*it)->getHealthMax() << ' ' << (*it)->getTimeMax() << ' ' << (*it)->getWalkTime() << ' ' << (*it)->getViewRadius() << ' ' << operative->getReloadTimeMultipl() << ' ' << operative->getForce() << ' ' << operative->getAccuracy() << std::endl;
-			fs << std::endl;
-		}
-		
-		fs.close();
-	}
-	
-	void EditTool::saveSentients() {
-		level.setTurn(SENTIENT);
-		
-		std::ofstream fs(SENTS_CFG, std::ios::trunc);
-		if (!fs.is_open()) {
-			throw std::runtime_error("Can't create files");
-		}
-		
-		const std::vector<Creature *> &creatures = level.getCurrentTeam();
-		for(auto it = creatures.begin(), endIt = creatures.end();it != endIt;++it){
-			auto sentient = dynamic_cast<Sentient*>(*it);
-			fs << (*it)->getName() << std::endl;
-			fs << (*it)->getPosition().x << ' ' <<  (*it)->getPosition().y << ' ' << (*it)->getHealthMax() << ' ' << (*it)->getTimeMax() << ' ' << (*it)->getWalkTime() << ' ' << (*it)->getViewRadius() << ' ' << sentient->getAccuracy() << std::endl;
-			fs << std::endl;
-		}
-		
-		fs.close();
-	}
-	
-	void EditTool::saveWilds() {
-		level.setTurn(WILD);
-		
-		std::ofstream fs(WILDS_CFG, std::ios::trunc);
-		if (!fs.is_open()) {
-			throw std::runtime_error("Can't create files");
-		}
-		
-		const std::vector<Creature *> &creatures = level.getCurrentTeam();
-		for(auto it = creatures.begin(), endIt = creatures.end();it != endIt;++it){
-			auto wild = dynamic_cast<Wild*>(*it);
-			fs << (*it)->getName() << std::endl;
-			fs << (*it)->getPosition().x << ' ' <<  (*it)->getPosition().y << ' ' << (*it)->getHealthMax() << ' ' << (*it)->getTimeMax() << ' ' << (*it)->getWalkTime() << ' ' << (*it)->getViewRadius() << ' ' << wild->getAccuracy() << ' ' << wild->getDamage() << std::endl;
-			fs << std::endl;
-		}
-		
-		fs.close();
-	}
-	
-	void EditTool::saveForagers() {
-		level.setTurn(FORAGER);
-		
-		std::ofstream fs(FORAGS_CFG, std::ios::trunc);
-		if (!fs.is_open()) {
-			throw std::runtime_error("Can't create files");
-		}
-		
-		const std::vector<Creature *> &creatures = level.getCurrentTeam();
-		for(auto it = creatures.begin(), endIt = creatures.end();it != endIt;++it){
-			auto forager = dynamic_cast<Forager*>(*it);
-			fs << (*it)->getName() << std::endl;
-			fs << (*it)->getPosition().x << ' ' << (*it)->getPosition().y << ' ' << (*it)->getHealthMax() << ' ' << (*it)->getTimeMax() << ' ' << (*it)->getWalkTime() << ' ' << (*it)->getViewRadius() << ' ' << forager->getForce() << std::endl;
-			fs << std::endl;
-		}
-		
-		fs.close();
-	}
-	
 	void EditTool::saveCreatures(){
-		saveOperatives();
-		saveSentients();
-		saveWilds();
-		saveForagers();
+		std::ofstream fs(CREATURES_CFG, std::ios::trunc);
+		if (!fs.is_open()) {
+			throw std::runtime_error("Can't create save files for creatures");
+		}
+		
+		for(Creature *it : level.getCreatureMap()){
+			it->saveFile(fs);
+		}
+		
+		fs.close();
 	}
 	
 	void EditTool::saveItems(){
 		std::ofstream fs(ITEMS_CFG, std::ios::trunc);
 		if (!fs.is_open()) {
-			throw std::runtime_error("Can't create files");
+			throw std::runtime_error("Can't create save files for items");
 		}
 		
 		for(Item *it : level.getItemMap()){
@@ -546,7 +476,7 @@ namespace edittool{
 	}
 	
 	void EditTool::saveLevel(){
-		int saveFlag = getInt("Input 1 to save changes", INT_MAX);
+		int saveFlag = getInt("Input 1 to save changes", -1);
 		if(saveFlag != 1) return;
 		
 		saveCells();
@@ -593,12 +523,12 @@ namespace edittool{
 		int x = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, y = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
 		
 		std::string name = getString("input name and Enter to confirm");
-		int healthMax = getInt("input health max and Enter to confirm", INT_MAX);
-		int timeMax = getInt("input time max and Enter to confirm", INT_MAX);
-		int walkTime = getInt("input walk max and Enter to confirm", INT_MAX);
+		int healthMax = getInt("input health max and Enter to confirm", -1);
+		int timeMax = getInt("input time max and Enter to confirm", -1);
+		int walkTime = getInt("input walk max and Enter to confirm", -1);
 		int viewRadius = getInt("input view radius and Enter to confirm", (int)sqrt(pow(level.getVertCells(), 2) + pow(level.getHorizCells(), 2)));
 		float reloadTime = getFloat("input reload coefficient and Enter to confirm", 100);
-		int force = getInt("input force and Enter to confirm", INT_MAX);
+		int force = getInt("input force and Enter to confirm", -1);
 		float accuracy = getFloat("input accuracy coefficient and Enter to confirm", 100);
 		clearError();
 		Point point(x, y);
@@ -611,9 +541,9 @@ namespace edittool{
 		int x = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, y = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
 		
 		std::string name = getString("input name and Enter to confirm");
-		int healthMax = getInt("input health max and Enter to confirm", INT_MAX);
-		int timeMax = getInt("input time max and Enter to confirm", INT_MAX);
-		int walkTime = getInt("input walk max and Enter to confirm", INT_MAX);
+		int healthMax = getInt("input health max and Enter to confirm", -1);
+		int timeMax = getInt("input time max and Enter to confirm", -1);
+		int walkTime = getInt("input walk max and Enter to confirm", -1);
 		int viewRadius = getInt("input view radius and Enter to confirm", (int)sqrt(pow(level.getVertCells(), 2) + pow(level.getHorizCells(), 2)));
 		float accuracy = getFloat("input accuracy coefficient and Enter to confirm", 100);
 		clearError();
@@ -622,31 +552,32 @@ namespace edittool{
 		level.spawnSentient(name, point, healthMax, timeMax, walkTime, viewRadius, accuracy);
 	}
 	void EditTool::buildWild() {
-//		std::string &name, Point coord, int healthMax, int timeMax, int walkTime, int viewRadius, int accuracy, int damage
+//		std::string &name, Point coord, int healthMax, int timeMax, int walkTime, int viewRadius, int accuracy, int damage, int attackTime
 		int x = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, y = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
 		
 		std::string name = getString("input name and Enter to confirm");
-		int healthMax = getInt("input health max and Enter to confirm", INT_MAX);
-		int timeMax = getInt("input time max and Enter to confirm", INT_MAX);
-		int walkTime = getInt("input walk max and Enter to confirm", INT_MAX);
+		int healthMax = getInt("input health max and Enter to confirm", -1);
+		int timeMax = getInt("input time max and Enter to confirm", -1);
+		int walkTime = getInt("input walk time and Enter to confirm", -1);
 		int viewRadius = getInt("input view radius and Enter to confirm", (int)sqrt(pow(level.getVertCells(), 2) + pow(level.getHorizCells(), 2)));
 		int accuracy = getInt("input accuracy coefficient and Enter to confirm", 100);
-		int damage = getInt("input damage and Enter to confirm", INT_MAX);
+		int damage = getInt("input damage and Enter to confirm", -1);
+		int attackTime = getInt("input attack time and Enter to confirm", -1);
 		clearError();
 		Point point(x, y);
 		
-		level.spawnWild(name, point, healthMax, timeMax, walkTime, viewRadius, accuracy, damage);
+		level.spawnWild(name, point, healthMax, timeMax, walkTime, viewRadius, accuracy, damage, attackTime);
 	}
 	void EditTool::buildForager() {
 //		std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, int force
 		int x = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, y = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
 		
 		std::string name = getString("input name and Enter to confirm");
-		int healthMax = getInt("input health max and Enter to confirm", INT_MAX);
-		int timeMax = getInt("input time max and Enter to confirm", INT_MAX);
-		int walkTime = getInt("input walk max and Enter to confirm", INT_MAX);
+		int healthMax = getInt("input health max and Enter to confirm", -1);
+		int timeMax = getInt("input time max and Enter to confirm", -1);
+		int walkTime = getInt("input walk max and Enter to confirm", -1);
 		int viewRadius = getInt("input view radius and Enter to confirm", (int)sqrt(pow(level.getVertCells(), 2) + pow(level.getHorizCells(), 2)));
-		int force = getInt("input force and Enter to confirm", INT_MAX);
+		int force = getInt("input force and Enter to confirm", -1);
 		clearError();
 		Point point(x, y);
 		
@@ -678,9 +609,9 @@ namespace edittool{
 		int x = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, y = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
 		
 		std::string name = getString("input name and Enter to confirm");
-		int weight = getInt("input weight and Enter to confirm", INT_MAX);
-		int healAmount = getInt("input heal amount and Enter to confirm", INT_MAX);
-		int healTime = getInt("input heal time and Enter to confirm", INT_MAX);
+		int weight = getInt("input weight and Enter to confirm", -1);
+		int healAmount = getInt("input heal amount and Enter to confirm", -1);
+		int healTime = getInt("input heal time and Enter to confirm", -1);
 		clearError();
 		Point point(x, y);
 		
@@ -691,15 +622,29 @@ namespace edittool{
 		int x = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, y = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
 		
 		std::string name = getString("input name and Enter to confirm");
-		int weight = getInt("input weight and Enter to confirm", INT_MAX);
-		int ammoTypeInt = getInt("input ammo type (1 = LARGE_CALIBER, 2 = MEDIUM_CALIBER, 3 = SMALL_CALIBER)\n and Enter to confirm", INT_MAX);
-		int ammoMax = getInt("input ammo max and Enter to confirm", INT_MAX);
+		int weight = getInt("input weight and Enter to confirm", -1);
+		int ammoTypeInt = getInt("input ammo type (1 = LARGE_CALIBER, 2 = MEDIUM_CALIBER, 3 = SMALL_CALIBER)\n and Enter to confirm", -1);
+		int ammoMax = getInt("input ammo max and Enter to confirm", -1);
 		clearError();
 		Point point(x, y);
 		ammoTypeInt--;
 		if(ammoTypeInt < 0 || ammoTypeInt >= AMMUNITION_COUNT){
 			mesTips[E_ERROR].setString("wrong ammo type");
 			return;
+		}
+		
+		switch (static_cast<Ammunition>(ammoTypeInt)) {
+			case LARGE_CALIBER:
+				name += "[LARGE CALIBER]";
+				break;
+			case MEDIUM_CALIBER:
+				name += "[MEDIUM CALIBER]";
+				break;
+			case SMALL_CALIBER:
+				name += "[SMALL CALIBER]";
+				break;
+			default:
+				return;
 		}
 		
 		level.spawnACont(name, weight, point, ammoTypeInt, ammoMax);
@@ -709,14 +654,14 @@ namespace edittool{
 		int x = sf::Mouse::getPosition(window).x/CELLSIZE - XOFFSET + coord.x, y = sf::Mouse::getPosition(window).y/CELLSIZE - YOFFSET + coord.y;
 		
 		std::string name = getString("input name and Enter to confirm");
-		int weight = getInt("input weight and Enter to confirm", INT_MAX);
-		int damage = getInt("input damage and Enter to confirm", INT_MAX);
-		int shootTime = getInt("input shoot time and Enter to confirm", INT_MAX);
-		int reloadTime = getInt("input reload time and Enter to confirm", INT_MAX);
-		int ammoTypeInt = getInt("input ammo type (1 = LARGE_CALIBER, 2 = MEDIUM_CALIBER, 3 = SMALL_CALIBER)\n and Enter to confirm", INT_MAX);
-		int ammoMax = getInt("input ammo max and Enter to confirm", INT_MAX);
+		int weight = getInt("input weight and Enter to confirm", -1);
+		int damage = getInt("input damage and Enter to confirm", -1);
+		int shootTime = getInt("input shoot time and Enter to confirm", -1);
+		int reloadTime = getInt("input reload time and Enter to confirm", -1);
+		int ammoTypeInt = getInt("input ammo type (1 = LARGE_CALIBER, 2 = MEDIUM_CALIBER, 3 = SMALL_CALIBER)\n and Enter to confirm", -1);
+		int ammoMax = getInt("input ammo max and Enter to confirm", -1);
 		float accuracy = getFloat("input accuracy and Enter to confirm", 100);
-		int switchTime = getInt("input switch time and Enter to confirm", INT_MAX);
+		int switchTime = getInt("input switch time and Enter to confirm", -1);
 		clearError();
 		Point point(x, y);
 		ammoTypeInt--;

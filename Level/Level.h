@@ -174,47 +174,29 @@ namespace nodata{
 		/*!
 		 * Восстанавливает текущее время у членов текущей команды
 		 */
-		 void resetTime();
+		void resetTime();
 		 /*!
 		  * Проверяет наличие живых существ-противников
 		  */
-		 bool enemyDied() const;
-		 
+		bool enemyDied() const;
 		 /*!
-		  * Функция выполняет ход команды разумных существ
+		  * Проверяет наличие живых оперативников
 		  */
-		 void moveSentients();
+	  	bool gameOver() const;
 		
-		/*!
-		 * Загружает клетки из данного файла
-		 * @param fname название файла для загрузки
-		 */
 		void loadCells(const char *fname);
-		/*!
-		 * Загружает оперативников из данного файла
-		 * @param fname название файла для загрузки
-		 */
-		void loadOperative(const char *fname);
-		/*!
-		 * Загружает разумных существ из данного файла
-		 * @param fname название файла для загрузки
-		 */
-		void loadSentient(const char *fname);
-		/*!
-		 * Загружает диких существ из данного файла
-		 * @param fname название файла для загрузки
-		 */
-		void loadWild(const char *fname);
-		/*!
-		 * Загружает фуражеров из данного файла
-		 * @param fname название файла для загрузки
-		 */
-		void loadForager(const char *fname);
 		
+		void loadCreatures(const char *);
+		void loadOperative(std::ifstream &fs, std::string &name);
+		void loadSentient(std::ifstream &fs, std::string &name);
+		void loadWild(std::ifstream &fs, std::string &name);
+		void loadForager(std::ifstream &fs, std::string &name);
+		
+		void loadItems(const char *);
 		void loadHKits(std::ifstream &fs, std::string &name);
 		void loadAConts(std::ifstream &fs, std::string &name);
 		void loadGuns(std::ifstream &fs, std::string &name);
-		void loadItems(const char *);
+		
 		void loadTextures();
 		
 		/*!
@@ -236,7 +218,7 @@ namespace nodata{
 		
 		void spawnOperator(std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, float reloadTime, int force, float accuracy);
 		void spawnSentient(std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, float accuracy);
-		void spawnWild(std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, int accuracy, int damage);
+		void spawnWild(std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, int accuracy, int damage, int attackTime);
 		void spawnForager(std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, int force);
 		
 		void spawnHKit(std::string &name, int weight, const Point &point, int healAmount, int healTime);

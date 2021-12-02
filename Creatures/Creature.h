@@ -118,7 +118,7 @@ namespace nodata{
 		 * Выполняет перемещение существо в данном направлении
 		 * @param direction направление
 		 */
-		void walk(Direction direction);
+		ErrorCodes walk(Direction direction);
 		/*!
 		 * Уменьшает текущее количество здоровья существа и убивает его при недостаточном количестве единиц здоровья
 		 * @param damage нанесенный урон
@@ -132,6 +132,10 @@ namespace nodata{
 		void drawCreat(sf::RenderWindow &window);
 		void setDrawPosition(float x, float y);
 		void setTexture(sf::Texture &texture);
+		
+		virtual void saveFile(std::ofstream&) = 0;
+		
+		virtual ErrorCodes move(int randVar) = 0;
 	};
 
 /*! @} */

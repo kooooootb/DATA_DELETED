@@ -39,10 +39,10 @@ namespace nodata{
 		
 		typedef MapIt<T> iterator;//goes through all items
 		iterator begin() const{
-			return iterator(vertAr, amountY);
+			return iterator(vertAr, amountY, *this);
 		}
 		iterator end() const{
-			return iterator(vertAr + amountY);
+			return iterator(vertAr + amountY, *this);
 		}
 		
 		void addItem(const Point &point, T item);
@@ -66,9 +66,11 @@ namespace nodata{
 		typename Map<T>::HorCell *hCell;
 		T *item;
 		
+		Map<T> &map;
+		
 		int curX, curItem, yAmount;
 	public:
-		explicit MapIt(typename Map<T>::VertCell *vertcell, int amount) {//init begin
+		explicit MapIt(typename Map<T>::VertCell *vertcell, int amount, Map<T> &Map) : map(Map) {//init begin
 			vCell = vertcell;
 			yAmount = amount;
 			if(amount != 0){
@@ -79,7 +81,7 @@ namespace nodata{
 			curItem = 1;
 		}
 		
-		explicit MapIt(typename Map<T>::VertCell *vertcell){//init end
+		explicit MapIt(typename Map<T>::VertCell *vertcell, Map<T> &Map) : map(Map) {//init end
 			vCell = vertcell;
 			hCell = nullptr;
 			curX = 1;
@@ -88,8 +90,8 @@ namespace nodata{
 		}
 		
 		void operator++(){
-			if(curItem == hCell->amount) {
-				if (curX == vCell->amountX) {
+			if(curItem == hCell->amount) {//last item
+				if (curX == vCell->amountX) {//last hCell
 					vCell++;
 					if(--yAmount == 0){
 						return;
@@ -99,14 +101,14 @@ namespace nodata{
 					curX = 1;
 					curItem = 1;
 				}
-				else{
+				else{//go to next hCell
 					hCell++;
 					curX++;
 					item = hCell->items;
 					curItem = 1;
 				}
 			}
-			else{
+			else{//go to next item
 				item++;
 				curItem++;
 			}
@@ -350,6 +352,7 @@ namespace nodata{
 		
 		Ptr<T> res;
 		res.ptr = nullptr;
+		res.amount = 0;
 		
 		int i;
 		VertCell *vCell = nullptr;

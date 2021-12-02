@@ -57,6 +57,13 @@ namespace nodata{
 		 * Выбрасывает все предметы из инвентаря фуражира
 		 */
 		void dropAllItems();
+		
+		/*!
+		 * Осуществляет ход существа
+		 */
+		 ErrorCodes move(int randVar) override;
+		 
+		 void saveFile(std::ofstream &) override;
 	};
 
 /*! @} */

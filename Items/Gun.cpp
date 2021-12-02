@@ -105,6 +105,6 @@ namespace nodata{
 	
 	void Gun::saveFile(std::ofstream &fs) {
 		fs << name_ << std::endl;
-		fs << GUN << ' ' << coord_.x << ' ' << coord_.y << ' ' << weight_ << ' ' << damage_ << ' ' << shootTime_ << ' ' << reloadTime_ << ' ' << ammoType_ << ' ' << ammoMax_ << ' ' << accuracy_ << ' ' << switchTime_ << std::endl;
+		fs << GUN << ' ' << coord_.x << ' ' << coord_.y << ' ' << weight_ - calcAmmoWeightByType(ammoMax_, ammoType_) << ' ' << damage_ << ' ' << shootTime_ << ' ' << reloadTime_ << ' ' << ammoType_ << ' ' << ammoMax_ << ' ' << accuracy_ << ' ' << switchTime_ << std::endl;
 	}
 }

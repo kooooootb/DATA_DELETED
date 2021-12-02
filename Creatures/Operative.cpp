@@ -106,4 +106,9 @@ namespace nodata{
 		if(force <= 0) return;
 		force_ = force;
 	}
+	
+	void Operative::saveFile(std::ofstream &fs){
+		fs << name_ << std::endl;
+		fs << OPERATIVE << ' ' << coord_.x << ' ' << coord_.y << ' ' << healthMax_ << ' ' << timeMax_ << ' ' << walkTime_ << ' ' << viewRadius_ << ' ' << reloadTimeMultipl_ << ' ' << force_ << ' ' << accuracyMultipl_ << std::endl;
+	}
 }

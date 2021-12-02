@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <stack>
 #include <cmath>
+#include <queue>
 
 #include "SFML/Graphics.hpp"
 
@@ -39,6 +40,7 @@ enum CellType{
 	CELLSTYPE_COUNT ///< Количество типов клеток, оставлять последним
 };
 
+/// Набор предметов
 enum ItemType{
 	HKIT = 0,
 	ACONT,
@@ -60,7 +62,8 @@ enum ErrorCodes{
 	OK, ///< Успех
 	TODELETE, ///< Элемент нужно очистить после завершения
 	TOREMOVE, ///< Элемент нужно убрать из массива после завершения
-	SUCCESS ///< Функция завершилась с успехом
+	SUCCESS, ///< Функция завершилась с успехом
+	WARNING
 };
 
 /// Направления
@@ -75,6 +78,8 @@ template<class T>
 struct Ptr{
 	T *ptr;
 	int amount;
+	
+	Ptr() : ptr(nullptr) , amount(0) {}
 };
 
 ///Структура точки или вектора
@@ -90,7 +95,49 @@ struct Point{
 	bool operator==(const Point &point) const{
 		return (point.x == x && point.y == y);
 	}
+	
+	Point operator+(const Point &point) const{
+		return Point(x + point.x, y + point.y);
+	}
+	
+	Direction getDirection(const Point &nextCell) const{
+		if(nextCell.x > x) return RIGHT;
+		if(nextCell.y > y) return DOWN;
+		if(nextCell.x < x) return LEFT;
+		return UP;
+	}
 };
+
+static void createCircle(std::vector<Point> &res, int r) {
+	int d = 3 - 2 * r;
+	int x = 0, y = r;
+	while (y >= x) {
+		res.emplace_back(x, y);
+		res.emplace_back(-x, y);
+		res.emplace_back(x, -y);
+		res.emplace_back(-x, -y);
+		res.emplace_back(y, x);
+		res.emplace_back(-y, x);
+		res.emplace_back(y, -x);
+		res.emplace_back(-y, -x);
+		x++;
+		
+		if (d >= 0) {
+			res.emplace_back(x, y);
+			res.emplace_back(-x, y);
+			res.emplace_back(x, -y);
+			res.emplace_back(-x, -y);
+			res.emplace_back(y, x);
+			res.emplace_back(-y, x);
+			res.emplace_back(y, -x);
+			res.emplace_back(-y, -x);
+			y--;
+			d = d + 4 * (x - y) + 10;
+		} else {
+			d = d + 4 * x + 6;
+		}
+	}
+}
 
 namespace nodata{
 	class Creature;

@@ -9,12 +9,8 @@ namespace nodata{
 		
 		loadTextures();
 		
-		loadOperative(OPERS_CFG);
-		loadSentient(SENTS_CFG);
-		loadWild(WILDS_CFG);
-		loadForager(FORAGS_CFG);
-		
 		loadItems(ITEMS_CFG);
+		loadCreatures(CREATURES_CFG);
 		
 		activeCreature = operativeAr_[0];
 	}
@@ -40,42 +36,17 @@ namespace nodata{
 		}
 	}
 	
-	void Level::loadOperative(const char * fname) {
+	void Level::loadCreatures(const char *fname) {
 		std::ifstream fs(fname);
-		if (!fs.is_open()) {
-			return;//no file
-		}
-		
-		skipComms(fs);
-		
-		std::string name;
-		while(std::getline(fs, name)){
-			while(std::all_of(name.begin(), name.end(), isspace)){
-				if(std::getline(fs, name).eof()) return;
-			}
-			//std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, float reloadTime, int force, float accuracy
-			int x, y, force, healthMax, timeMax, walkTime, viewRadius;
-			float reloadTime, accuracy;
-			fs >> x >> y >> healthMax >> timeMax >> walkTime >> viewRadius >> reloadTime >> force >> accuracy;
-			Point coord(x, y);
-			
-			if(invalidArgs(x, y) || reloadTime < 0 || accuracy < 0)
-				continue;
-			
-			auto *operative = new Operative(this, name, coord, healthMax, timeMax, walkTime, viewRadius, reloadTime, force, accuracy);
+		if (!fs.is_open()) {//no file
+			std::string name;
+			Point coord(5, 5);
+			auto *operative = new Operative(this, name, coord, 100, 100, 1, 10, 1, 1000, 1);
 			operative->setTexture(creatText[OPERATIVE]);
-			
 			operativeAr_.push_back(operative);
 			creatureMap.addItem(coord, operative);
+			return;
 		}
-		
-		fs.close();
-	}
-	
-	void Level::loadSentient(const char * fname) {
-		std::ifstream fs(fname);
-		if (!fs.is_open())
-			return;//no file
 		
 		skipComms(fs);
 		
@@ -84,83 +55,90 @@ namespace nodata{
 			while(std::all_of(name.begin(), name.end(), isspace)){
 				if(std::getline(fs, name).eof()) return;
 			}
-			//std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, float accuracy
-			int x, y, healthMax, timeMax, walkTime, viewRadius;
-			float accuracy;
-			fs >> x >> y >> healthMax >> timeMax >> walkTime >> viewRadius >> accuracy;
-			Point coord(x, y);
-			
-			if(invalidArgs(x, y) || accuracy < 0)
-				continue;
-			
-			auto *sentient = new Sentient(this, name, coord, healthMax, timeMax, walkTime, viewRadius, accuracy);
-			sentient->setTexture(creatText[SENTIENT]);
-			
-			sentientAr_.push_back(sentient);
-			creatureMap.addItem(coord, sentient);
+			int typeInt;
+			fs >> typeInt;
+			auto type = static_cast<CreatType>(typeInt);
+			switch (type) {
+				case OPERATIVE:
+					loadOperative(fs, name);
+					break;
+				case SENTIENT:
+					loadSentient(fs, name);
+					break;
+				case WILD:
+					loadWild(fs, name);
+					break;
+				case FORAGER:
+					loadForager(fs, name);
+					break;
+				default:
+					throw std::runtime_error("Invalid creatures save file");
+			}
 		}
 		
 		fs.close();
 	}
 	
-	void Level::loadWild(const char * fname) {
-		std::ifstream fs(fname);
-		if (!fs.is_open())
-			return;//no file
+	void Level::loadOperative(std::ifstream &fs, std::string &name) {
+		int x, y, force, healthMax, timeMax, walkTime, viewRadius;
+		float reloadTime, accuracy;
+		fs >> x >> y >> healthMax >> timeMax >> walkTime >> viewRadius >> reloadTime >> force >> accuracy;
+		Point coord(x, y);
 		
-		skipComms(fs);
+		if (invalidArgs(x, y) || reloadTime < 0 || accuracy < 0)
+			return;
 		
-		std::string name;
-		while(std::getline(fs, name)){
-			while(std::all_of(name.begin(), name.end(), isspace)){
-				if(std::getline(fs, name).eof()) return;
-			}
-			//std::string &name, Point coord, int healthMax, int timeMax, int walkTime, int viewRadius, int accuracy, int damage
-			int x, y, damage, accuracy, healthMax, timeMax, walkTime, viewRadius;
-			fs >> x >> y >> healthMax >> timeMax >> walkTime >> viewRadius >> accuracy >> damage;
-			Point coord(x, y);
-			
-			if(invalidArgs(x, y))
-				continue;
-			
-			auto *wild = new Wild(this, name, coord, healthMax, timeMax, walkTime, viewRadius, accuracy, damage);
-			wild->setTexture(creatText[WILD]);
-			
-			wildAr_.push_back(wild);
-			creatureMap.addItem(coord, wild);
-		}
+		auto *operative = new Operative(this, name, coord, healthMax, timeMax, walkTime, viewRadius, reloadTime, force, accuracy);
+		operative->setTexture(creatText[OPERATIVE]);
 		
-		fs.close();
+		operativeAr_.push_back(operative);
+		creatureMap.addItem(coord, operative);
 	}
 	
-	void Level::loadForager(const char * fname) {
-		std::ifstream fs(fname);
-		if (!fs.is_open())
-			return;//no file
+	void Level::loadSentient(std::ifstream &fs, std::string &name) {
+		int x, y, healthMax, timeMax, walkTime, viewRadius;
+		float accuracy;
+		fs >> x >> y >> healthMax >> timeMax >> walkTime >> viewRadius >> accuracy;
+		Point coord(x, y);
 		
-		skipComms(fs);
+		if (invalidArgs(x, y) || accuracy < 0)
+			return;
 		
-		std::string name;
-		while(std::getline(fs, name)){
-			while(std::all_of(name.begin(), name.end(), isspace)){
-				if(std::getline(fs, name).eof()) return;
-			}
-			//std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, int force
-			int x, y, force, healthMax, timeMax, walkTime, viewRadius;
-			fs >> x >> y >> healthMax >> timeMax >> walkTime >> viewRadius >> force;
-			Point coord(x, y);
-			
-			if(invalidArgs(x, y))
-				continue;
-			
-			auto *forager = new Forager(this, name, coord, healthMax, timeMax, walkTime, viewRadius, force);
-			forager->setTexture(creatText[FORAGER]);
-			
-			foragerAr_.push_back(forager);
-			creatureMap.addItem(coord, forager);
-		}
+		auto *sentient = new Sentient(this, name, coord, healthMax, timeMax, walkTime, viewRadius, accuracy);
+		sentient->setTexture(creatText[SENTIENT]);
 		
-		fs.close();
+		sentientAr_.push_back(sentient);
+		creatureMap.addItem(coord, sentient);
+	}
+	
+	void Level::loadWild(std::ifstream &fs, std::string &name) {
+		int x, y, damage, accuracy, healthMax, timeMax, walkTime, viewRadius, attackTime;
+		fs >> x >> y >> healthMax >> timeMax >> walkTime >> viewRadius >> accuracy >> damage >> attackTime;
+		Point coord(x, y);
+		
+		if (invalidArgs(x, y))
+			return;
+		
+		auto *wild = new Wild(this, name, coord, healthMax, timeMax, walkTime, viewRadius, accuracy, damage, attackTime);
+		wild->setTexture(creatText[WILD]);
+		
+		wildAr_.push_back(wild);
+		creatureMap.addItem(coord, wild);
+	}
+	
+	void Level::loadForager(std::ifstream &fs, std::string &name) {
+		int x, y, force, healthMax, timeMax, walkTime, viewRadius;
+		fs >> x >> y >> healthMax >> timeMax >> walkTime >> viewRadius >> force;
+		Point coord(x, y);
+		
+		if (invalidArgs(x, y))
+			return;
+		
+		auto *forager = new Forager(this, name, coord, healthMax, timeMax, walkTime, viewRadius, force);
+		forager->setTexture(creatText[FORAGER]);
+		
+		foragerAr_.push_back(forager);
+		creatureMap.addItem(coord, forager);
 	}
 	
 	void Level::loadItems(const char *fname) {
@@ -238,20 +216,6 @@ namespace nodata{
 			return;
 		
 		auto ammoType = static_cast<Ammunition>(ammoTypeInt);
-		
-		switch (ammoType) {
-			case LARGE_CALIBER:
-				name += "[LARGE CALIBER]";
-				break;
-			case MEDIUM_CALIBER:
-				name += "[MEDIUM CALIBER]";
-				break;
-			case SMALL_CALIBER:
-				name += "[SMALL CALIBER]";
-				break;
-			default:
-				return;
-		}
 		
 		auto *acont = new AmmoContainer(name, weight, coord, ammoType, ammoMax);
 		acont->setTexture(itemText[ACONT]);
@@ -360,7 +324,6 @@ namespace nodata{
 				creatureMap.addItem(x - 1, y, creature);
 				break;
 		}
-//		std::cout << "moved" << std::endl;
 	}
 	
 	void Level::setActive(int i) {
@@ -437,11 +400,11 @@ namespace nodata{
 		creatureMap.addItem(coord, sentient);
 	}
 	
-	void Level::spawnWild(std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, int accuracy, int damage) {
+	void Level::spawnWild(std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, int accuracy, int damage, int attackTime) {
 		if(invalidArgs(coord.x, coord.y))
 			return;
 		
-		auto *wild = new Wild(this, name, coord, healthMax, timeMax, walkTime, viewRadius, accuracy, damage);
+		auto *wild = new Wild(this, name, coord, healthMax, timeMax, walkTime, viewRadius, accuracy, damage, attackTime);
 		wild->setTexture(creatText[WILD]);
 		
 		wildAr_.push_back(wild);
@@ -484,17 +447,13 @@ namespace nodata{
 	}
 	
 	void Level::resetTime() {
-		for(auto it = getCurrentTeam().begin(), endIt = getCurrentTeam().end();it != endIt;++it){
-			(*it)->resetTime();
+		for(auto it : creatureMap){
+			it->resetTime();
 		}
 	}
 	
 	bool Level::enemyDied() const{
 		return sentientAr_.empty() && wildAr_.empty() && foragerAr_.empty();
-	}
-	
-	void Level::moveSentients(){
-	
 	}
 	
 	void Level::loadTextures() {
@@ -531,20 +490,6 @@ namespace nodata{
 	void Level::spawnACont(std::string &name, int weight, const Point &point, int ammoTypeInt, int ammoMax) {
 		auto ammoType = static_cast<Ammunition>(ammoTypeInt);
 		
-		switch (ammoType) {
-			case LARGE_CALIBER:
-				name += "[LARGE CALIBER]";
-				break;
-			case MEDIUM_CALIBER:
-				name += "[MEDIUM CALIBER]";
-				break;
-			case SMALL_CALIBER:
-				name += "[SMALL CALIBER]";
-				break;
-			default:
-				return;
-		}
-		
 		auto *acont = new AmmoContainer(name, weight, point, ammoType, ammoMax);
 		acont->setTexture(itemText[ACONT]);
 		
@@ -558,5 +503,9 @@ namespace nodata{
 		gun->setTexture(itemText[GUN]);
 		
 		itemMap.addItem(point, gun);
+	}
+	
+	bool Level::gameOver() const {
+		return operativeAr_.empty();
 	}
 }

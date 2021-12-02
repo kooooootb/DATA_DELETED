@@ -13,31 +13,31 @@ namespace nodata{
 	
 	Creature::~Creature() = default;//nothing to delete
 	
-	void Creature::walk(Direction direction) {
-		if(timeCurrent_ < walkTime_) return;
+	ErrorCodes Creature::walk(Direction direction) {
+		if(timeCurrent_ < walkTime_) return ERROR;//not enough time
 		Cell **cells = level_.getCells();
 		switch (direction) {
 			case LEFT:
-				if (coord_.x == 0) return;
-				if (!cells[coord_.x - 1][coord_.y].walkAble()) return;
+				if (coord_.x == 0) return WARNING;
+				if (!cells[coord_.x - 1][coord_.y].walkAble()) return WARNING;
 				level_.moveCreature(coord_.x, coord_.y, this, LEFT);
 				coord_.x--;
 				break;
 			case UP:
-				if (coord_.y == 0) return;
-				if (!cells[coord_.x][coord_.y - 1].walkAble()) return;
+				if (coord_.y == 0) return WARNING;
+				if (!cells[coord_.x][coord_.y - 1].walkAble()) return WARNING;
 				level_.moveCreature(coord_.x, coord_.y, this, UP);
 				coord_.y--;
 				break;
 			case RIGHT:
-				if (coord_.x == level_.getHorizCells() - 1) return;
-				if (!cells[coord_.x + 1][coord_.y].walkAble()) return;
+				if (coord_.x == level_.getHorizCells() - 1) return WARNING;
+				if (!cells[coord_.x + 1][coord_.y].walkAble()) return WARNING;
 				level_.moveCreature(coord_.x, coord_.y, this, RIGHT);
 				coord_.x++;
 				break;
 			case DOWN:
-				if (coord_.y == level_.getVertCells() - 1) return;
-				if (!cells[coord_.x][coord_.y + 1].walkAble()) return;
+				if (coord_.y == level_.getVertCells() - 1) return WARNING;
+				if (!cells[coord_.x][coord_.y + 1].walkAble()) return WARNING;
 				level_.moveCreature(coord_.x, coord_.y, this, DOWN);
 				coord_.y++;
 				break;
@@ -45,6 +45,7 @@ namespace nodata{
 		
 		spendTime(walkTime_);
 		sprite.setRotation(direction * 90);
+		return OK;
 	}
 	
 	void Creature::heal(int healAmount) {

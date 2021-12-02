@@ -52,7 +52,7 @@ namespace nodata{
 		int getIntFromWindow(int amount);
 		void redrawWindow();
 		void drawCell(int x, int y);
-		void drawRay(int x, int y);
+		void drawRay(const Point &point);
 		
 		void refreshActcreature();
 		void refreshTake();
@@ -70,7 +70,7 @@ namespace nodata{
 	public:
 		Game();
 		
-		~Game();
+		~Game() = default;
 		
 		//refresh moves and changes shapes
 		void refreshMap();

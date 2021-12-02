@@ -108,6 +108,10 @@ namespace nodata{
 		 * Выбрасывает все предметы из инвентаря оперативника
 		 */
 		void dropAllItems();
+		
+		void saveFile(std::ofstream &) override;
+		
+		ErrorCodes move(int randVar) override { return ERROR; }
 	};
 
 /*! @} */

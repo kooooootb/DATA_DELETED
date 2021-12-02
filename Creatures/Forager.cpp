@@ -34,4 +34,15 @@ namespace nodata{
 	void Forager::dropAllItems() {
 		itemTable_.dropAll(level_, coord_);
 	}
+	
+	ErrorCodes Forager::move(int randVar){
+		
+		
+		return ERROR;
+	}
+	
+	void Forager::saveFile(std::ofstream &fs){
+		fs << name_ << std::endl;
+		fs << FORAGER << ' ' << coord_.x << ' ' << coord_.y << ' ' << healthMax_ << ' ' << timeMax_ << ' ' << walkTime_ << ' ' << viewRadius_ << ' ' << force_ << std::endl;
+	}
 }

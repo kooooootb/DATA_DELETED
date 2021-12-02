@@ -4,7 +4,6 @@
 namespace nodata{
 	Game::Game() : window(sf::VideoMode(WINDOWWIDTH, WINDOWHEIGHT), "test") , interfaceWindow(sf::Vector2f((float)WINDOWWIDTH / 4, (float)WINDOWHEIGHT / 3)) , invWindow(sf::Vector2f((float)WINDOWWIDTH / 4, (float)WINDOWHEIGHT / 2))
 	{
-		nearItems.ptr = nullptr;
 		cr = level.getActiveCreature();
 		const Point &coord = cr->getPosition();
 		
@@ -59,7 +58,7 @@ namespace nodata{
 					window.close();
 				if (event.type == sf::Event::TextEntered){
 					int keycode = event.key.code;
-					if(keycode >= 48 && keycode <= 57) sfInput += event.text.unicode;
+					if(keycode >= '0' && keycode <= '9') sfInput += event.text.unicode;
 				}
 				if (event.type == sf::Event::KeyPressed){
 					if (event.key.code == sf::Keyboard::Enter) {
@@ -124,9 +123,9 @@ namespace nodata{
 		cellsOnScreen.push_back(cell);
 	}
 	
-	void Game::drawRay(int x, int y) {
+	void Game::drawRay(const Point &point) {
 		const Point &coord = cr->getPosition();
-		Point endP(coord.x + x, coord.y - y);
+		Point endP(coord + point);
 		level.setRay(coord, endP);
 //		for (Level::Iterator it = level.begin(), endIt = level.end(); it != endIt; ++it) {
 		for (const CellIt &it : level) {
@@ -143,8 +142,8 @@ namespace nodata{
 		itemsOnScreen.clear();
 		const Point &coord = cr->getPosition();
 		
-		level.getActiveCreature()->setDrawPosition(XOFFSET, YOFFSET);
-		creaturesOnScreen.push_back(level.getActiveCreature());
+		cr->setDrawPosition(XOFFSET, YOFFSET);
+		creaturesOnScreen.push_back(cr);
 		level[coord]->setDrawPosition(XOFFSET, YOFFSET);
 		cellsOnScreen.push_back(level[coord]);
 		
@@ -164,41 +163,17 @@ namespace nodata{
 			}
 		}
 		
-		int r = cr->getViewRadius();
-		int d = 3 - 2 * r;
-		int x = 0, y = r;
-		
-		while(y >= x){
-			drawRay(x, y);
-			drawRay(-x, y);
-			drawRay(x, -y);
-			drawRay(-x, -y);
-			drawRay(y, x);
-			drawRay(-y, x);
-			drawRay(y, -x);
-			drawRay(-y, -x);
-			x++;
-			
-			if(d >= 0){
-				drawRay(x, y);
-				drawRay(-x, y);
-				drawRay(x, -y);
-				drawRay(-x, -y);
-				drawRay(y, x);
-				drawRay(-y, x);
-				drawRay(y, -x);
-				drawRay(-y, -x);
-				y--;
-				d = d + 4 * (x - y) + 10;
-			}else{
-				d = d + 4 * x + 6;
-			}
+		std::vector<Point> circle;
+		createCircle(circle, cr->getViewRadius());
+		for(auto it : circle){
+			drawRay(it);
 		}
+		
 	}
 	
 	void Game::refreshActcreature() {
 		std::string mes("Current creature:");
-		mes += level.getActiveCreature()->getName();
+		mes += cr->getName();
 		mesTips[T_ACTCREATURE].setString(mes);
 	}
 	
@@ -389,6 +364,7 @@ namespace nodata{
 							status = endInt();
 							if(status == ERROR){
 								window.close();
+								return;
 							}
 							else if(status == SUCCESS){
 								showError("You won!");
@@ -560,14 +536,21 @@ namespace nodata{
 	}
 	
 	ErrorCodes Game::endInt() {
-		level.moveSentients();
-		//other creatures moves here
-		
-		level.setTurn(OPERATIVE);
-		if(level.getCurrentTeam().empty()){
-			std::cout << "Game over!" << std::endl;
-			return ERROR;
+		srand(time(nullptr));
+//		sentient's move
+//		wilds's move
+//		forager's move
+		for(auto it : level.getCreatureMap()){
+			while(it->move(rand()) != ERROR){
+				if(level.gameOver()){
+					std::cout << "Game over!" << std::endl;
+					return ERROR;
+				}
+				refreshMap();
+				redrawWindow();
+			}
 		}
+		
 		if(level.enemyDied()){
 			std::cout << "You won!" << std::endl;
 			return SUCCESS;
@@ -601,8 +584,5 @@ namespace nodata{
 		for(int i = 0;i < amount + 1;++i){
 			mesTips.pop_back();
 		}
-	}
-	
-	Game::~Game() {
 	}
 }
