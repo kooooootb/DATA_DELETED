@@ -3,27 +3,16 @@
 #include "Creature.h"
 #include "Item.h"
 #include "Level.h"
-#include "Operative.h"
 
 
 namespace nodata{
 	Operative::Operative(Level *level, std::string &name, Point &coord, int healthMax, int timeMax, int walkTime, int viewRadius, float reloadTime, int force, float accuracy) : Creature(level, name, coord, healthMax, timeMax, walkTime, viewRadius) , reloadTimeMultipl_(reloadTime) , force_(force) , accuracyMultipl_(accuracy) {
 		activeGun_ = nullptr;
-		//...
 	}
 	
 	Operative::~Operative() {
-		//activeGun should be nullptr here if operative was killed
 		delete activeGun_;
 	}
-
-//void Operative::switchGun(int index) {
-//	Item *item = itemTable_.getItem(index);
-//	if(item == nullptr) return;
-//
-//	item->use(this);
-//}
-//useItem == switchGun
 	
 	ErrorCodes Operative::receiveItem(Item *item) {
 		int sumWeight = item->getWeight() + itemTable_.getWeight();
@@ -38,6 +27,7 @@ namespace nodata{
 	void Operative::throwItem(int index) {
 		if(index == -1){//throw active gun
 			level_.dropItem(coord_, activeGun_);
+			setTexture(UNARMED);
 			activeGun_ = nullptr;
 		}
 		else{
@@ -51,6 +41,7 @@ namespace nodata{
 	void Operative::useItem(int index) {
 		if(index == -1){
 			receiveItem(activeGun_);
+			setTexture(UNARMED);
 			activeGun_ = nullptr;
 		}else{
 			Item *item = itemTable_.getItem(index);
@@ -79,12 +70,21 @@ namespace nodata{
 	
 	void Operative::shoot(Point &point) {
 		if(activeGun_ == nullptr) return;
+		srand(timeCurrent_ * time(nullptr));
 		
-		activeGun_->shoot(level_, point, this, activeGun_->countAccuracy(accuracyMultipl_,sqrt(pow(coord_.x - point.x, 2) + pow(coord_.y - point.y, 2))));
+		auto countHits = [](double agun, double aoper, double dist) -> int {
+			double res = (dist - 2) / (agun * aoper);
+			if(res < 0) res = 0;
+			res = sqrt(res);
+			return (int)res;
+		};
+		
+		activeGun_->shoot(level_, point, this, countHits(activeGun_->getAccuracy(), accuracyMultipl_, sqrt(pow(coord_.x - point.x, 2) + pow(coord_.y - point.y, 2))), rand());
 	}
 	
 	void Operative::setActiveGun(Gun *gun) {
 		activeGun_ = gun;
+		setTexture(WITH_GUN);
 	}
 	
 	void Operative::kill() {

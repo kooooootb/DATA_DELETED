@@ -1,6 +1,7 @@
 #include "dialog.h"
 
 int main(){
-	Dialog::menu();
+	Dialog::dialog d;
+	d.menu();
 	return 0;
 }

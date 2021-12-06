@@ -112,6 +112,8 @@ namespace nodata{
 		void saveFile(std::ofstream &) override;
 		
 		ErrorCodes move(int randVar) override { return ERROR; }
+		
+		CreatType getType() override { return OPERATIVE; }
 	};
 
 /*! @} */

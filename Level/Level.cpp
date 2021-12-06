@@ -1,21 +1,29 @@
+#include "../Game.h"
 #include "Level.h"
 #include "../Parameters.h"
 
+#include <iostream>
+
 namespace nodata{
-	Level::Level() {
+	Level::Level(std::string &cells_cfg, std::string &items_cfg, std::string &creatures_cfg, Game *game) {
+		curGame = game;
 		turn = OPERATIVE;
-		loadCells(CELLS_CFG);
-		activeCreature = nullptr;
+		loadCells(cells_cfg);
 		
 		loadTextures();
 		
-		loadItems(ITEMS_CFG);
-		loadCreatures(CREATURES_CFG);
+		loadItems(items_cfg);
+		loadCreatures(creatures_cfg);
 		
-		activeCreature = operativeAr_[0];
+		if(operativeAr_.empty()){
+			activeCreature = nullptr;
+		}
+		else{
+			activeCreature = operativeAr_[0];
+		}
 	}
 	
-	Level::Level(const char *cellsFname) {
+	Level::Level(std::string &cellsFname) {
 		turn = OPERATIVE;
 		loadCells(cellsFname);
 		activeCreature = nullptr;
@@ -36,13 +44,13 @@ namespace nodata{
 		}
 	}
 	
-	void Level::loadCreatures(const char *fname) {
+	void Level::loadCreatures(std::string &fname) {
 		std::ifstream fs(fname);
 		if (!fs.is_open()) {//no file
 			std::string name;
 			Point coord(5, 5);
 			auto *operative = new Operative(this, name, coord, 100, 100, 1, 10, 1, 1000, 1);
-			operative->setTexture(creatText[OPERATIVE]);
+			operative->setTexture(creatText);
 			operativeAr_.push_back(operative);
 			creatureMap.addItem(coord, operative);
 			return;
@@ -89,7 +97,7 @@ namespace nodata{
 			return;
 		
 		auto *operative = new Operative(this, name, coord, healthMax, timeMax, walkTime, viewRadius, reloadTime, force, accuracy);
-		operative->setTexture(creatText[OPERATIVE]);
+		operative->setTexture(creatText);
 		
 		operativeAr_.push_back(operative);
 		creatureMap.addItem(coord, operative);
@@ -105,7 +113,7 @@ namespace nodata{
 			return;
 		
 		auto *sentient = new Sentient(this, name, coord, healthMax, timeMax, walkTime, viewRadius, accuracy);
-		sentient->setTexture(creatText[SENTIENT]);
+		sentient->setTexture(creatText);
 		
 		sentientAr_.push_back(sentient);
 		creatureMap.addItem(coord, sentient);
@@ -120,7 +128,7 @@ namespace nodata{
 			return;
 		
 		auto *wild = new Wild(this, name, coord, healthMax, timeMax, walkTime, viewRadius, accuracy, damage, attackTime);
-		wild->setTexture(creatText[WILD]);
+		wild->setTexture(creatText);
 		
 		wildAr_.push_back(wild);
 		creatureMap.addItem(coord, wild);
@@ -135,13 +143,13 @@ namespace nodata{
 			return;
 		
 		auto *forager = new Forager(this, name, coord, healthMax, timeMax, walkTime, viewRadius, force);
-		forager->setTexture(creatText[FORAGER]);
+		forager->setTexture(creatText);
 		
 		foragerAr_.push_back(forager);
 		creatureMap.addItem(coord, forager);
 	}
 	
-	void Level::loadItems(const char *fname) {
+	void Level::loadItems(std::string &fname) {
 		std::ifstream fs(fname);
 		if (!fs.is_open())
 			return;//no file
@@ -188,7 +196,7 @@ namespace nodata{
 		
 		auto *gun = new Gun(name, weight, coord, damage, shootTime, reloadTime, ammoType, ammoMax, accuracy,
 							switchTime);
-		gun->setTexture(itemText[GUN]);
+		gun->setTexture(gunText[ammoType]);
 		
 		itemMap.addItem(coord, gun);
 	}
@@ -234,21 +242,54 @@ namespace nodata{
 	void Level::killOperative(Creature *cr) {
 		operativeAr_.erase(std::find(operativeAr_.begin(), operativeAr_.end(), cr));
 		creatureMap.removeItem(cr->getPosition(), cr);
+		
+		if(cr == activeCreature){
+			if(!operativeAr_.empty()){
+				activeCreature = operativeAr_[0];
+			}
+			else activeCreature = nullptr;
+		}
+		
 		delete cr;
 	}
+	
 	void Level::killSentient(Creature *cr) {
 		sentientAr_.erase(std::find(sentientAr_.begin(), sentientAr_.end(), cr));
 		creatureMap.removeItem(cr->getPosition(), cr);
+		
+		if(cr == activeCreature){
+			if(!sentientAr_.empty()){
+				activeCreature = sentientAr_[0];
+			}
+			else activeCreature = nullptr;
+		}
+		
 		delete cr;
 	}
 	void Level::killWild(Creature *cr) {
 		wildAr_.erase(std::find(wildAr_.begin(), wildAr_.end(), cr));
 		creatureMap.removeItem(cr->getPosition(), cr);
+		
+		if(cr == activeCreature){
+			if(!wildAr_.empty()){
+				activeCreature = wildAr_[0];
+			}
+			else activeCreature = nullptr;
+		}
+		
 		delete cr;
 	}
 	void Level::killForager(Creature *cr) {
 		foragerAr_.erase(std::find(foragerAr_.begin(), foragerAr_.end(), cr));
 		creatureMap.removeItem(cr->getPosition(), cr);
+		
+		if(cr == activeCreature){
+			if(!foragerAr_.empty()){
+				activeCreature = foragerAr_[0];
+			}
+			else activeCreature = nullptr;
+		}
+		
 		delete cr;
 	}
 	
@@ -256,7 +297,7 @@ namespace nodata{
 		itemMap.addItem(point, item);
 	}
 	
-	void Level::loadCells(const char *fname) {
+	void Level::loadCells(std::string &fname) {
 		std::ifstream fs(fname);
 		if (!fs.is_open()) {
 			throw std::runtime_error("No file named for Cell.cfg found");
@@ -278,6 +319,9 @@ namespace nodata{
 		while(fs >> type){
 			fs >> x >> y;
 			cells_[x][y].setType(static_cast<CellType>(type), cellText);
+			if(type == STORAGE){
+				storages.emplace_back(x, y);
+			}
 		}
 		
 		//goes after initialization to avoid retyping by save file
@@ -383,7 +427,7 @@ namespace nodata{
 			return;
 		
 		auto *operative = new Operative(this, name, coord, healthMax, timeMax, walkTime, viewRadius, reloadTime, force, accuracy);
-		operative->setTexture(creatText[OPERATIVE]);
+		operative->setTexture(creatText);
 		
 		operativeAr_.push_back(operative);
 		creatureMap.addItem(coord, operative);
@@ -394,7 +438,7 @@ namespace nodata{
 			return;
 		
 		auto *sentient = new Sentient(this, name, coord, healthMax, timeMax, walkTime, viewRadius, accuracy);
-		sentient->setTexture(creatText[SENTIENT]);
+		sentient->setTexture(creatText);
 		
 		sentientAr_.push_back(sentient);
 		creatureMap.addItem(coord, sentient);
@@ -405,7 +449,7 @@ namespace nodata{
 			return;
 		
 		auto *wild = new Wild(this, name, coord, healthMax, timeMax, walkTime, viewRadius, accuracy, damage, attackTime);
-		wild->setTexture(creatText[WILD]);
+		wild->setTexture(creatText);
 		
 		wildAr_.push_back(wild);
 		creatureMap.addItem(coord, wild);
@@ -416,7 +460,7 @@ namespace nodata{
 			return;
 		
 		auto *forager = new Forager(this, name, coord, healthMax, timeMax, walkTime, viewRadius, force);
-		forager->setTexture(creatText[FORAGER]);
+		forager->setTexture(creatText);
 		
 		foragerAr_.push_back(forager);
 		creatureMap.addItem(coord, forager);
@@ -457,26 +501,36 @@ namespace nodata{
 	}
 	
 	void Level::loadTextures() {
-		for(int i = FLOOR;i != CELLSTYPE_COUNT;++i){
+		for(int i = 0;i != CELLSTYPE_COUNT;++i){
 			if(!cellText[i].loadFromFile(CELLS_TEXTURES[i])){
 				throw std::runtime_error("Can't find texture for cell");
 			}
 		}
 		
-		for(int i = OPERATIVE;i != CREATURES_COUNT;++i){
+		for(int i = 0;i != CREATTEXT_COUNT;++i){
 			if(!creatText[i].loadFromFile(CREATURES_TEXTURES[i])){
 				throw std::runtime_error("Can't find texture for creature");
 			}
 		}
 		
-		for(int i = HKIT;i != ITEMS_COUNT;++i){
+		for(int i = 0;i != ITEMS_COUNT - 1;++i){
 			if(!itemText[i].loadFromFile(ITEMS_TEXTURES[i])){
 				throw std::runtime_error("Can't find texture for item");
+			}
+		}
+		
+		for(int i = 0;i != AMMUNITION_COUNT;++i){
+			if(!gunText[i].loadFromFile(GUNS_TEXTURES[i])){
+				throw std::runtime_error("Can't find texture for guns");
 			}
 		}
 	}
 	
 	Cell *Level::operator[](const Point &point){
+		return cells_[point.x] + point.y;
+	}
+	
+	const Cell *Level::operator[](const Point &point) const{
 		return cells_[point.x] + point.y;
 	}
 	
@@ -500,12 +554,155 @@ namespace nodata{
 		auto ammoType = static_cast<Ammunition>(ammoTypeInt);
 		
 		auto *gun = new Gun(name, weight, point, damage, shootTime, reloadTime, ammoType, ammoMax, accuracy, switchTime);
-		gun->setTexture(itemText[GUN]);
+		gun->setTexture(gunText[ammoType]);
 		
 		itemMap.addItem(point, gun);
 	}
 	
 	bool Level::gameOver() const {
 		return operativeAr_.empty();
+	}
+	
+	void Level::drawLine(const Point &from, const Point &to) {
+		if(activeCreature == nullptr) return;
+		
+		Point fromOS((from.x - activeCreature->getPosition().x + XOFFSET) * CELLSIZEX, (from.y - activeCreature->getPosition().y + YOFFSET) * CELLSIZEY);
+		Point toOS((to.x - activeCreature->getPosition().x + XOFFSET) * CELLSIZEX, (to.y - activeCreature->getPosition().y + YOFFSET) * CELLSIZEY);
+		
+		curGame->setLine(fromOS, toOS);
+	}
+	
+	std::stack<Direction> Level::getPath(const Point &begin, const Point &end, bool (*checkFunc)(const Cell&)) const{//using a*
+		std::stack<Direction> res;
+		
+		auto heuristic = [&end](const Point &from) -> double {//shows distance from current to goal point
+			return std::abs(from.x - end.x) + std::abs(from.y - end.y);
+		};
+		
+		auto getNeighbors = [&](const Point &p1) -> std::vector<Point> {//get current's 4 neighbors
+			std::vector<Point> res;
+			
+			if(p1.x > 0 && checkFunc(*(*this)[Point(p1.x - 1, p1.y)])) res.emplace_back(p1.x - 1, p1.y);
+			if(p1.y > 0 && checkFunc(*(*this)[Point(p1.x, p1.y - 1)])) res.emplace_back(p1.x, p1.y - 1);
+			if(p1.x < this->horizCells - 1 && checkFunc(*(*this)[Point(p1.x + 1, p1.y)])) res.emplace_back(p1.x + 1, p1.y);
+			if(p1.y < this->vertCells - 1 && checkFunc(*(*this)[Point(p1.x, p1.y + 1)])) res.emplace_back(p1.x, p1.y + 1);
+			
+			return res;
+		};
+		
+		std::priority_queue<std::pair<double, Point>, std::vector<std::pair<double, Point>>, comparePairGreater<double, Point>> frontier;
+		frontier.push(std::make_pair(0, begin));
+		
+		std::unordered_map<Point, Point, hashP> came_from;
+		std::unordered_map<Point, double, hashP> cost_so_far;
+		
+		came_from[begin] = begin;
+		cost_so_far[begin] = 0;
+		
+		while(!frontier.empty()){
+			Point current = frontier.top().second;
+			frontier.pop();
+			
+			if(current == end){
+				break;
+			}
+			
+			for(Point next : getNeighbors(current)){
+				double new_cost = cost_so_far[current] + 1;//1 = distance between neighbors
+				
+				if(cost_so_far.find(next) == cost_so_far.end() || new_cost < cost_so_far[next]){
+					cost_so_far[next] = new_cost;
+					double priority = new_cost + heuristic(next);
+					frontier.push(std::make_pair(priority, next));
+					came_from[next] = current;
+				}
+			}
+		}
+		
+		if(came_from.count(end) == 0){//no path?
+			return res;
+		}
+		
+//		std::cout << "graph with available built" << std::endl;
+		
+		Point current = end;
+		while(current != begin){
+			res.push(came_from[current].getDirection(current));
+			current = came_from[current];
+		}
+		
+//		std::cout << "path built" << std::endl;
+		
+		return res;
+	}
+	
+	std::stack<Direction> Level::makePath(const Point &begin, int randVar) const{//make the longest possible path
+		std::stack<Direction> res;
+		srand(randVar);
+		
+		auto heuristic = [&begin](const Point &from) -> double {//shows distance from current to begin point
+			return std::abs(from.x - begin.x) + std::abs(from.y - begin.y);
+		};
+		
+		auto getNeighbors = [this](const Point &p1) -> std::vector<Point> {//get current's 4 neighbors
+			std::vector<Point> res;
+			
+			if(p1.x > 0 && (*this)[Point(p1.x - 1, p1.y)]->walkAble()) res.emplace_back(p1.x - 1, p1.y);
+			if(p1.y > 0 && (*this)[Point(p1.x, p1.y - 1)]->walkAble()) res.emplace_back(p1.x, p1.y - 1);
+			if(p1.x < this->horizCells - 1 && (*this)[Point(p1.x + 1, p1.y)]->walkAble()) res.emplace_back(p1.x + 1, p1.y);
+			if(p1.y < this->vertCells - 1 && (*this)[Point(p1.x, p1.y + 1)]->walkAble()) res.emplace_back(p1.x, p1.y + 1);
+			
+			std::swap(res[rand() % res.size()], res[rand() % res.size()]);
+			
+			return res;
+		};
+		
+		std::priority_queue<std::pair<double, Point>, std::vector<std::pair<double, Point>>, comparePairGreater<double, Point>> frontier;
+		frontier.push(std::make_pair(0, begin));
+		
+		std::unordered_map<Point, Point, hashP> came_from;
+		std::unordered_map<Point, double, hashP> cost_so_far;
+		
+		came_from[begin] = begin;
+		cost_so_far[begin] = 0;
+		
+		Point end;
+		double new_cost;
+		
+		while(!frontier.empty()){
+			end = frontier.top().second;
+			frontier.pop();
+			
+			if(cost_so_far[end] == 100){
+				break;
+			}
+			
+			for(Point next : getNeighbors(end)){
+				new_cost = cost_so_far[end] + 1;//1 = distance between neighbors
+				
+				if(cost_so_far.find(next) == cost_so_far.end() || new_cost < cost_so_far[next]){
+					cost_so_far[next] = new_cost;
+					double priority = new_cost + heuristic(next);
+					frontier.push(std::make_pair(priority, next));
+					came_from[next] = end;
+				}
+			}
+		}
+		
+		if(came_from.count(end) == 0){//no path?
+			return res;
+		}
+		
+//		std::cout << "graph with available built" << std::endl;
+		
+		Point current = end;
+		while(current != begin){
+			res.push(came_from[current].getDirection(current));
+			current = came_from[current];
+		}
+		
+//		std::cout << "path built" << std::endl;
+		
+		return res;
 	}
 }

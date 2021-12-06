@@ -76,6 +76,8 @@ namespace nodata{
 		ErrorCodes use(Creature *creature) override;
 		
 		void saveFile(std::ofstream&) override;
+		
+		ItemType getType() const override { return ACONT; }
 	};
 
 /*! @} */

@@ -11,6 +11,25 @@
 #include <stack>
 #include <cmath>
 #include <queue>
+#include <unordered_map>
+#include <random>
+#include <functional>
+
+namespace nodata{
+	class Creature;
+	class Forager;
+	class Operative;
+	class Sentient;
+	class Wild;
+	class AmmoContainer;
+	class Gun;
+	class HealthKit;
+	class Item;
+	class Table;
+	class Cell;
+	class Level;
+	class Game;
+}
 
 #include "SFML/Graphics.hpp"
 
@@ -28,6 +47,15 @@ enum CreatType{
 	WILD, ///< Дикое существо
 	FORAGER, ///< Одомашненный фуражер
 	CREATURES_COUNT ///< Количество существ, оставлять последним
+};
+
+///Наборы текстур для существ
+enum CreatText{
+	OPERATIVE_WITH_GUN = CREATURES_COUNT,
+	SENTIENT_WITH_GUN,
+	CREATTEXT_COUNT,
+	WITH_GUN,
+	UNARMED
 };
 
 /// Типы клeток
@@ -84,7 +112,7 @@ struct Ptr{
 
 ///Структура точки или вектора
 struct Point{
-	int x,y; ///< координаты
+	int x, y; ///< координаты
 	
 	explicit Point(int X = 0, int Y = 0) : x(X), y(Y) {} ///< Инициализирующий конструктор
 	
@@ -100,18 +128,39 @@ struct Point{
 		return Point(x + point.x, y + point.y);
 	}
 	
-	Direction getDirection(const Point &nextCell) const{
+	Direction getDirection(const Point &nextCell) const{//if points are near
 		if(nextCell.x > x) return RIGHT;
 		if(nextCell.y > y) return DOWN;
 		if(nextCell.x < x) return LEFT;
 		return UP;
 	}
+//
+//	Direction getDirection(const Point &nextCell) const{
+//		int dx = nextCell.x - x;
+//		int dy = nextCell.y - y;
+//
+//		if(dx >= dy){
+//			if(-dx >= dy){
+//				return DOWN;
+//			}else{
+//				return RIGHT;
+//			}
+//		}
+//		else{
+//			if(-dx >= dy){
+//				return UP;
+//			}else{
+//				return LEFT;
+//			}
+//		}
+//	}
 };
 
 static void createCircle(std::vector<Point> &res, int r) {
 	int d = 3 - 2 * r;
 	int x = 0, y = r;
-	while (y >= x) {
+	
+	auto addAll = [&]() {
 		res.emplace_back(x, y);
 		res.emplace_back(-x, y);
 		res.emplace_back(x, -y);
@@ -120,17 +169,14 @@ static void createCircle(std::vector<Point> &res, int r) {
 		res.emplace_back(-y, x);
 		res.emplace_back(y, -x);
 		res.emplace_back(-y, -x);
+	};
+	
+	while (y >= x) {
+		addAll();
 		x++;
 		
 		if (d >= 0) {
-			res.emplace_back(x, y);
-			res.emplace_back(-x, y);
-			res.emplace_back(x, -y);
-			res.emplace_back(-x, -y);
-			res.emplace_back(y, x);
-			res.emplace_back(-y, x);
-			res.emplace_back(y, -x);
-			res.emplace_back(-y, -x);
+			addAll();
 			y--;
 			d = d + 4 * (x - y) + 10;
 		} else {
@@ -139,20 +185,25 @@ static void createCircle(std::vector<Point> &res, int r) {
 	}
 }
 
-namespace nodata{
-	class Creature;
-	class Forager;
-	class Operative;
-	class Sentient;
-	class Wild;
-	class AmmoContainer;
-	class Gun;
-	class HealthKit;
-	class Item;
-	class Table;
-	class Cell;
-	class Level;
-}
+struct hashP{
+	size_t operator()(const Point &p1) const{
+		return p1.x * 1000 + p1.y;
+	}
+};
+
+template<class T1 = double, class T2 = Point>
+struct comparePairGreater{
+	bool operator()(std::pair<T1,T2> &p1, std::pair<T1,T2> &p2) const{
+		return p1.first > p2.first;
+	}
+};
+
+template<class T1 = double, class T2 = Point>
+struct comparePairLess{
+	bool operator()(std::pair<T1,T2> &p1, std::pair<T1,T2> &p2) const{
+		return p1.first < p2.first;
+	}
+};
 
 namespace sf{
 	class RectangleShape;

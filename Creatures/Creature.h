@@ -38,6 +38,7 @@ namespace nodata{
 		Level &level_; ///< Ссылка на уровень, содержащий существо
 		
 		sf::Sprite sprite;
+		sf::Texture *textures;
 	public:
 		/*!
 		 * Конструктор класса, инициализирующий его параметры
@@ -131,11 +132,15 @@ namespace nodata{
 		 */
 		void drawCreat(sf::RenderWindow &window);
 		void setDrawPosition(float x, float y);
-		void setTexture(sf::Texture &texture);
+		void setTexture(sf::Texture *texture);
+		void setTexture(CreatType);
+		void setTexture(CreatText);
 		
 		virtual void saveFile(std::ofstream&) = 0;
 		
 		virtual ErrorCodes move(int randVar) = 0;
+		
+		virtual CreatType getType() = 0;
 	};
 
 /*! @} */

@@ -2,6 +2,7 @@
 #include "Table.h"
 #include "Creature.h"
 #include "Level.h"
+#include "../Parameters.h"
 
 #include <iostream>
 
@@ -26,43 +27,58 @@ namespace nodata{
 	ErrorCodes Wild::move(int randVar) {
 		ErrorCodes status;
 		Ptr<Creature*> nearcr = level_.getCreatureMap()[coord_];
-		if(nearcr.amount > 1){
-			int i = 0;
-			if(nearcr.ptr[i] == this) i += 1;
-			status = attack(nearcr.ptr[i]);
-			return status;
+		for(int i = 0;i < nearcr.amount;++i){
+			if(nearcr.ptr[i]->getType() == OPERATIVE){
+				path_ = std::stack<Direction>();
+				status = attack(nearcr.ptr[i]);
+				return status;
+			}
 		}
 		
 		srand(randVar);
-		if(penaltyMoves_ > 0){
+		if(penaltyMoves_ > 0){//previously bumped in wall
 			auto direction = static_cast<Direction>(rand() % 4);
 			status = walk(direction);
 			penaltyMoves_--;
-		}else if(!path_.empty()){
-			status = walk(path_.front());
+		}else if(!path_.empty()){//have path to target
+			status = walk(path_.top());
 			path_.pop();
-			if(status == WARNING){
-				path_ = std::queue<Direction>();
+			if(status == WARNING){//bumped into wall
+				path_ = std::stack<Direction>();
 				penaltyMoves_ = 5;
 			}
 		}else{
-			std::vector<Point> circle;
-			createCircle(circle, viewRadius_);
-			for(auto it : circle){
-				level_.setRay(coord_, coord_ + it);
-				for (const CellIt &cell : level_) {
-					Ptr<Creature*> creatures = level_.getCreatureMap()[cell.getPoint()];
-					if(creatures.ptr != nullptr){
-						for(int i = 0;i < creatures.amount;++i){
-							if(dynamic_cast<Operative*>(creatures.ptr[i]) != nullptr){
-								Point point = coord_;
-								level_.setRay(coord_, cell.getPoint());
-								for(const CellIt &cellpath : level_){
-									path_.emplace(point.getDirection(cellpath.getPoint()));
-									point = cellpath.getPoint();
-								}
-								return OK;
-							}
+			Ptr<Point> nearCreatures = level_.getCreatureMap().getNear(coord_, viewRadius_);
+			
+			for(int pointId = 0;pointId < nearCreatures.amount;++pointId) {//for every point
+				Ptr<Creature *> creatures = level_.getCreatureMap()[nearCreatures.ptr[pointId]];
+				
+				bool isOperative = false;
+				for (int crId = 0; crId < creatures.amount; ++crId) {//for every creature in point
+					if (creatures.ptr[crId]->getType() == OPERATIVE) {
+						isOperative = true;
+						break;
+					}
+				}
+				
+				if (isOperative) {//found operative
+					bool canReach = true;
+					level_.setRay(coord_, nearCreatures.ptr[pointId]);
+					std::queue<Direction> savedPath;
+					for (auto it : level_) {
+						if(!it.getCell()->seeAble()){
+							canReach = false;
+							break;
+						}
+					}
+					
+					if(canReach){
+						std::stack<Direction> newPath = level_.getPath(coord_, nearCreatures.ptr[pointId], [](const Cell &cell) -> bool {
+							return cell.seeAble();
+						});
+						if(!newPath.empty()){//reachable
+							path_ = std::move(newPath);
+							return OK;
 						}
 					}
 				}
@@ -70,10 +86,12 @@ namespace nodata{
 			
 			auto direction = static_cast<Direction>(rand() % 4);
 			status = walk(direction);
+			return status;
 		}
 		
 		if(status == ERROR){
-			path_ = std::queue<Direction>();
+			path_ = std::stack<Direction>();
+			penaltyMoves_ = 0;
 		}
 		
 		return status;

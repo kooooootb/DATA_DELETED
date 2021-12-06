@@ -41,13 +41,16 @@ namespace nodata{
 		Map<Item*> itemMap; ///< Карта выпавших предметов
 		Map<Creature*> creatureMap; ///< Карта существ
 		CreatType turn; ///< Определяет команду, совершающую текущих ход
+		Game *curGame = nullptr;
 		
 		int horizCells, vertCells;
+		
+		std::vector<Point> storages; ///< Массив складских точек для удобного поиска ближайшей точки для фуражера
 		
 		friend class CellIt;
 		Point rayBegin, rayEnd;
 		
-		sf::Texture cellText[CELLSTYPE_COUNT], creatText[CREATURES_COUNT], itemText[ITEMS_COUNT];
+		sf::Texture cellText[CELLSTYPE_COUNT], creatText[CREATTEXT_COUNT], itemText[ITEMS_COUNT - 1], gunText[AMMUNITION_COUNT];
 		
 		/*!
 		 * Проверяет корректность введенных координат
@@ -61,20 +64,14 @@ namespace nodata{
 		static void skipComms(std::ifstream &fs);
 	public:
 		/*!
-		 * Конструктор класса Level загружает клетки и существа из стандартных файлов, устанавливает активное существо и дает ход команде оперативников.
-		 * Типы клеток загружаются из файла с названием CELLS_CFG.
-		 * Оперативники загружаются из файла с названием OPERS_CFG.
-		 * Разумные существа загружаются из файла с названием SENTS_CFG.
-		 * Дикие существа загружаются из файла с названием WILDS_CFG.
-		 * Фуражеры загружаются из файла с названием FORAGS_CFG.
-		 * Все названия файлов опеределены в файле Parameters.h
+		 * Конструктор класса Level загружает клетки и существа из файлов, устанавливает активное существо и дает ход команде оперативников.
 		 */
-		Level();
+		Level(std::string &cells_cfg, std::string &items_cfg, std::string &creatures_cfg, Game *game);
 		/*!
 		 * Конструктор класса Level загружает клетки из данного файла, создает оперативника по умолчанию, устанавливает активное существо и дает ход команде оперативников.
 		 * @param cellsFname Название файла для загрузки клеток
 		 */
-		explicit Level(const char *cellsFname);
+		explicit Level(std::string &cellsFname);
 		
 		~Level();
 		
@@ -83,6 +80,12 @@ namespace nodata{
 		iterator end() const;
 		
 		void setRay(const Point &begin, const Point &end);
+		
+		std::stack<Direction> getPath(const Point &begin, const Point &end, bool (*f)(const Cell&)) const;
+		
+		std::stack<Direction> makePath(const Point &begin, int randVar) const;
+		
+		void drawLine(const Point &from, const Point &to);
 		
 		/*!
 		 * Возвращает указатель на массив клеток
@@ -137,7 +140,15 @@ namespace nodata{
 		/*!
 		 * Возвращает указатель на клетку по данной координате
 		 */
-		 Cell *operator[](const Point &point);
+		Cell *operator[](const Point &point);
+		/*!
+		 * Возвращает константный указатель на клетку по данной координате
+		 */
+		const Cell *operator[](const Point &point) const;
+		/*!
+		 * Возвращает ссылку на массив складских точек
+		 */
+		 const std::vector<Point> &getStorages() const { return storages; }
 		
 		/*!
 		 * Устанавливает тип type для клетки, находящейся на данных координатах x и y
@@ -184,15 +195,15 @@ namespace nodata{
 		  */
 	  	bool gameOver() const;
 		
-		void loadCells(const char *fname);
+		void loadCells(std::string &);
 		
-		void loadCreatures(const char *);
+		void loadCreatures(std::string &);
 		void loadOperative(std::ifstream &fs, std::string &name);
 		void loadSentient(std::ifstream &fs, std::string &name);
 		void loadWild(std::ifstream &fs, std::string &name);
 		void loadForager(std::ifstream &fs, std::string &name);
 		
-		void loadItems(const char *);
+		void loadItems(std::string &);
 		void loadHKits(std::ifstream &fs, std::string &name);
 		void loadAConts(std::ifstream &fs, std::string &name);
 		void loadGuns(std::ifstream &fs, std::string &name);

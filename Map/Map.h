@@ -39,10 +39,10 @@ namespace nodata{
 		
 		typedef MapIt<T> iterator;//goes through all items
 		iterator begin() const{
-			return iterator(vertAr, amountY, *this);
+			return iterator(vertAr, amountY);
 		}
 		iterator end() const{
-			return iterator(vertAr + amountY, *this);
+			return iterator(vertAr + amountY);
 		}
 		
 		void addItem(const Point &point, T item);
@@ -56,6 +56,8 @@ namespace nodata{
 		
 		Ptr<T> operator[](const Point &point) const;
 		
+		Ptr<Point> getNear(const Point &point, int dist) const;
+		
 		void print(std::ostream &s);
 	};
 	
@@ -66,11 +68,9 @@ namespace nodata{
 		typename Map<T>::HorCell *hCell;
 		T *item;
 		
-		Map<T> &map;
-		
 		int curX, curItem, yAmount;
 	public:
-		explicit MapIt(typename Map<T>::VertCell *vertcell, int amount, Map<T> &Map) : map(Map) {//init begin
+		explicit MapIt(typename Map<T>::VertCell *vertcell, int amount) {//init begin
 			vCell = vertcell;
 			yAmount = amount;
 			if(amount != 0){
@@ -81,7 +81,7 @@ namespace nodata{
 			curItem = 1;
 		}
 		
-		explicit MapIt(typename Map<T>::VertCell *vertcell, Map<T> &Map) : map(Map) {//init end
+		explicit MapIt(typename Map<T>::VertCell *vertcell){//init end
 			vCell = vertcell;
 			hCell = nullptr;
 			curX = 1;
@@ -90,8 +90,8 @@ namespace nodata{
 		}
 		
 		void operator++(){
-			if(curItem == hCell->amount) {//last item
-				if (curX == vCell->amountX) {//last hCell
+			if(curItem == hCell->amount) {
+				if (curX == vCell->amountX) {
 					vCell++;
 					if(--yAmount == 0){
 						return;
@@ -101,14 +101,14 @@ namespace nodata{
 					curX = 1;
 					curItem = 1;
 				}
-				else{//go to next hCell
+				else{
 					hCell++;
 					curX++;
 					item = hCell->items;
 					curItem = 1;
 				}
 			}
-			else{//go to next item
+			else{
 				item++;
 				curItem++;
 			}
@@ -352,7 +352,6 @@ namespace nodata{
 		
 		Ptr<T> res;
 		res.ptr = nullptr;
-		res.amount = 0;
 		
 		int i;
 		VertCell *vCell = nullptr;
@@ -370,9 +369,50 @@ namespace nodata{
 		int amountX = vCell->amountX;
 		for(i = 0;i < amountX;++i){
 			if(row[i].x == x){
-				res.ptr = row[i].items;
 				res.amount = row[i].amount;
+				res.ptr = new T[res.amount];
+				for(int j = 0;j < res.amount;++j){
+					res.ptr[j] = row[i].items[j];
+				}
+				
 				return res;
+			}
+		}
+		
+		return res;
+	}
+	
+	template<class T>
+	Ptr<Point> Map<T>::getNear(const Point &point, int dist) const {
+		Ptr<Point> res;
+		int i;
+		VertCell *vCell = vertAr;
+		for(i = 0;i < amountY;++i, ++vCell){
+			if(vCell->y >= point.y - dist){
+				break;
+			}
+		}
+		if(i == amountY) return res;
+		
+		for(;i < amountY;++i, ++vCell){
+			if(vCell->y <= point.y + dist){
+				HorCell *hCell = vCell->row;
+				for(int j = 0;j < vCell->amountX;++j, ++hCell){
+					if(hCell->x >= point.x - dist && hCell->x <= point.x + dist){
+						Ptr<Point> newPtr;
+						newPtr.amount = res.amount + 1;
+						newPtr.ptr = new Point[newPtr.amount];
+						
+						for(int q = 0;q < res.amount;++q){
+							newPtr.ptr[q] = res.ptr[q];
+						}
+						newPtr.ptr[res.amount].x = hCell->x;
+						newPtr.ptr[res.amount].y = vCell->y;
+						
+						delete [] res.ptr;
+						res = newPtr;
+					}
+				}
 			}
 		}
 		

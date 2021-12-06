@@ -14,6 +14,8 @@ enum Tips{
 	T_THROW,
 	T_ERROR,
 	T_INTMES,
+	T_WIN,
+	T_TURN,
 	T_COUNT
 };
 
@@ -45,6 +47,8 @@ namespace nodata{
 		sf::Vertex line[2];
 		sf::Time period;
 		
+		sf::Event event;
+		
 		std::vector<Cell*> cellsOnScreen;
 		std::vector<Creature*> creaturesOnScreen;
 		std::vector<Item*> itemsOnScreen;
@@ -64,11 +68,9 @@ namespace nodata{
 		void refreshAmmo();
 		void refreshWeight();
 		
-		void setLine(const Point &from, const Point &to);
-		
 		void cleanTips(int amount);
 	public:
-		Game();
+		Game(std::string &cells_cfg, std::string &items_cfg, std::string &creatures_cfg);
 		
 		~Game() = default;
 		
@@ -90,8 +92,9 @@ namespace nodata{
 		ErrorCodes endInt();
 		void throwInt();
 		
-		void start();
+		void setLine(const Point &from, const Point &to);
 		
+		void start();
 	};
 }
 

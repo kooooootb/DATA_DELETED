@@ -66,6 +66,8 @@ namespace nodata{
 		void setTexture(sf::Texture &texture);
 		
 		virtual void saveFile(std::ofstream&) = 0;
+		
+		virtual ItemType getType() const = 0;
 	};
 
 	/*! @} */

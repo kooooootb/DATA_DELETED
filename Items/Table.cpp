@@ -58,6 +58,7 @@ namespace nodata{
 	void Table::dropAll(Level &level, Point &point) {
 		for(auto it = items_.begin();it != items_.end();it++){
 			level.dropItem(point, *it);
+			weight_ -= (*it)->getWeight();
 		}
 		items_.clear();
 	}

@@ -27,7 +27,7 @@ namespace nodata{
 		int attackTime_; ///< Время, затрачиваемое при атаке
 		
 		int penaltyMoves_ = 0;
-		std::queue<Direction> path_;
+		std::stack<Direction> path_;
 	public:
 		/*!
 		 * Конструктор класса, инициализирующий его параметры
@@ -56,6 +56,8 @@ namespace nodata{
 		ErrorCodes move(int randVar) override;
 		
 		void saveFile(std::ofstream &) override;
+		
+		CreatType getType() override { return WILD; }
 	};
 
 /*! @} */

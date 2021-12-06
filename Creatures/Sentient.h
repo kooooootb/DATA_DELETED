@@ -23,6 +23,11 @@ namespace nodata{
 	private:
 		Gun* activeGun_; ///< Текущее оружие оперативника, которое он несет в руках
 		float accuracyMultipl_; ///< Коэффициент точности стрельбы
+		
+		std::stack<Direction> path;
+		bool isBusy = false; ///< Занят ли подбором оружия
+		std::vector<Point> unreachable; ///< Недосягаемые на этом ходу точки
+		std::vector<Point> useless; ///< Точки с выкинутыми оружиями, у которых кончились патроны
 	public:
 		/*!
 		 * Конструктор класса, инициализирующий его параметры
@@ -34,10 +39,9 @@ namespace nodata{
 		float getAccuracy() const { return accuracyMultipl_; }
 		
 		/*!
-		 * Подбирает оружие и делает его активным оружием разумного существа
-		 * @param gun Указатель на подбираемое оружие
+		 * Подбирает ближайшее оружие и делает его активным оружием разумного существа
 		 */
-		void receiveGun(Gun *gun);
+		void receiveGun();
 		/*!
 		 * Выбрасывает оружие разумного существа
 		 */
@@ -47,6 +51,7 @@ namespace nodata{
 		 * @param victim указатель на существо-жертву
 		 */;
 		void shoot(Creature *victim);
+		ErrorCodes shoot(Point &point, int randVar);
 		/*!
 		 *	Убивает существо и выбрасывает его активное оружие
 		 */
@@ -58,6 +63,8 @@ namespace nodata{
 		ErrorCodes move(int randVar) override;
 		
 		void saveFile(std::ofstream &) override;
+		
+		CreatType getType() override { return SENTIENT; }
 	};
 
 /*! @} */

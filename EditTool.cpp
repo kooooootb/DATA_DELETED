@@ -3,7 +3,13 @@
 
 namespace edittool{
 	
-	EditTool::EditTool() : window(sf::VideoMode(WINDOWWIDTH, WINDOWHEIGHT), "test") , coord(20,20)
+	EditTool::EditTool(std::string &c_cfg, std::string &i_cfg, std::string &cr_cfg) :
+		window(sf::VideoMode(WINDOWWIDTH, WINDOWHEIGHT), "test") ,
+		coord(20,20) ,
+		level(c_cfg, i_cfg, cr_cfg, nullptr) ,
+		creatures_cfg(cr_cfg) ,
+		cells_cfg(c_cfg) ,
+		items_cfg(i_cfg)
 	{
 		window.setFramerateLimit(60);
 		
@@ -433,7 +439,7 @@ namespace edittool{
 	void EditTool::saveCells(){
 		Cell **cells = level.getCells();
 		
-		std::ofstream fs(CELLS_CFG, std::ios::trunc);
+		std::ofstream fs(cells_cfg, std::ios::trunc);
 		if (!fs.is_open()) {
 			throw std::runtime_error("Can't create files");
 		}
@@ -450,7 +456,7 @@ namespace edittool{
 	}
 	
 	void EditTool::saveCreatures(){
-		std::ofstream fs(CREATURES_CFG, std::ios::trunc);
+		std::ofstream fs(creatures_cfg, std::ios::trunc);
 		if (!fs.is_open()) {
 			throw std::runtime_error("Can't create save files for creatures");
 		}
@@ -463,7 +469,7 @@ namespace edittool{
 	}
 	
 	void EditTool::saveItems(){
-		std::ofstream fs(ITEMS_CFG, std::ios::trunc);
+		std::ofstream fs(items_cfg, std::ios::trunc);
 		if (!fs.is_open()) {
 			throw std::runtime_error("Can't create save files for items");
 		}

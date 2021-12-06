@@ -67,6 +67,7 @@ namespace nodata{
 		 * Возвращает shootTime_
 		 */
 		int getShootTime() const { return shootTime_; }
+		double getAccuracy() const { return accuracy_; }
 		
 		/*!
 		 * Устанавливает ammoCurrent_
@@ -83,7 +84,7 @@ namespace nodata{
 		 * @param hitsMultipl коэффициент попаданий
 		 */
 		void shoot(Creature *victim) const;
-		void shoot(Level &level, Point &coord, Creature *shooter, int hitsMultipl);
+		ErrorCodes shoot(Level &level, Point &coord, Creature *shooter, int hitsMultipl, int randVar);
 		/*!
 		 * Функция вычисляет коэффициент количества попаданий в зависимости от точности стрелявшего существа и точности оружия. Коэффициент не может быть больше единицы.
 		 * @param crAccuracy коэффициент точности стреляющего
@@ -99,6 +100,8 @@ namespace nodata{
 		static int calcAmmoWeightByType(int amount, Ammunition ammoType);
 		
 		void saveFile(std::ofstream&) override;
+		
+		ItemType getType() const override { return GUN; }
 	};
 
 /*! @} */

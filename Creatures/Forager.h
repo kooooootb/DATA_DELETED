@@ -24,6 +24,13 @@ namespace nodata{
 	private:
 		Table itemTable_; ///< Таблица инвентаря фуражира
 		int force_; ///< Максимальный вес, который фуражир может нести
+		
+		std::stack<Direction> path; ///< Текущий путь
+		std::vector<Point> unreachable; ///< Недостижимые на данном ходу точки
+		std::vector<Point> cantTake; ///< Недостижимые на данном ходу точки
+		
+		bool isBusy = false; ///< Занят ли подбором предмета
+		bool goingToStorage = false; ///< Идет ли к складсклй точке
 	public:
 		/*!
 		 * Конструктор класса, инициализирующий его параметры
@@ -42,11 +49,10 @@ namespace nodata{
 		 */
 		void kill() override;
 		/*!
-		 * Добавляет предмет в инвентарь фуражира если возможно
-		 * @param item Указатель на добавляемый предмет
+		 * Добавляет ближайший предмет в инвентарь фуражира если возможно
 		 * @return ERROR если предмет слишком тяжелый, OK при успешной операции
 		 */
-		ErrorCodes receiveItem(Item *item);
+		ErrorCodes receiveItems();
 		/*!
 		 * Выбрасывает предмет из инвентаря фуражира
 		 * @param index номер предмета в таблице инвентаря
@@ -64,6 +70,8 @@ namespace nodata{
 		 ErrorCodes move(int randVar) override;
 		 
 		 void saveFile(std::ofstream &) override;
+		
+		CreatType getType() override { return FORAGER; }
 	};
 
 /*! @} */

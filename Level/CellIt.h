@@ -25,6 +25,8 @@ namespace nodata{
 		CellIt & operator++();
 		CellIt operator++(int);
 		
+		bool isFirst() const { return index == 1; }
+		
 		const CellIt &operator*() const;
 		bool operator!=(const CellIt &it) const;
 	};

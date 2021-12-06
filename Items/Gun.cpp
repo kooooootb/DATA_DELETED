@@ -57,43 +57,70 @@ namespace nodata{
 		victim->receiveDamage(damage_);
 	}
 	
-	void Gun::shoot(Level &level, Point &coord, Creature *shooter, int hitsMultipl) {
-		if (ammoCurrent_ < 1 || shooter->getTimeCurrent() < shootTime_ || coord == shooter->getPosition()) {
+	ErrorCodes Gun::shoot(Level &level, Point &coord, Creature *shooter, int hitsMultipl, int randVar) {
+		if (ammoCurrent_ <= 0) {//no bullets
 			coord = shooter->getPosition();
-			return;
+			return WARNING;
+		}
+		if (shooter->getTimeCurrent() < shootTime_) {//no time
+			coord = shooter->getPosition();
+			return ERROR;
 		}
 		
-		srand(time(nullptr));
-		if (hitsMultipl != 0) {
-			coord.x += rand() % (2 * hitsMultipl) - hitsMultipl;
-			coord.y += rand() % (2 * hitsMultipl) - hitsMultipl;
-		}
-		
-		//make ray
-		level.setRay(shooter->getPosition(), coord);
-		for (const CellIt &it : level) {
-			Point curPoint = it.getPoint();
-			if (!it.getCell()->walkAble() || level.getCreatureMap()[curPoint].ptr != nullptr) {
-				coord = curPoint;
-				break;
+		if(coord == shooter->getPosition()){//if shoot point and creature's coord are the same
+			Ptr<Creature*> nearCreatures = level.getCreatureMap()[coord];
+			Creature *victim = nullptr;
+			
+			for(int i = 0;i < nearCreatures.amount;++i){//look for victim
+				if(nearCreatures.ptr[i] != shooter){
+					victim = nearCreatures.ptr[i];
+					break;
+				}
 			}
+			
+			if(victim == nullptr){//nobody near you, can't shoot yourself
+				coord = shooter->getPosition();
+				return OK;
+			}
+			
+			shoot(victim);
 		}
-		
-		//shoot
-		Ptr<Creature *> creatures = level.getCreatureMap()[coord];
-		Cell *cell;
-		ErrorCodes status = level.getCell(coord, cell);
-		if (creatures.ptr != nullptr) {//shoot creature
-			int amount = (int) creatures.amount;
-			srand(time(nullptr));
-			shoot(creatures.ptr[rand() % amount]);
-		} else if (status != ERROR) {//shoot cell
-			if ((cell->getType() == GLASS || cell->getType() == PARTITION)) level.setCell(coord, FLOOR);
+		else{
+			//count accuracy
+			srand(randVar);
+			if (hitsMultipl != 0) {
+				coord.x += rand() % (2 * hitsMultipl) - hitsMultipl;
+				coord.y += rand() % (2 * hitsMultipl) - hitsMultipl;
+			}
+			
+			//make ray
+			level.setRay(shooter->getPosition(), coord);
+			for (const CellIt &it : level) {
+				Point curPoint = it.getPoint();
+				if (!it.getCell()->walkAble() || level.getCreatureMap()[curPoint].ptr != nullptr) {
+					coord = curPoint;
+					break;
+				}
+			}
+			
+			//shoot
+			Ptr<Creature *> creatures = level.getCreatureMap()[coord];
+			Cell *cell;
+			ErrorCodes status = level.getCell(coord, cell);
+			if (creatures.ptr != nullptr) {//shoot creature
+				int amount = (int) creatures.amount;
+				srand(randVar);
+				shoot(creatures.ptr[rand() % amount]);
+			} else if (status != ERROR) {//shoot cell
+				if ((cell->getType() == GLASS || cell->getType() == PARTITION)) level.setCell(coord, FLOOR);
+			}
 		}
 		
 		ammoCurrent_ -= 1;
 		shooter->spendTime(shootTime_);
 		weight_ -= calcAmmoWeightByType(1, ammoType_);
+		
+		return OK;
 	}
 	
 	int Gun::countAccuracy(double crAccuracy, double dist) const {

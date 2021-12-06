@@ -2,7 +2,11 @@
 #include <iostream>
 
 namespace nodata{
-	Game::Game() : window(sf::VideoMode(WINDOWWIDTH, WINDOWHEIGHT), "test") , interfaceWindow(sf::Vector2f((float)WINDOWWIDTH / 4, (float)WINDOWHEIGHT / 3)) , invWindow(sf::Vector2f((float)WINDOWWIDTH / 4, (float)WINDOWHEIGHT / 2))
+	Game::Game(std::string &cells_cfg, std::string &items_cfg, std::string &creatures_cfg) :
+		window(sf::VideoMode(WINDOWWIDTH, WINDOWHEIGHT), "test") ,
+		interfaceWindow(sf::Vector2f((float)WINDOWWIDTH / 4, (float)WINDOWHEIGHT / 3)) ,
+		invWindow(sf::Vector2f((float)WINDOWWIDTH / 4, (float)WINDOWHEIGHT / 2)) ,
+		level(cells_cfg, items_cfg, creatures_cfg, this)
 	{
 		cr = level.getActiveCreature();
 		const Point &coord = cr->getPosition();
@@ -32,6 +36,11 @@ namespace nodata{
 		mesTips[T_THROW].setPosition((float)WINDOWWIDTH * 3 / 4, 4 * FONTSIZE);
 		mesTips[T_ERROR].setPosition(0, WINDOWHEIGHT - FONTSIZE);
 		mesTips[T_INTMES].setPosition((float)WINDOWWIDTH / 2 - FONTSIZE * 10, 0);
+		mesTips[T_WIN].setPosition((float)WINDOWWIDTH * 2 / 5, FONTSIZE * 3);
+		mesTips[T_TURN].setPosition((float)WINDOWWIDTH * 2 / 5, FONTSIZE * 3);
+		
+		mesTips[T_WIN].setScale(3, 3);
+		mesTips[T_WIN].setString("");
 		
 		for(int i = 0;i < S_COUNT;++i){
 			mesStats.emplace_back("", font, FONTSIZE);
@@ -52,7 +61,6 @@ namespace nodata{
 		sf::String sfInput;
 		bool flag = false;
 		while(window.isOpen()){
-			sf::Event event;
 			while (window.pollEvent(event)){
 				if (event.type == sf::Event::Closed)
 					window.close();
@@ -137,6 +145,7 @@ namespace nodata{
 	}
 	
 	void Game::refreshMap(){
+		cr = level.getActiveCreature();
 		cellsOnScreen.clear();
 		creaturesOnScreen.clear();
 		itemsOnScreen.clear();
@@ -304,7 +313,6 @@ namespace nodata{
 		ErrorCodes status;
 		while (window.isOpen())
 		{
-			sf::Event event;
 			while (window.pollEvent(event))
 			{
 				if (event.type == sf::Event::Closed)
@@ -365,9 +373,6 @@ namespace nodata{
 							if(status == ERROR){
 								window.close();
 								return;
-							}
-							else if(status == SUCCESS){
-								showError("You won!");
 							}
 							break;
 						default :
@@ -536,11 +541,12 @@ namespace nodata{
 	}
 	
 	ErrorCodes Game::endInt() {
+		mesTips[T_TURN].setString("Enemy's turn");
 		srand(time(nullptr));
+		
 //		sentient's move
-//		wilds's move
-//		forager's move
-		for(auto it : level.getCreatureMap()){
+		level.setTurn(SENTIENT);
+		for(auto it : level.getCurrentTeam()){
 			while(it->move(rand()) != ERROR){
 				if(level.gameOver()){
 					std::cout << "Game over!" << std::endl;
@@ -548,12 +554,43 @@ namespace nodata{
 				}
 				refreshMap();
 				redrawWindow();
+				while(window.pollEvent(event));
 			}
 		}
 		
+//		wilds's move
+		level.setTurn(WILD);
+		for(auto it : level.getCurrentTeam()){
+			while(it->move(rand()) != ERROR){
+				if(level.gameOver()){
+					std::cout << "Game over!" << std::endl;
+					return ERROR;
+				}
+				refreshMap();
+				redrawWindow();
+				while(window.pollEvent(event));
+			}
+		}
+		
+//		forager's move
+		level.setTurn(FORAGER);
+		for(auto it : level.getCurrentTeam()){
+			while(it->move(rand()) != ERROR){
+				if(level.gameOver()){
+					std::cout << "Game over!" << std::endl;
+					return ERROR;
+				}
+				refreshMap();
+				redrawWindow();
+				while(window.pollEvent(event));
+			}
+		}
+		
+		level.setTurn(OPERATIVE);
+		mesTips[T_TURN].setString("");
 		if(level.enemyDied()){
 			std::cout << "You won!" << std::endl;
-			return SUCCESS;
+			mesTips[T_WIN].setString("You won!");
 		}
 		level.resetTime();
 		return OK;

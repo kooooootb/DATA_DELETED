@@ -48,6 +48,8 @@ namespace edittool{
 		std::vector<Creature*> creaturesOnScreen;
 		std::vector<Item*> itemsOnScreen;
 		
+		std::string &cells_cfg, &creatures_cfg, &items_cfg;
+		
 		void buildCell();
 		void buildCreature();
 		void buildItem();
@@ -82,7 +84,7 @@ namespace edittool{
 		
 		void saveItems();
 	public:
-		EditTool();
+		EditTool(std::string &c_cfg, std::string &i_cfg, std::string &cr_cfg);
 		
 		~EditTool();
 		

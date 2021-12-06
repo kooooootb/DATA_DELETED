@@ -35,4 +35,8 @@ namespace nodata{
 	bool Cell::walkAble() const {
 		return (type_ == FLOOR || type_ == STORAGE);
 	}
+	
+	bool Cell::seeAble() const {
+		return (type_ == FLOOR || type_ == STORAGE || type_ == GLASS);
+	}
 }

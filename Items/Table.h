@@ -53,6 +53,10 @@ namespace nodata{
 		 * Возвращает константную ссылку на items_(массив предметов в инвентаре)
 		 */
 		const std::vector<Item*> &getVector() const { return items_; }
+		/*!
+		 * Проверяет пуст ли контейнер
+		 */
+		bool empty() const { return items_.empty(); }
 		
 		/*!
 		 * Заменяет предмет с данным индексом на данный предмет, убранный предмет очищается
