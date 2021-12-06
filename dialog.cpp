@@ -4,16 +4,65 @@
 
 namespace Dialog{
 	dialog::dialog() {
+		std::fstream fs(PRESETS_CFG, std::ios::in);
+		if (!fs.is_open()) {
+			fs.open(PRESETS_CFG, std::ios::trunc | std::ios::in);
+		}
+		
+		std::string line;
+		while(std::getline(fs, line)){
+			while(std::all_of(line.begin(), line.end(), isspace)){
+				if(std::getline(fs, line).eof()) return;
+			}
+			presets.push_back(line);
+		}
+		
+		if(presets.empty() || presets.size() % 3 != 0){
+			fs.close();
+			fs.open(PRESETS_CFG, std::ios::trunc | std::ios::out);
+			
+			presets.emplace_back(CELLS_CFG);
+			presets.emplace_back(ITEMS_CFG);
+			presets.emplace_back(CREATURES_CFG);
+			fs << CELLS_CFG << std::endl << ITEMS_CFG << std::endl << CREATURES_CFG << std::endl;
+		}
+		
+		cells_cfg = presets[0];
+		items_cfg = presets[1];
+		creatures_cfg = presets[2];
+		
+		fs.close();
+		
+		refreshDialog();
+	}
+	
+	void dialog::refreshDialog() {
 		msgs[0] = "1 - Start game";
 		msgs[1] = "2 - Edit map";
-		msgs[2] = "3 - Change cell cfg file, current is:" + cells_cfg;
-		msgs[3] = "4 - Change items cfg file, current is:" + items_cfg;
-		msgs[4] = "5 - Change creatures cfg file, current is:" + creatures_cfg;
-		msgs[5] = "0 - Quit";
+		msgs[2] = "3 - Switch preset.\n\t\tCurrent cell cfg file is:" + cells_cfg + "\n\t\tCurrent items cfg file is:" + items_cfg + "\n\t\tCurrent creatures cfg file is:" + creatures_cfg;
+		msgs[3] = "4 - Edit current preset";
+		msgs[4] = "5 - Add new preset";
+		msgs[5] = "6 - Delete new preset";
+		msgs[6] = "7 - List presets";
+		msgs[7] = "0 - Quit";
+	}
+	
+	void dialog::refreshFile(){
+		std::ofstream fs(PRESETS_CFG, std::ios::trunc);
+		if (!fs.is_open()) {
+			throw std::runtime_error("Can't create files");
+		}
+		
+		for(const auto& it : presets){
+			fs << it << std::endl;
+		}
+		
+		fs.close();
 	}
 	
 	void dialog::menu() {
-		void (dialog::*fptr[])() = {nullptr, &dialog::startGame, &dialog::editMap, &dialog::changeCellsFile, &dialog::changeItemsFile, &dialog::changeCreaturesFile};
+		void (dialog::*fptr[])() = {nullptr, &dialog::startGame, &dialog::editMap, &dialog::switchPreset, &dialog::editPreset,
+									&dialog::addPreset, &dialog::deletePreset, &dialog::listPresets};
 		int rc = getOption();
 		while(rc){
 			void (dialog::*func)() = fptr[rc];
@@ -51,22 +100,90 @@ namespace Dialog{
 	
 	void dialog::changeCellsFile() {
 		std::cout << "Input new cells cfg filename:";
-		std::cin.ignore(std::numeric_limits<int>::max(), '\n');
 		std::getline(std::cin, cells_cfg);
-		msgs[2] = "3 - Change cell cfg file, current is:" + cells_cfg;
+		refreshDialog();
 	}
 	
 	void dialog::changeItemsFile() {
 		std::cout << "Input new items cfg filename:";
-		std::cin.ignore(std::numeric_limits<int>::max(), '\n');
 		std::getline(std::cin, items_cfg);
-		msgs[3] = "4 - Change items cfg file, current is:" + items_cfg;
+		refreshDialog();
 	}
 	
 	void dialog::changeCreaturesFile() {
 		std::cout << "Input new creatures cfg filename:";
-		std::cin.ignore(std::numeric_limits<int>::max(), '\n');
 		std::getline(std::cin, creatures_cfg);
-		msgs[4] = "5 - Change creatures cfg file, current is:" + creatures_cfg;
+		refreshDialog();
+	}
+	
+	void dialog::switchPreset() {
+		int choice;
+		std::cout << "Input preset's index:";
+		if(getNum(choice, std::cin) < 0) return;
+		
+		if(choice <= presets.size() / 3){
+			curPreset = choice;
+			choice -= 1;
+			cells_cfg = presets[choice * 3];
+			items_cfg = presets[choice * 3 + 1];
+			creatures_cfg = presets[choice * 3 + 2];
+		}
+		
+		refreshDialog();
+	}
+	
+	void dialog::editPreset() {
+		std::cin.ignore(std::numeric_limits<int>::max(), '\n');
+		changeCellsFile();
+		changeItemsFile();
+		changeCreaturesFile();
+		presets[curPreset] = cells_cfg;
+		presets[curPreset + 1] = items_cfg;
+		presets[curPreset + 2] = creatures_cfg;
+		
+		refreshFile();
+		refreshDialog();
+	}
+	
+	void dialog::addPreset() {
+		std::cin.ignore(std::numeric_limits<int>::max(), '\n');
+		changeCellsFile();
+		changeItemsFile();
+		changeCreaturesFile();
+		presets.emplace_back(cells_cfg);
+		presets.emplace_back(items_cfg);
+		presets.emplace_back(creatures_cfg);
+		
+		refreshFile();
+		refreshDialog();
+	}
+	
+	void dialog::deletePreset() {
+		int choice;
+		std::cout << "Input preset's index:";
+		if(getNum(choice, std::cin) < 0) return;
+		
+		if(choice <= presets.size() / 3 && presets.size() != 1){
+			choice -= 1;
+			presets.erase(presets.begin() + choice * 3);
+			presets.erase(presets.begin() + choice * 3);
+			presets.erase(presets.begin() + choice * 3);
+			
+			cells_cfg = presets[0];
+			items_cfg = presets[1];
+			creatures_cfg = presets[2];
+		}
+		
+		refreshFile();
+		refreshDialog();
+	}
+	
+	void dialog::listPresets() {
+		for(int i = 0;i < presets.size() / 3;++i){
+			std::cout << "Preset #" << i + 1 << ':' << std::endl;
+			std::cout << "\tcells cfg file:" << presets[i * 3] << std::endl;
+			std::cout << "\titems cfg file:" << presets[i * 3 + 1] << std::endl;
+			std::cout << "\tcreatures cfg file:" << presets[i * 3 + 2] << std::endl;
+		}
 	}
 }

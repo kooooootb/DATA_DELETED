@@ -36,11 +36,10 @@ const unsigned int CHOOSEOFFSET = FONTSIZE * 5;
 
 //config files' names
 static const char * CREATURES_CFG = "Creatures.cfg";
-
 static const char * CELLS_CFG = "Cells.cfg";
 //static const char * CELLS_CFG = "c1.cfg";
-
 static const char * ITEMS_CFG = "Items.cfg";
+static const char * PRESETS_CFG = "presets.cfg";
 
 //Textures
 #define TEXTURE_DIRECTORY "Textures/"

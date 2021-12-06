@@ -3,8 +3,7 @@
 
 #include <iostream>
 #include <limits>
-
-#include "Parameters.h"
+#include <vector>
 
 namespace Dialog{
 	template<class T>//шаблон для ввода чисел
@@ -24,11 +23,18 @@ namespace Dialog{
 	
 	class dialog{
 	private:
-		std::string cells_cfg = CELLS_CFG;
-		std::string items_cfg = ITEMS_CFG;
-		std::string creatures_cfg = CREATURES_CFG;
+		std::string cells_cfg;
+		std::string items_cfg;
+		std::string creatures_cfg;
 		
-		std::string msgs[6];
+		std::vector<std::string> presets;
+		
+		std::string msgs[8];
+		
+		int curPreset = 0;
+		
+		void refreshDialog();
+		void refreshFile();
 	public:
 		dialog();
 		
@@ -36,6 +42,13 @@ namespace Dialog{
 		int getOption();
 		void startGame();
 		void editMap();
+		
+		void switchPreset();
+		void editPreset();
+		void addPreset();
+		void deletePreset();
+		void listPresets();
+		
 		void changeCellsFile();
 		void changeCreaturesFile();
 		void changeItemsFile();
