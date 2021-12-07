@@ -21,6 +21,7 @@ namespace nodata{
 			itemTable_.addItem(nearItems.ptr[i]);
 			level_.getItemMap().removeItem(coord_, nearItems.ptr[i]);
 		}
+		delete [] nearItems.ptr;
 		
 		return OK;
 	}
@@ -67,6 +68,7 @@ namespace nodata{
 					if (!newPath.empty()) {//reachable
 						isBusy = true;
 						path = std::move(newPath);
+						delete [] nearItems.ptr;
 						
 						return OK;
 					} else {//unreachable
@@ -74,6 +76,7 @@ namespace nodata{
 					}
 				}
 			}
+			delete [] nearItems.ptr;
 			
 			if (path.empty()) {//can't find item => make random path
 				path = level_.makePath(coord_, rand());
@@ -121,6 +124,7 @@ namespace nodata{
 						goingToStorage = false;
 						isBusy = true;
 						path = std::move(newPath);
+						delete [] nearItems.ptr;
 						
 						return OK;
 					} else {//unreachable
@@ -128,6 +132,7 @@ namespace nodata{
 					}
 				}
 			}
+			delete [] nearItems.ptr;
 			
 			if(!path.empty()){//go
 				status = walk(path.top());

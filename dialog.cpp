@@ -39,7 +39,7 @@ namespace Dialog{
 	void dialog::refreshDialog() {
 		msgs[0] = "1 - Start game";
 		msgs[1] = "2 - Edit map";
-		msgs[2] = "3 - Switch preset.\n\t\tCurrent cell cfg file is:" + cells_cfg + "\n\t\tCurrent items cfg file is:" + items_cfg + "\n\t\tCurrent creatures cfg file is:" + creatures_cfg;
+		msgs[2] = "3 - Switch preset\n\t\tCurrent cell cfg file is:" + cells_cfg + "\n\t\tCurrent items cfg file is:" + items_cfg + "\n\t\tCurrent creatures cfg file is:" + creatures_cfg;
 		msgs[3] = "4 - Edit current preset";
 		msgs[4] = "5 - Add new preset";
 		msgs[5] = "6 - Delete new preset";
@@ -121,7 +121,7 @@ namespace Dialog{
 		std::cout << "Input preset's index:";
 		if(getNum(choice, std::cin) < 0) return;
 		
-		if(choice <= presets.size() / 3){
+		if(choice >= 1 && choice <= presets.size() / 3){
 			curPreset = choice;
 			choice -= 1;
 			cells_cfg = presets[choice * 3];
@@ -163,7 +163,7 @@ namespace Dialog{
 		std::cout << "Input preset's index:";
 		if(getNum(choice, std::cin) < 0) return;
 		
-		if(choice <= presets.size() / 3 && presets.size() != 1){
+		if(choice >= 1 && choice <= presets.size() / 3 && presets.size() != 1){
 			choice -= 1;
 			presets.erase(presets.begin() + choice * 3);
 			presets.erase(presets.begin() + choice * 3);

@@ -24,6 +24,7 @@ namespace nodata{
 				break;
 			}
 		}
+		delete [] nearItems.ptr;
 		
 		if(gun != nullptr){
 			activeGun_ = gun;
@@ -89,6 +90,7 @@ namespace nodata{
 							break;
 						}
 					}
+					delete [] items.ptr;
 					if (isGun) {//if there is a gun make path
 						std::stack<Direction> newPath = level_.getPath(coord_, nearItems.ptr[i],
 																	   [](const Cell &cell) -> bool {
@@ -97,6 +99,7 @@ namespace nodata{
 						if (!newPath.empty()) {//reachable
 							isBusy = true;
 							path = std::move(newPath);
+							delete [] nearItems.ptr;
 							
 							return OK;
 						} else {//unreachable
@@ -105,6 +108,7 @@ namespace nodata{
 					}
 				}
 			}
+			delete [] nearItems.ptr;
 			
 			if(path.empty()){//can't go to gun => make random path
 				path = level_.makePath(coord_, rand());
@@ -155,14 +159,18 @@ namespace nodata{
 								throwGun();
 								useless.push_back(coord_);//this point has empty gun
 							}
+							delete [] creatures.ptr;
+							delete [] nearCreatures.ptr;
+							
 							return status;
 						}
 						
 						break;//can't hit current point, go to next
 					}
 				}
+				delete [] creatures.ptr;
 			}
-			
+			delete [] nearCreatures.ptr;
 			
 			if(path.empty()){//can't hit anyone => make random path
 				path = level_.makePath(coord_, rand());

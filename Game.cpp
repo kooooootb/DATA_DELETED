@@ -11,7 +11,7 @@ namespace nodata{
 		cr = level.getActiveCreature();
 		const Point &coord = cr->getPosition();
 		
-		window.setFramerateLimit(60);
+		window.setFramerateLimit(20);
 		
 		interfaceWindow.setFillColor(sf::Color(50,50,50,50));
 		interfaceWindow.setPosition((float)WINDOWWIDTH * 3 / 4, 0);
@@ -127,6 +127,8 @@ namespace nodata{
 				}
 			}
 		}
+		delete [] item.ptr;
+		delete [] creature.ptr;
 
 		cellsOnScreen.push_back(cell);
 	}
@@ -171,6 +173,8 @@ namespace nodata{
 				creaturesOnScreen.push_back(creature.ptr[i]);
 			}
 		}
+		delete [] item.ptr;
+		delete [] creature.ptr;
 		
 		std::vector<Point> circle;
 		createCircle(circle, cr->getViewRadius());
@@ -187,6 +191,7 @@ namespace nodata{
 	}
 	
 	void Game::refreshTake() {
+		delete [] nearItems.ptr;
 		nearItems = level.getItemMap()[cr->getPosition()];
 		if(nearItems.ptr == nullptr){
 			mesTips[T_TAKE].setString("No items available");
@@ -590,7 +595,7 @@ namespace nodata{
 		mesTips[T_TURN].setString("");
 		if(level.enemyDied()){
 			std::cout << "You won!" << std::endl;
-			mesTips[T_WIN].setString("You won!");
+			mesTips[T_WIN].setString("Victory!");
 		}
 		level.resetTime();
 		return OK;
@@ -621,5 +626,9 @@ namespace nodata{
 		for(int i = 0;i < amount + 1;++i){
 			mesTips.pop_back();
 		}
+	}
+	
+	Game::~Game() {
+		delete [] nearItems.ptr;
 	}
 }

@@ -26,14 +26,16 @@ namespace nodata{
 	
 	ErrorCodes Wild::move(int randVar) {
 		ErrorCodes status;
-		Ptr<Creature*> nearcr = level_.getCreatureMap()[coord_];
-		for(int i = 0;i < nearcr.amount;++i){
-			if(nearcr.ptr[i]->getType() == OPERATIVE){
+		Ptr<Creature*> nearCr = level_.getCreatureMap()[coord_];
+		for(int i = 0; i < nearCr.amount; ++i){
+			if(nearCr.ptr[i]->getType() == OPERATIVE){
 				path_ = std::stack<Direction>();
-				status = attack(nearcr.ptr[i]);
+				status = attack(nearCr.ptr[i]);
+				delete [] nearCr.ptr;
 				return status;
 			}
 		}
+		delete [] nearCr.ptr;
 		
 		srand(randVar);
 		if(penaltyMoves_ > 0){//previously bumped in wall
@@ -78,11 +80,16 @@ namespace nodata{
 						});
 						if(!newPath.empty()){//reachable
 							path_ = std::move(newPath);
+							delete [] creatures.ptr;
+							delete [] nearCreatures.ptr;
+							
 							return OK;
 						}
 					}
 				}
+				delete [] creatures.ptr;
 			}
+			delete [] nearCreatures.ptr;
 			
 			auto direction = static_cast<Direction>(rand() % 4);
 			status = walk(direction);

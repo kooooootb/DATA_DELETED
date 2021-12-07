@@ -685,8 +685,10 @@ namespace edittool{
 		Ptr<Creature*> creatures = level.getCreatureMap()[point];
 		while(creatures.ptr != nullptr){
 			creatures.ptr[0]->kill();
+			delete [] creatures.ptr;
 			creatures = level.getCreatureMap()[point];
 		}
+		delete [] creatures.ptr;
 	}
 	
 	void EditTool::clearItems() {
@@ -696,8 +698,10 @@ namespace edittool{
 		while(items.ptr != nullptr){
 			delete *items.ptr;
 			level.getItemMap().removeItem(point, *items.ptr);
+			delete [] items.ptr;
 			items = level.getItemMap()[point];
 		}
+		delete [] items.ptr;
 	}
 	
 	void EditTool::redrawWindow() {

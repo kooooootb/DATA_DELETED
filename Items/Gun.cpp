@@ -77,6 +77,7 @@ namespace nodata{
 					break;
 				}
 			}
+			delete [] nearCreatures.ptr;
 			
 			if(victim == nullptr){//nobody near you, can't shoot yourself
 				coord = shooter->getPosition();
@@ -97,7 +98,9 @@ namespace nodata{
 			level.setRay(shooter->getPosition(), coord);
 			for (const CellIt &it : level) {
 				Point curPoint = it.getPoint();
-				if (!it.getCell()->walkAble() || level.getCreatureMap()[curPoint].ptr != nullptr) {
+				Ptr<Creature*> nearCr = level.getCreatureMap()[curPoint];
+				if (!it.getCell()->walkAble() || nearCr.ptr != nullptr) {
+					delete [] nearCr.ptr;
 					coord = curPoint;
 					break;
 				}
@@ -111,6 +114,7 @@ namespace nodata{
 				int amount = (int) creatures.amount;
 				srand(randVar);
 				shoot(creatures.ptr[rand() % amount]);
+				delete [] creatures.ptr;
 			} else if (status != ERROR) {//shoot cell
 				if ((cell->getType() == GLASS || cell->getType() == PARTITION)) level.setCell(coord, FLOOR);
 			}

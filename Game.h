@@ -72,7 +72,7 @@ namespace nodata{
 	public:
 		Game(std::string &cells_cfg, std::string &items_cfg, std::string &creatures_cfg);
 		
-		~Game() = default;
+		~Game();
 		
 		//refresh moves and changes shapes
 		void refreshMap();
