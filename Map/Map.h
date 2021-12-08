@@ -1,6 +1,8 @@
 #ifndef LAB4_MAP_H
 #define LAB4_MAP_H
 
+#include <iostream>
+
 namespace nodata{
 #include "../AllClasses.h"
 	template<class T>
@@ -125,6 +127,8 @@ namespace nodata{
 	
 	template<class T>
 	void Map<T>::insert(HorCell &hcell, T item){
+		std::cout << "inserted" << std::endl;
+		
 		T *newItems = new T[hcell.amount + 1];
 		for(int i = 0;i < hcell.amount;++i){
 			newItems[i] = hcell.items[i];
@@ -137,6 +141,15 @@ namespace nodata{
 	
 	template<class T>
 	void Map<T>::extract(HorCell &hcell, T item){
+		std::cout << "extracted" << std::endl;
+		
+		if(hcell.amount == 1){
+			delete [] hcell.items;
+			hcell.items = nullptr;
+			hcell.amount--;
+			return;
+		}
+		
 		T *newItems = new T[hcell.amount - 1];
 		int diff = 0;
 		for(int i = 0;i < hcell.amount;++i){
@@ -284,6 +297,9 @@ namespace nodata{
 			extract(*hCell, item);
 		}
 		else if(hCell->amount == 1){
+			
+			extract(*hCell, item);
+			
 			if(removeCell<HorCell>(iH, row, amountX) == nullptr){
 				removeCell<VertCell>(iV, vertAr, amountY);
 			}

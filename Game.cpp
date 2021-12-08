@@ -425,6 +425,7 @@ namespace nodata{
 				showError("Too heavy!");
 			}
 			else level.getItemMap().removeItem(cr->getPosition(), *nearItems.ptr);
+            delete [] nearItems.ptr;
 			nearItems.ptr = nullptr;
 		}
 		else{

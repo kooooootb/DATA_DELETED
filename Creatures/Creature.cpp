@@ -57,10 +57,12 @@ namespace nodata{
 	
 	void Creature::receiveDamage(int damage) {
 		if(damage >= healthCurrent_) kill();
-		else healthCurrent_ -= damage;
-		
-		int fade = (int)(255.0 * ((float)healthCurrent_ / (float)healthMax_));
-		sprite.setColor(sf::Color(255, fade,fade));
+		else{
+			healthCurrent_ -= damage;
+			
+			int fade = (int)(255.0 * ((float)healthCurrent_ / (float)healthMax_));
+			sprite.setColor(sf::Color(255, fade,fade));
+		}
 	}
 	
 	void Creature::setHealthMax(int healthMax) {
