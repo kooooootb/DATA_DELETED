@@ -625,46 +625,74 @@ namespace nodata{
 	ErrorCodes Game::endInt() {
 		mesTips[T_TURN].setString("Enemy's turn");
 		srand(time(nullptr));
+		bool itOver;
 		
 //		sentient's move
+		itOver = false;
 		level.setTurn(SENTIENT);
-		for(auto it : level.getCurrentTeam()){
-			while(it->move(rand()) != ERROR){
-				if(level.gameOver()){
-					std::cout << "Game over!" << std::endl;
-					return ERROR;
+		while(!itOver){
+			itOver = true;
+			unsigned long long size = level.getCurrentTeam().size();
+			for(auto it : level.getCurrentTeam()){
+				while(it->move(rand()) != ERROR){
+					if(level.gameOver()){
+						std::cout << "Game over!" << std::endl;
+						return ERROR;
+					}
+					refreshMap();
+					redrawWindow();
+					while(window.pollEvent(event));
 				}
-				refreshMap();
-				redrawWindow();
-				while(window.pollEvent(event));
+				if(level.getCurrentTeam().size() != size){
+					itOver = false;
+					break;
+				}
 			}
 		}
 		
 //		wilds's move
+		itOver = false;
 		level.setTurn(WILD);
-		for(auto it : level.getCurrentTeam()){
-			while(it->move(rand()) != ERROR){
-				if(level.gameOver()){
-					std::cout << "Game over!" << std::endl;
-					return ERROR;
+		while(!itOver){
+			itOver = true;
+			unsigned long long size = level.getCurrentTeam().size();
+			for(auto it : level.getCurrentTeam()){
+				while(it->move(rand()) != ERROR){
+					if(level.gameOver()){
+						std::cout << "Game over!" << std::endl;
+						return ERROR;
+					}
+					refreshMap();
+					redrawWindow();
+					while(window.pollEvent(event));
 				}
-				refreshMap();
-				redrawWindow();
-				while(window.pollEvent(event));
+				if(level.getCurrentTeam().size() != size){
+					itOver = false;
+					break;
+				}
 			}
 		}
 		
 //		forager's move
+		itOver = false;
 		level.setTurn(FORAGER);
-		for(auto it : level.getCurrentTeam()){
-			while(it->move(rand()) != ERROR){
-				if(level.gameOver()){
-					std::cout << "Game over!" << std::endl;
-					return ERROR;
+		while(!itOver){
+			itOver = true;
+			unsigned long long size = level.getCurrentTeam().size();
+			for(auto it : level.getCurrentTeam()){
+				while(it->move(rand()) != ERROR){
+					if(level.gameOver()){
+						std::cout << "Game over!" << std::endl;
+						return ERROR;
+					}
+					refreshMap();
+					redrawWindow();
+					while(window.pollEvent(event));
 				}
-				refreshMap();
-				redrawWindow();
-				while(window.pollEvent(event));
+				if(level.getCurrentTeam().size() != size){
+					itOver = false;
+					break;
+				}
 			}
 		}
 		

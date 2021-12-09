@@ -115,6 +115,45 @@ namespace nodata{
 			}
 			delete [] nearItems.ptr;
 			
+			//make path to the nearest storage
+			const std::vector<Point> &storages = level_.getStorages();
+			if(!storages.empty()){
+				Point targetPoint;
+				int tries = 0;
+				while(path.empty()){
+					tries++;
+					if(tries > storages.size()){
+						break;//no storages near
+					}
+					
+					int dist = level_.getHorizCells() + level_.getVertCells();
+					for(auto it : storages){
+						if (std::find(unreachable.begin(), unreachable.end(), it) != unreachable.end()) {
+							continue;//point was marked as unreachable и нет смысла проверять ее еще раз
+						}
+						
+						int newDist = std::abs(it.x - coord_.x) + std::abs(it.y - coord_.y);
+						if(newDist < dist){
+							dist = newDist;
+							targetPoint = it;
+						}
+					}
+					
+					std::stack<Direction> newPath = level_.getPath(coord_, targetPoint,
+																   [](const Cell &cell) -> bool {
+																	   return cell.walkAble();
+																   });
+					if (!newPath.empty()) {//reachable
+						isBusy = true;
+						path = std::move(newPath);
+						
+						return OK;
+					} else {//unreachable
+						unreachable.push_back(targetPoint);
+					}
+				}
+			}
+			
 			if(path.empty()){//can't go to gun => make random path
 				path = level_.makePath(coord_, rand());
 			}
@@ -130,7 +169,10 @@ namespace nodata{
 			}
 			else{//take
 				receiveGun();
-				if (activeGun_->getAmmoCurrent() <= 0) {//out of ammo
+				if(activeGun_ == nullptr){
+					unreachable.push_back(coord_);
+				}
+				else if (activeGun_->getAmmoCurrent() <= 0) {//out of ammo
 					throwGun();
 					useless.push_back(coord_);//this point has empty gun
 				}

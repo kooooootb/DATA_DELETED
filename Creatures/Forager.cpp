@@ -160,7 +160,13 @@ namespace nodata{
 			if(!storages.empty()){
 				int dist = level_.getHorizCells() + level_.getVertCells();
 				Point targetPoint;
+				int tries = 0;
 				while(path.empty()){
+					tries++;
+					if(tries > storages.size()){
+						break;//no storages near
+					}
+					
 					for(auto it : storages){
 						if (std::find(unreachable.begin(), unreachable.end(), it) != unreachable.end()) {
 							continue;//point was marked as unreachable и нет смысла проверять ее еще раз
