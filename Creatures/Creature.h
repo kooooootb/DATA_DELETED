@@ -100,6 +100,8 @@ namespace nodata{
 		 * Устанавливает timeMax_
 		 */
 		void setTimeMax(int timeMax);
+		void setTimeCurrent(int timeCurrent);
+		void setPosition(const Point &point);
 		
 		/*!
 		 * Увеличивает текущее количество единиц здоровья на healAmount, но не больше healthMax
@@ -137,6 +139,7 @@ namespace nodata{
 		void setTexture(CreatText);
 		
 		virtual void saveFile(std::ofstream&) = 0;
+		virtual void saveCurrentState(std::ofstream&) = 0;
 		
 		virtual ErrorCodes move(int randVar) = 0;
 		

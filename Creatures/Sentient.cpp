@@ -15,6 +15,11 @@ namespace nodata{
 		delete activeGun_;
 	}
 	
+	void Sentient::setActiveGun(Gun *gun) {
+		activeGun_ = gun;
+		setTexture(WITH_GUN);
+	}
+	
 	void Sentient::receiveGun() {
 		Ptr<Item*> nearItems = level_.getItemMap()[coord_];
 		Gun *gun = nullptr;
@@ -192,5 +197,14 @@ namespace nodata{
 	void Sentient::saveFile(std::ofstream &fs){
 		fs << name_ << std::endl;
 		fs << SENTIENT << ' ' << coord_.x << ' ' << coord_.y << ' ' << healthMax_ << ' ' << timeMax_ << ' ' << walkTime_ << ' ' << viewRadius_ << ' ' << accuracyMultipl_ << std::endl;
+	}
+	
+	void Sentient::saveCurrentState(std::ofstream &fs){
+		fs << name_ << std::endl;
+		fs << SENTIENT << ' ' << coord_.x << ' ' << coord_.y << ' ' << healthMax_ << ' ' << timeMax_ << ' ' << walkTime_ << ' ' << viewRadius_ << ' ' << accuracyMultipl_ << ' ' << healthCurrent_ << ' ' << timeCurrent_ << ' ' << (activeGun_ == nullptr ? 0 : 1) << std::endl;
+		
+		if(activeGun_ != nullptr){
+			activeGun_->saveCurrentState(fs);
+		}
 	}
 }

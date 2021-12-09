@@ -108,4 +108,9 @@ namespace nodata{
 		fs << name_ << std::endl;
 		fs << WILD << ' ' << coord_.x << ' ' << coord_.y << ' ' << healthMax_ << ' ' << timeMax_ << ' ' << walkTime_ << ' ' << viewRadius_ << ' ' << accuracy_ << ' ' << damage_ << ' ' << attackTime_ << std::endl;
 	}
+	
+	void Wild::saveCurrentState(std::ofstream &fs){
+		fs << name_ << std::endl;
+		fs << WILD << ' ' << coord_.x << ' ' << coord_.y << ' ' << healthMax_ << ' ' << timeMax_ << ' ' << walkTime_ << ' ' << viewRadius_ << ' ' << accuracy_ << ' ' << damage_ << ' ' << attackTime_ << ' ' << healthCurrent_ << ' ' << timeCurrent_ << std::endl;
+	}
 }

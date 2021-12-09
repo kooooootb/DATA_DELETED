@@ -72,6 +72,9 @@ namespace nodata{
 	void Creature::setHealthCurrent(int healthCurrent) {
 		healthCurrent_ = healthCurrent;
 		if(healthMax_ < healthCurrent) healthMax_ = healthCurrent;
+		
+		int fade = (int)(255.0 * ((float)healthCurrent_ / (float)healthMax_));
+		sprite.setColor(sf::Color(255, fade,fade));
 	}
 	
 	void Creature::setWalkTime(int walkTime) {
@@ -85,6 +88,15 @@ namespace nodata{
 	void Creature::setTimeMax(int timeMax) {
 		timeMax_ = timeMax;
 		if(timeCurrent_ > timeMax) timeCurrent_ = timeMax;
+	}
+	
+	void Creature::setTimeCurrent(int timeCurrent) {
+		timeCurrent_ = timeCurrent;
+		if(timeCurrent_ > timeMax_) timeCurrent_ = timeMax_;
+	}
+	
+	void Creature::setPosition(const Point &point) {
+		coord_ = point;
 	}
 	
 	void Creature::spendTime(int time) {

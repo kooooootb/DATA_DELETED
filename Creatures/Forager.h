@@ -54,6 +54,12 @@ namespace nodata{
 		 */
 		ErrorCodes receiveItems();
 		/*!
+		 * Добавляет предмет в инвентарь оперативника если возможно
+		 * @param item Указатель на добавляемый предмет
+		 * @return ERROR если предмет слишком тяжелый, OK при успешной операции
+		 */
+		ErrorCodes receiveItem(Item *item);
+		/*!
 		 * Выбрасывает предмет из инвентаря фуражира
 		 * @param index номер предмета в таблице инвентаря
 		 * @return ERROR при отсутствии предмета в инвентаре с данным индексом, OK при успешной операции
@@ -70,6 +76,7 @@ namespace nodata{
 		 ErrorCodes move(int randVar) override;
 		 
 		 void saveFile(std::ofstream &) override;
+		 void saveCurrentState(std::ofstream &) override;
 		
 		CreatType getType() override { return FORAGER; }
 	};

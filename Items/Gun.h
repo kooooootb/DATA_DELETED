@@ -100,6 +100,7 @@ namespace nodata{
 		static int calcAmmoWeightByType(int amount, Ammunition ammoType);
 		
 		void saveFile(std::ofstream&) override;
+		void saveCurrentState(std::ofstream&) override;
 		
 		ItemType getType() const override { return GUN; }
 	};

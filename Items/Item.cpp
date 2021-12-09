@@ -13,6 +13,10 @@ namespace nodata{
 		sprite.setPosition(x * CELLSIZEX + ((float)CELLSIZEX/2), y * CELLSIZEY + ((float)CELLSIZEY/2));
 	}
 	
+	void Item::setPosition(const Point &point) {
+		coord_ = point;
+	}
+	
 	void Item::setTexture(sf::Texture &texture) {
 		sprite.setTexture(texture);
 		sprite.setScale(CELLSIZEX/sprite.getLocalBounds().width, CELLSIZEY/sprite.getLocalBounds().height);

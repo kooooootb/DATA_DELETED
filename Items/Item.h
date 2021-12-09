@@ -46,6 +46,8 @@ namespace nodata{
 		 * Возвращает константную ссылку на name_
 		 */
 		const std::string &getName() const { return name_; }
+		const Point &getPosition() const { return coord_; }
+		void setPosition(const Point &point);
 		
 		/*!
 		 * Устанавливает weight_
@@ -66,6 +68,7 @@ namespace nodata{
 		void setTexture(sf::Texture &texture);
 		
 		virtual void saveFile(std::ofstream&) = 0;
+		virtual void saveCurrentState(std::ofstream&) = 0;
 		
 		virtual ItemType getType() const = 0;
 	};

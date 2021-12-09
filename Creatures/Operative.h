@@ -110,6 +110,7 @@ namespace nodata{
 		void dropAllItems();
 		
 		void saveFile(std::ofstream &) override;
+		void saveCurrentState(std::ofstream &) override;
 		
 		ErrorCodes move(int randVar) override { return ERROR; }
 		

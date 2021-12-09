@@ -45,6 +45,7 @@ namespace nodata{
 		ErrorCodes use(Creature *creature) override;
 		
 		void saveFile(std::ofstream&) override;
+		void saveCurrentState(std::ofstream&) override;
 		
 		ItemType getType() const override { return HKIT; }
 	};

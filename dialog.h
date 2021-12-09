@@ -29,7 +29,7 @@ namespace Dialog{
 		
 		std::vector<std::string> presets;
 		
-		std::string msgs[8];
+		std::string msgs[9];
 		
 		int curPreset = 0;
 		
@@ -42,6 +42,7 @@ namespace Dialog{
 		int getOption();
 		void startGame();
 		void editMap();
+		void loadGame();
 		
 		void switchPreset();
 		void editPreset();

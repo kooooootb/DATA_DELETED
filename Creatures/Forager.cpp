@@ -26,6 +26,15 @@ namespace nodata{
 		return OK;
 	}
 	
+	ErrorCodes Forager::receiveItem(Item *item) {
+		int sumWeight = item->getWeight() + itemTable_.getWeight();
+		if(sumWeight > force_) return ERROR;//too heavy
+		
+		itemTable_.addItem(item);
+		
+		return OK;
+	}
+	
 	ErrorCodes Forager::throwItem(int index) {
 		Item *item = itemTable_.getItem(index);
 		if(item == nullptr) return ERROR;
@@ -202,5 +211,13 @@ namespace nodata{
 	void Forager::saveFile(std::ofstream &fs){
 		fs << name_ << std::endl;
 		fs << FORAGER << ' ' << coord_.x << ' ' << coord_.y << ' ' << healthMax_ << ' ' << timeMax_ << ' ' << walkTime_ << ' ' << viewRadius_ << ' ' << force_ << std::endl;
+	}
+	
+	void Forager::saveCurrentState(std::ofstream &fs){
+		fs << name_ << std::endl;
+		fs << FORAGER << ' ' << coord_.x << ' ' << coord_.y << ' ' << healthMax_ << ' ' << timeMax_ << ' ' << walkTime_ << ' ' << viewRadius_ << ' ' << force_ << ' ' << healthCurrent_ << ' ' << timeCurrent_ << ' ' << itemTable_.size() << std::endl;
+		for(auto it : itemTable_.getVector()){
+			it->saveCurrentState(fs);
+		}
 	}
 }

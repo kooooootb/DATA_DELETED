@@ -6,9 +6,27 @@ namespace nodata{
 		window(sf::VideoMode(WINDOWWIDTH, WINDOWHEIGHT), "test") ,
 		interfaceWindow(sf::Vector2f((float)WINDOWWIDTH / 4, (float)WINDOWHEIGHT / 3)) ,
 		invWindow(sf::Vector2f((float)WINDOWWIDTH / 4, (float)WINDOWHEIGHT / 2)) ,
-		level(cells_cfg, items_cfg, creatures_cfg, this)
+		level(cells_cfg, items_cfg, creatures_cfg, this) ,
+		event()
 	{
+		initGame();
+	}
+	
+	Game::Game(std::string &save) :
+		window(sf::VideoMode(WINDOWWIDTH, WINDOWHEIGHT), "test") ,
+		interfaceWindow(sf::Vector2f((float)WINDOWWIDTH / 4, (float)WINDOWHEIGHT / 3)) ,
+		invWindow(sf::Vector2f((float)WINDOWWIDTH / 4, (float)WINDOWHEIGHT / 2)) ,
+		level(save, this) ,
+		event()
+	{
+		initGame();
+	}
+	
+	void Game::initGame(){
 		cr = level.getActiveCreature();
+		if(cr == nullptr){
+			throw std::runtime_error("Bad save files");
+		}
 		const Point &coord = cr->getPosition();
 		
 		window.setFramerateLimit(20);
@@ -36,6 +54,7 @@ namespace nodata{
 		mesTips[T_THROW].setPosition((float)WINDOWWIDTH * 3 / 4, 4 * FONTSIZE);
 		mesTips[T_ERROR].setPosition(0, WINDOWHEIGHT - FONTSIZE);
 		mesTips[T_INTMES].setPosition((float)WINDOWWIDTH / 2 - FONTSIZE * 10, 0);
+		mesTips[T_INPUT].setPosition((float)WINDOWWIDTH / 2 - FONTSIZE * 10, FONTSIZE);
 		mesTips[T_WIN].setPosition((float)WINDOWWIDTH * 2 / 5, FONTSIZE * 3);
 		mesTips[T_TURN].setPosition((float)WINDOWWIDTH * 2 / 5, FONTSIZE * 3);
 		
@@ -95,6 +114,62 @@ namespace nodata{
 		}
 		clearIntmes();
 		return choice;
+	}
+	
+	std::string Game::getStringFromWindow(){
+		std::string str;
+		
+		sf::String sfInput;
+		bool flag = false;
+		while(window.isOpen()){
+			sf::Event event;
+			while (window.pollEvent(event)){
+				if (event.type == sf::Event::Closed)
+					window.close();
+				if (event.type == sf::Event::TextEntered){
+					if(event.text.unicode == '\b'){
+						if(sfInput.getSize() > 0) sfInput.erase(sfInput.getSize() - 1, 1);
+					}else{
+						sfInput += event.text.unicode;
+					}
+					mesTips[T_INPUT].setString(sfInput.toAnsiString());
+					redrawWindow();
+				}
+				if (event.type == sf::Event::KeyPressed){
+					if (event.key.code == sf::Keyboard::Enter) {
+						str = sfInput.toAnsiString();
+						flag = true;
+					}
+				}
+			}
+			if(flag) break;
+		}
+		mesTips[T_INPUT].setString("");
+		redrawWindow();
+		
+		return str;
+	}
+	
+	int Game::getInt(const char *mes, int amount) {
+		setIntmes(mes);
+		refreshInterface();
+		redrawWindow();
+		window.pollEvent(event);
+		return getIntFromWindow(amount);
+	}
+	
+	std::string Game::getString(const char *mes) {
+		setIntmes(mes);
+		refreshInterface();
+		redrawWindow();
+		window.pollEvent(event);
+		return getStringFromWindow();
+	}
+	
+	void Game::clearError() {
+		mesTips[T_ERROR].setString("");
+		refreshInterface();
+		redrawWindow();
 	}
 
 	void Game::drawCell(int xR, int yR) {
@@ -329,6 +404,7 @@ namespace nodata{
 				{
 					switch(event.key.code){
 						case sf::Keyboard::Escape:
+							saveGame();
 							window.close();
 							break;
 						case sf::Keyboard::W:
@@ -627,6 +703,13 @@ namespace nodata{
 		for(int i = 0;i < amount + 1;++i){
 			mesTips.pop_back();
 		}
+	}
+	
+	void Game::saveGame() {
+		std::string saveName = getString("Input file's name to save game and press Enter");
+		if(saveName.empty()) return;
+		
+		level.saveGame(saveName);
 	}
 	
 	Game::~Game() {

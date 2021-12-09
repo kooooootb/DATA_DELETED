@@ -111,4 +111,17 @@ namespace nodata{
 		fs << name_ << std::endl;
 		fs << OPERATIVE << ' ' << coord_.x << ' ' << coord_.y << ' ' << healthMax_ << ' ' << timeMax_ << ' ' << walkTime_ << ' ' << viewRadius_ << ' ' << reloadTimeMultipl_ << ' ' << force_ << ' ' << accuracyMultipl_ << std::endl;
 	}
+	
+	void Operative::saveCurrentState(std::ofstream &fs){
+		fs << name_ << std::endl;
+		fs << OPERATIVE << ' ' << coord_.x << ' ' << coord_.y << ' ' << healthMax_ << ' ' << timeMax_ << ' ' << walkTime_ << ' ' << viewRadius_ << ' ' << reloadTimeMultipl_ << ' ' << force_ << ' ' << accuracyMultipl_ << ' ' << healthCurrent_ << ' ' << timeCurrent_ << ' ' << (activeGun_ == nullptr ? 0 : 1) << ' ' << itemTable_.size() << std::endl;
+		
+		if(activeGun_ != nullptr){
+			activeGun_->saveCurrentState(fs);
+		}
+		
+		for(auto it : itemTable_.getVector()){
+			it->saveCurrentState(fs);
+		}
+	}
 }

@@ -77,6 +77,11 @@ namespace nodata{
 	
 	void AmmoContainer::saveFile(std::ofstream &fs) {
 		fs << name_ << std::endl;
-		fs << ACONT << ' ' << coord_.x << ' ' << coord_.y << ' ' << weight_ << ' ' << ammoType_ << ' ' << ammoMax_ << std::endl;
+		fs << ACONT << ' ' << coord_.x << ' ' << coord_.y << ' ' << weight_ - calcAmmoWeightByType(ammoCurrent_) << ' ' << ammoType_ << ' ' << ammoMax_ << std::endl;
+	}
+	
+	void AmmoContainer::saveCurrentState(std::ofstream &fs) {
+		fs << name_ << std::endl;
+		fs << ACONT << ' ' << coord_.x << ' ' << coord_.y << ' ' << weight_ - calcAmmoWeightByType(ammoCurrent_) << ' ' << ammoType_ << ' ' << ammoMax_ << ' ' << ammoCurrent_ << std::endl;
 	}
 }

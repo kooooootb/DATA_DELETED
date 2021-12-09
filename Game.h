@@ -16,6 +16,7 @@ enum Tips{
 	T_INTMES,
 	T_WIN,
 	T_TURN,
+	T_INPUT,
 	T_COUNT
 };
 
@@ -54,6 +55,7 @@ namespace nodata{
 		std::vector<Item*> itemsOnScreen;
 		
 		int getIntFromWindow(int amount);
+		std::string getStringFromWindow();
 		void redrawWindow();
 		void drawCell(int x, int y);
 		void drawRay(const Point &point);
@@ -69,8 +71,17 @@ namespace nodata{
 		void refreshWeight();
 		
 		void cleanTips(int amount);
+		
+		void initGame();
+		
+		int getInt(const char *mes, int amount);
+		std::string getString(const char *mes);
+		void clearError();
+		
+		void saveGame();
 	public:
 		Game(std::string &cells_cfg, std::string &items_cfg, std::string &creatures_cfg);
+		explicit Game(std::string &save);
 		
 		~Game();
 		

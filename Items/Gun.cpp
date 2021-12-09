@@ -4,8 +4,6 @@
 #include "../Parameters.h"
 #include "Level.h"
 
-#include <iostream>
-
 namespace nodata{
 	Gun::Gun(std::string &name, int weight, const Point &point, int damage, int shootTime, int reloadTime, Ammunition ammoType, int ammoMax, float accuracy, int switchTime) :
 			Item(name, 0, point) , damage_(damage) , shootTime_(shootTime) , reloadTime_(reloadTime) , ammoType_(ammoType) ,
@@ -15,6 +13,7 @@ namespace nodata{
 	}
 	
 	void Gun::setAmmoCurrent(int ammoCurrent) {
+		setWeight(weight_ - calcAmmoWeightByType(ammoCurrent_, ammoType_) + calcAmmoWeightByType(ammoCurrent, ammoType_));
 		ammoCurrent_ = ammoCurrent;
 	}
 	
@@ -136,6 +135,11 @@ namespace nodata{
 	
 	void Gun::saveFile(std::ofstream &fs) {
 		fs << name_ << std::endl;
-		fs << GUN << ' ' << coord_.x << ' ' << coord_.y << ' ' << weight_ - calcAmmoWeightByType(ammoMax_, ammoType_) << ' ' << damage_ << ' ' << shootTime_ << ' ' << reloadTime_ << ' ' << ammoType_ << ' ' << ammoMax_ << ' ' << accuracy_ << ' ' << switchTime_ << std::endl;
+		fs << GUN << ' ' << coord_.x << ' ' << coord_.y << ' ' << weight_ - calcAmmoWeightByType(ammoCurrent_, ammoType_) << ' ' << damage_ << ' ' << shootTime_ << ' ' << reloadTime_ << ' ' << ammoType_ << ' ' << ammoMax_ << ' ' << accuracy_ << ' ' << switchTime_ << std::endl;
+	}
+	
+	void Gun::saveCurrentState(std::ofstream &fs) {
+		fs << name_ << std::endl;
+		fs << GUN << ' ' << coord_.x << ' ' << coord_.y << ' ' << weight_ - calcAmmoWeightByType(ammoCurrent_, ammoType_) << ' ' << damage_ << ' ' << shootTime_ << ' ' << reloadTime_ << ' ' << ammoType_ << ' ' << ammoMax_ << ' ' << accuracy_ << ' ' << switchTime_ << ' ' << ammoCurrent_ << std::endl;
 	}
 }

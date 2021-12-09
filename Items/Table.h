@@ -57,6 +57,7 @@ namespace nodata{
 		 * Проверяет пуст ли контейнер
 		 */
 		bool empty() const { return items_.empty(); }
+		unsigned long long size() const { return items_.size(); }
 		
 		/*!
 		 * Заменяет предмет с данным индексом на данный предмет, убранный предмет очищается

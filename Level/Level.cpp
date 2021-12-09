@@ -1,19 +1,40 @@
 #include "../Game.h"
-#include "Level.h"
-#include "../Parameters.h"
 
 #include <iostream>
 
 namespace nodata{
-	Level::Level(std::string &cells_cfg, std::string &items_cfg, std::string &creatures_cfg, Game *game) {
+	Level::Level(std::string &cells_cfg, std::string &items_cfg, std::string &creatures_cfg, Game *game) {//create new game
 		curGame = game;
 		turn = OPERATIVE;
-		loadCells(cells_cfg);
+		
+		std::ifstream fs(cells_cfg);
+		loadCells(fs);
+		fs.close();
 		
 		loadTextures();
 		
-		loadItems(items_cfg);
-		loadCreatures(creatures_cfg);
+		fs.open(items_cfg);
+		loadItems(fs);
+		fs.close();
+		
+		fs.open(creatures_cfg);
+		loadCreatures(fs);
+		fs.close();
+		
+		if(operativeAr_.empty()){
+			activeCreature = nullptr;
+		}
+		else{
+			activeCreature = operativeAr_[0];
+		}
+	}
+	
+	Level::Level(std::string &save, Game *game) {//load game from save
+		curGame = game;
+		turn = OPERATIVE;
+		loadTextures();
+		
+		loadSave(save);
 		
 		if(operativeAr_.empty()){
 			activeCreature = nullptr;
@@ -25,13 +46,40 @@ namespace nodata{
 	
 	Level::Level(std::string &cellsFname) {
 		turn = OPERATIVE;
-		loadCells(cellsFname);
-		activeCreature = nullptr;
+		
+		std::ifstream fs(cellsFname);
+		if (!fs.is_open()) {
+			throw std::runtime_error("No file named for Cell.cfg found");
+		}
+		
+		loadCells(fs);
+		
+		fs.close();
+		
 		std::string name("default");
 		Point coord(1, 1);
 		spawnOperator(name, coord, 100, 100, 1, 10, 1, 100, 1);
 		
 		activeCreature = operativeAr_[0];
+	}
+	
+	void Level::loadSave(std::string &save) {
+		std::ifstream fs(save);
+		if (!fs.is_open()) {
+			throw std::runtime_error("No file with given name was found or file can't be opened");
+		}
+		
+		int amount;
+		fs >> amount;
+		loadCells(fs, amount);
+		
+		fs >> amount;
+		loadItems(fs, amount);
+		
+		fs >> amount;
+		loadCreatures(fs, amount);
+	
+		fs.close();
 	}
 	
 	void Level::skipComms(std::ifstream &fs){
@@ -44,8 +92,7 @@ namespace nodata{
 		}
 	}
 	
-	void Level::loadCreatures(std::string &fname) {
-		std::ifstream fs(fname);
+	void Level::loadCreatures(std::ifstream &fs, int amount) {
 		if (!fs.is_open()) {//no file
 			std::string name;
 			Point coord(5, 5);
@@ -59,35 +106,60 @@ namespace nodata{
 		skipComms(fs);
 		
 		std::string name;
-		while(std::getline(fs, name)){
-			while(std::all_of(name.begin(), name.end(), isspace)){
-				if(std::getline(fs, name).eof()) return;
-			}
-			int typeInt;
-			fs >> typeInt;
-			auto type = static_cast<CreatType>(typeInt);
-			switch (type) {
-				case OPERATIVE:
-					loadOperative(fs, name);
-					break;
-				case SENTIENT:
-					loadSentient(fs, name);
-					break;
-				case WILD:
-					loadWild(fs, name);
-					break;
-				case FORAGER:
-					loadForager(fs, name);
-					break;
-				default:
-					throw std::runtime_error("Invalid creatures save file");
+		if(amount > -1){
+			for(int i = 0;i < amount;++i){
+				fs.ignore(std::numeric_limits<int>::max(), '\n');
+				std::getline(fs, name);
+				int typeInt;
+				fs >> typeInt;
+				auto type = static_cast<CreatType>(typeInt);
+				switch (type) {
+					case OPERATIVE:
+						loadOperative(fs, name, true);
+						break;
+					case SENTIENT:
+						loadSentient(fs, name, true);
+						break;
+					case WILD:
+						loadWild(fs, name, true);
+						break;
+					case FORAGER:
+						loadForager(fs, name, true);
+						break;
+					default:
+						throw std::runtime_error("Invalid creatures save file");
+				}
 			}
 		}
-		
-		fs.close();
+		else{
+			while(std::getline(fs, name)){
+				while(std::all_of(name.begin(), name.end(), isspace)){
+					if(std::getline(fs, name).eof()) return;
+				}
+				int typeInt;
+				fs >> typeInt;
+				auto type = static_cast<CreatType>(typeInt);
+				switch (type) {
+					case OPERATIVE:
+						loadOperative(fs, name);
+						break;
+					case SENTIENT:
+						loadSentient(fs, name);
+						break;
+					case WILD:
+						loadWild(fs, name);
+						break;
+					case FORAGER:
+						loadForager(fs, name);
+						break;
+					default:
+						throw std::runtime_error("Invalid creatures save file");
+				}
+			}
+		}
 	}
 	
-	void Level::loadOperative(std::ifstream &fs, std::string &name) {
+	void Level::loadOperative(std::ifstream &fs, std::string &name, bool loadCurrent) {
 		int x, y, force, healthMax, timeMax, walkTime, viewRadius;
 		float reloadTime, accuracy;
 		fs >> x >> y >> healthMax >> timeMax >> walkTime >> viewRadius >> reloadTime >> force >> accuracy;
@@ -99,11 +171,50 @@ namespace nodata{
 		auto *operative = new Operative(this, name, coord, healthMax, timeMax, walkTime, viewRadius, reloadTime, force, accuracy);
 		operative->setTexture(creatText);
 		
+		if(loadCurrent){
+			int healthCurrent, timeCurrent, isArmed, invSize;
+			fs >> healthCurrent >> timeCurrent >> isArmed >> invSize;
+			
+			operative->setHealthCurrent(healthCurrent);
+			operative->setTimeCurrent(timeCurrent);
+			
+			if(isArmed == 1){
+				fs.ignore(std::numeric_limits<int>::max(), '\n');
+				std::getline(fs, name);
+				fs >> x;//skip type
+				
+				operative->setActiveGun(loadGunCurrentState(fs, name));
+			}
+			
+			if(invSize > 0){
+				for(int i = 0;i < invSize;++i){
+					fs.ignore(std::numeric_limits<int>::max(), '\n');
+					std::getline(fs, name);
+					int typeInt;
+					fs >> typeInt;
+					auto type = static_cast<ItemType>(typeInt);
+					switch (type) {
+						case HKIT:
+							operative->receiveItem(loadHKitCurrentState(fs, name));
+							break;
+						case GUN:
+							operative->receiveItem(loadGunCurrentState(fs, name));
+							break;
+						case ACONT:
+							operative->receiveItem(loadAContCurrentState(fs, name));
+							break;
+						default:
+							throw std::runtime_error("Invalid items save file");
+					}
+				}
+			}
+		}
+		
 		operativeAr_.push_back(operative);
 		creatureMap.addItem(coord, operative);
 	}
 	
-	void Level::loadSentient(std::ifstream &fs, std::string &name) {
+	void Level::loadSentient(std::ifstream &fs, std::string &name, bool loadCurrent) {
 		int x, y, healthMax, timeMax, walkTime, viewRadius;
 		float accuracy;
 		fs >> x >> y >> healthMax >> timeMax >> walkTime >> viewRadius >> accuracy;
@@ -115,11 +226,27 @@ namespace nodata{
 		auto *sentient = new Sentient(this, name, coord, healthMax, timeMax, walkTime, viewRadius, accuracy);
 		sentient->setTexture(creatText);
 		
+		if(loadCurrent){
+			int healthCurrent, timeCurrent, isArmed;
+			fs >> healthCurrent >> timeCurrent >> isArmed;
+			
+			sentient->setHealthCurrent(healthCurrent);
+			sentient->setTimeCurrent(timeCurrent);
+			
+			if(isArmed == 1){
+				fs.ignore(std::numeric_limits<int>::max(), '\n');
+				std::getline(fs, name);
+				fs >> x;//skip type
+				
+				sentient->setActiveGun(loadGunCurrentState(fs, name));
+			}
+		}
+		
 		sentientAr_.push_back(sentient);
 		creatureMap.addItem(coord, sentient);
 	}
 	
-	void Level::loadWild(std::ifstream &fs, std::string &name) {
+	void Level::loadWild(std::ifstream &fs, std::string &name, bool loadCurrent) {
 		int x, y, damage, accuracy, healthMax, timeMax, walkTime, viewRadius, attackTime;
 		fs >> x >> y >> healthMax >> timeMax >> walkTime >> viewRadius >> accuracy >> damage >> attackTime;
 		Point coord(x, y);
@@ -130,11 +257,19 @@ namespace nodata{
 		auto *wild = new Wild(this, name, coord, healthMax, timeMax, walkTime, viewRadius, accuracy, damage, attackTime);
 		wild->setTexture(creatText);
 		
+		if(loadCurrent){
+			int healthCurrent, timeCurrent;
+			fs >> healthCurrent >> timeCurrent;
+			
+			wild->setHealthCurrent(healthCurrent);
+			wild->setTimeCurrent(timeCurrent);
+		}
+		
 		wildAr_.push_back(wild);
 		creatureMap.addItem(coord, wild);
 	}
 	
-	void Level::loadForager(std::ifstream &fs, std::string &name) {
+	void Level::loadForager(std::ifstream &fs, std::string &name, bool loadCurrent) {
 		int x, y, force, healthMax, timeMax, walkTime, viewRadius;
 		fs >> x >> y >> healthMax >> timeMax >> walkTime >> viewRadius >> force;
 		Point coord(x, y);
@@ -145,41 +280,93 @@ namespace nodata{
 		auto *forager = new Forager(this, name, coord, healthMax, timeMax, walkTime, viewRadius, force);
 		forager->setTexture(creatText);
 		
+		if(loadCurrent){
+			int healthCurrent, timeCurrent, invSize;
+			fs >> healthCurrent >> timeCurrent >> invSize;
+			
+			forager->setHealthCurrent(healthCurrent);
+			forager->setTimeCurrent(timeCurrent);
+			
+			if(invSize > 0){
+				for(int i = 0;i < invSize;++i){
+					fs.ignore(std::numeric_limits<int>::max(), '\n');
+					std::getline(fs, name);
+					int typeInt;
+					fs >> typeInt;
+					auto type = static_cast<ItemType>(typeInt);
+					switch (type) {
+						case HKIT:
+							forager->receiveItem(loadHKitCurrentState(fs, name));
+							break;
+						case GUN:
+							forager->receiveItem(loadGunCurrentState(fs, name));
+							break;
+						case ACONT:
+							forager->receiveItem(loadAContCurrentState(fs, name));
+							break;
+						default:
+							throw std::runtime_error("Invalid items save file");
+					}
+				}
+			}
+		}
+		
 		foragerAr_.push_back(forager);
 		creatureMap.addItem(coord, forager);
 	}
 	
-	void Level::loadItems(std::string &fname) {
-		std::ifstream fs(fname);
-		if (!fs.is_open())
-			return;//no file
+	void Level::loadItems(std::ifstream &fs, int amount) {
+		if (!fs.is_open()) {
+			throw std::runtime_error("No cfg file for items was found");
+		}
 		
 		skipComms(fs);
 		
 		std::string name;
-		while(std::getline(fs, name)){
-			while(std::all_of(name.begin(), name.end(), isspace)){
-				if(std::getline(fs, name).eof()) return;
+		if(amount > -1){
+			for(int i = 0;i < amount;++i){
+				fs.ignore(std::numeric_limits<int>::max(), '\n');
+				std::getline(fs, name);
+				int typeInt;
+				fs >> typeInt;
+				auto type = static_cast<ItemType>(typeInt);
+				switch (type) {
+					case HKIT:
+						loadHKitsCurrentState(fs, name);
+						break;
+					case GUN:
+						loadGunsCurrentState(fs, name);
+						break;
+					case ACONT:
+						loadAContsCurrentState(fs, name);
+						break;
+					default:
+						throw std::runtime_error("Invalid items save file");
+				}
 			}
-			int typeInt;
-			fs >> typeInt;
-			auto type = static_cast<ItemType>(typeInt);
-			switch (type) {
-				case HKIT:
-					loadHKits(fs, name);
-					break;
-				case GUN:
-					loadGuns(fs, name);
-					break;
-				case ACONT:
-					loadAConts(fs, name);
-					break;
-				default:
-					throw std::runtime_error("Invalid items save file");
+		}else{
+			while(std::getline(fs, name)){
+				while(std::all_of(name.begin(), name.end(), isspace)){
+					if(std::getline(fs, name).eof()) return;
+				}
+				int typeInt;
+				fs >> typeInt;
+				auto type = static_cast<ItemType>(typeInt);
+				switch (type) {
+					case HKIT:
+						loadHKits(fs, name);
+						break;
+					case GUN:
+						loadGuns(fs, name);
+						break;
+					case ACONT:
+						loadAConts(fs, name);
+						break;
+					default:
+						throw std::runtime_error("Invalid items save file");
+				}
 			}
 		}
-		
-		fs.close();
 	}
 	
 	void Level::loadGuns(std::ifstream &fs, std::string &name) {
@@ -229,6 +416,72 @@ namespace nodata{
 		acont->setTexture(itemText[ACONT]);
 		
 		itemMap.addItem(coord, acont);
+	}
+	
+	void Level::loadGunsCurrentState(std::ifstream &fs, std::string &name) {
+		Gun *gun = loadGunCurrentState(fs, name);
+		itemMap.addItem(gun->getPosition(), gun);
+	}
+	
+	void Level::loadHKitsCurrentState(std::ifstream &fs, std::string &name) {
+		HealthKit *hkit = loadHKitCurrentState(fs, name);
+		itemMap.addItem(hkit->getPosition(), hkit);
+	}
+	
+	void Level::loadAContsCurrentState(std::ifstream &fs, std::string &name) {
+		AmmoContainer *acont = loadAContCurrentState(fs, name);
+		itemMap.addItem(acont->getPosition(), acont);
+	}
+	
+	Gun *Level::loadGunCurrentState(std::ifstream &fs, std::string &name) {
+		int x, y, weight, damage, shootTime, reloadTime, ammoTypeInt, ammoMax, switchTime, ammoCurrent;
+		float accuracy;
+		fs >> x >> y >> weight >> damage >> shootTime >> reloadTime >> ammoTypeInt >> ammoMax >> accuracy >> switchTime >> ammoCurrent;
+		Point coord(x, y);
+		
+		if (invalidArgs(x, y) || weight < 0 || damage < 0 || shootTime < 0 || reloadTime < 0 || ammoTypeInt < 0 ||
+			ammoTypeInt >= AMMUNITION_COUNT || ammoMax < 0 || accuracy < 0 || accuracy > 100 || switchTime < 0)
+			return nullptr;
+		
+		auto ammoType = static_cast<Ammunition>(ammoTypeInt);
+		
+		auto *gun = new Gun(name, weight, coord, damage, shootTime, reloadTime, ammoType, ammoMax, accuracy,
+							switchTime);
+		gun->setTexture(gunText[ammoType]);
+		gun->setAmmoCurrent(ammoCurrent);
+		
+		return gun;
+	}
+	
+	HealthKit *Level::loadHKitCurrentState(std::ifstream &fs, std::string &name) {
+		int x, y, weight, healAmount, healTime;
+		fs >> x >> y >> weight >> healAmount >> healTime;
+		Point coord(x, y);
+		
+		if (invalidArgs(x, y) || weight < 0 || healTime < 0 || healAmount < 0)
+			return nullptr;
+		
+		auto *hkit = new HealthKit(name, weight, coord, healAmount, healTime);
+		hkit->setTexture(itemText[HKIT]);
+		
+		return hkit;
+	}
+	
+	AmmoContainer *Level::loadAContCurrentState(std::ifstream &fs, std::string &name) {
+		int x, y, weight, ammoTypeInt, ammoMax, ammoCurrent;
+		fs >> x >> y >> weight >> ammoTypeInt >> ammoMax >> ammoCurrent;
+		Point coord(x, y);
+		
+		if (invalidArgs(x, y) || weight < 0 || ammoTypeInt < 0 || ammoTypeInt >= AMMUNITION_COUNT || ammoMax < 0)
+			return nullptr;
+		
+		auto ammoType = static_cast<Ammunition>(ammoTypeInt);
+		
+		auto *acont = new AmmoContainer(name, weight, coord, ammoType, ammoMax);
+		acont->setTexture(itemText[ACONT]);
+		acont->setAmmoCurrent(ammoCurrent);
+		
+		return acont;
 	}
 	
 	void Level::setCell(int x, int y, CellType type) {
@@ -295,14 +548,13 @@ namespace nodata{
 	
 	void Level::dropItem(Point &point, Item *item) {
 		itemMap.addItem(point, item);
+		item->setPosition(point);
 	}
 	
-	void Level::loadCells(std::string &fname) {
-		std::ifstream fs(fname);
+	void Level::loadCells(std::ifstream &fs, int amount) {
 		if (!fs.is_open()) {
-			throw std::runtime_error("No file named for Cell.cfg found");
+			throw std::runtime_error("No cfg file for cells was found");
 		}
-		
 		fs >> vertCells >> horizCells;
 		
 		cells_ = new Cell*[horizCells];
@@ -316,11 +568,21 @@ namespace nodata{
 		
 		int type;
 		int x,y;
-		while(fs >> type){
-			fs >> x >> y;
-			cells_[x][y].setType(static_cast<CellType>(type), cellText);
-			if(type == STORAGE){
-				storages.emplace_back(x, y);
+		if(amount > -1){
+			for(int i = 0;i < amount;++i){
+				fs >> type >> x >> y;
+				cells_[x][y].setType(static_cast<CellType>(type), cellText);
+				if(type == STORAGE){
+					storages.emplace_back(x, y);
+				}
+			}
+		}else{
+			while(fs >> type){
+				fs >> x >> y;
+				cells_[x][y].setType(static_cast<CellType>(type), cellText);
+				if(type == STORAGE){
+					storages.emplace_back(x, y);
+				}
 			}
 		}
 		
@@ -333,8 +595,6 @@ namespace nodata{
 			cells_[0][i].setType(WALL, cellText);
 			cells_[vertCells - 1][i].setType(WALL, cellText);
 		}
-		
-		fs.close();
 	}
 	
 	ErrorCodes Level::getCell(int x, int y, Cell *&cell) const {
@@ -704,5 +964,53 @@ namespace nodata{
 //		std::cout << "path built" << std::endl;
 		
 		return res;
+	}
+	
+	void Level::saveGame(std::string &fname) {
+		std::ofstream fs(fname, std::ios::trunc);
+		if(!fs.is_open()){
+			throw std::runtime_error("Can't create file");
+		}
+		
+		int amount = 0;
+		//save cells
+		for(int i = 1;i < horizCells - 1;++i){
+			for(int j = 1;j < vertCells - 1;++j){
+				if(cells_[i][j].getType() != FLOOR){
+					amount += 1;
+				}
+			}
+		}
+		
+		fs << amount << ' ' << horizCells << ' ' << vertCells << ' ';
+		for(int i = 1;i < horizCells - 1;++i){
+			for(int j = 1;j < vertCells - 1;++j){
+				if(cells_[i][j].getType() != FLOOR){
+					fs << cells_[i][j].getType() << ' ' << i << ' ' << j << ' ';
+				}
+			}
+		}
+		
+		//save items
+		amount = 0;
+		for(Item *it : itemMap){
+			amount += 1;
+		}
+		fs << amount << std::endl;
+		for(Item *it : itemMap){
+			it->saveCurrentState(fs);
+		}
+		
+		//save creatures
+		amount = 0;
+		for(Creature *it : creatureMap){
+			amount += 1;
+		}
+		fs << amount << std::endl;
+		for(Creature *it : creatureMap){
+			it->saveCurrentState(fs);
+		}
+		
+		fs.close();
 	}
 }

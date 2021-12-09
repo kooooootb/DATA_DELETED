@@ -124,6 +124,8 @@ struct Point{
 		return (point.x == x && point.y == y);
 	}
 	
+	Point &operator=(const Point &point) = default;
+	
 	Point operator+(const Point &point) const{
 		return Point(x + point.x, y + point.y);
 	}

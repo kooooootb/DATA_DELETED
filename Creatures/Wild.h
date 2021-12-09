@@ -56,6 +56,7 @@ namespace nodata{
 		ErrorCodes move(int randVar) override;
 		
 		void saveFile(std::ofstream &) override;
+		void saveCurrentState(std::ofstream &) override;
 		
 		CreatType getType() override { return WILD; }
 	};

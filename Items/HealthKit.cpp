@@ -19,4 +19,9 @@ namespace nodata{
 		fs << name_ << std::endl;
 		fs << HKIT << ' ' << coord_.x << ' ' << coord_.y << ' ' << weight_ << ' ' << healAmount_ << ' ' << healTime_ << std::endl;
 	}
+	
+	void HealthKit::saveCurrentState(std::ofstream &fs) {
+		fs << name_ << std::endl;
+		fs << HKIT << ' ' << coord_.x << ' ' << coord_.y << ' ' << weight_ << ' ' << healAmount_ << ' ' << healTime_ << std::endl;
+	}
 }

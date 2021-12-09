@@ -72,6 +72,7 @@ namespace nodata{
 		 * @param cellsFname Название файла для загрузки клеток
 		 */
 		explicit Level(std::string &cellsFname);
+		explicit Level(std::string &cellsFname, Game *game);
 		
 		~Level();
 		
@@ -195,20 +196,30 @@ namespace nodata{
 		  */
 	  	bool gameOver() const;
 		
-		void loadCells(std::string &);
+		void loadCells(std::ifstream &,int amount = -1);
 		
-		void loadCreatures(std::string &);
-		void loadOperative(std::ifstream &fs, std::string &name);
-		void loadSentient(std::ifstream &fs, std::string &name);
-		void loadWild(std::ifstream &fs, std::string &name);
-		void loadForager(std::ifstream &fs, std::string &name);
+		void loadCreatures(std::ifstream &, int amount = -1);
+		void loadOperative(std::ifstream &fs, std::string &name, bool loadCurrent = false);
+		void loadSentient(std::ifstream &fs, std::string &name, bool loadCurrent = false);
+		void loadWild(std::ifstream &fs, std::string &name, bool loadCurrent = false);
+		void loadForager(std::ifstream &fs, std::string &name, bool loadCurrent = false);
 		
-		void loadItems(std::string &);
+		void loadItems(std::ifstream &, int amount = -1);
 		void loadHKits(std::ifstream &fs, std::string &name);
 		void loadAConts(std::ifstream &fs, std::string &name);
 		void loadGuns(std::ifstream &fs, std::string &name);
 		
+		void loadHKitsCurrentState(std::ifstream &fs, std::string &name);
+		void loadAContsCurrentState(std::ifstream &fs, std::string &name);
+		void loadGunsCurrentState(std::ifstream &fs, std::string &name);
+		
+		HealthKit *loadHKitCurrentState(std::ifstream &fs, std::string &name);
+		AmmoContainer *loadAContCurrentState(std::ifstream &fs, std::string &name);
+		Gun *loadGunCurrentState(std::ifstream &fs, std::string &name);
+		
 		void loadTextures();
+		
+		void loadSave(std::string &save);
 		
 		/*!
 		 * Убирает данного оперативника из карты существ и вектора оперативников
@@ -235,6 +246,8 @@ namespace nodata{
 		void spawnHKit(std::string &name, int weight, const Point &point, int healAmount, int healTime);
 		void spawnACont(std::string &name, int weight, const Point &point, int ammoTypeInt, int ammoMax);
 		void spawnGun(std::string &name, int weight, const Point &point, int damage, int shootTime, int reloadTime, int ammoTypeInt, int ammoMax, float accuracy, int switchTime);
+		
+		void saveGame(std::string &);
 	};
 
 	/*! @} */

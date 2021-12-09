@@ -37,14 +37,15 @@ namespace Dialog{
 	}
 	
 	void dialog::refreshDialog() {
-		msgs[0] = "1 - Start game";
+		msgs[0] = "1 - Start new game";
 		msgs[1] = "2 - Edit map";
-		msgs[2] = "3 - Switch preset\n\t\tCurrent cell cfg file is:" + cells_cfg + "\n\t\tCurrent items cfg file is:" + items_cfg + "\n\t\tCurrent creatures cfg file is:" + creatures_cfg;
-		msgs[3] = "4 - Edit current preset";
-		msgs[4] = "5 - Add new preset";
-		msgs[5] = "6 - Delete new preset";
-		msgs[6] = "7 - List presets";
-		msgs[7] = "0 - Quit";
+		msgs[2] = "3 - Load saved game";
+		msgs[3] = "4 - Switch preset\n\t\tCurrent cell cfg file is:" + cells_cfg + "\n\t\tCurrent items cfg file is:" + items_cfg + "\n\t\tCurrent creatures cfg file is:" + creatures_cfg;
+		msgs[4] = "5 - Edit current preset";
+		msgs[5] = "6 - Add new preset";
+		msgs[6] = "7 - Delete new preset";
+		msgs[7] = "8 - List presets";
+		msgs[8] = "0 - Quit";
 	}
 	
 	void dialog::refreshFile(){
@@ -61,7 +62,7 @@ namespace Dialog{
 	}
 	
 	void dialog::menu() {
-		void (dialog::*fptr[])() = {nullptr, &dialog::startGame, &dialog::editMap, &dialog::switchPreset, &dialog::editPreset,
+		void (dialog::*fptr[])() = {nullptr, &dialog::startGame, &dialog::editMap, &dialog::loadGame, &dialog::switchPreset, &dialog::editPreset,
 									&dialog::addPreset, &dialog::deletePreset, &dialog::listPresets};
 		int rc = getOption();
 		while(rc){
@@ -96,6 +97,20 @@ namespace Dialog{
 		edittool::EditTool edit(cells_cfg, items_cfg, creatures_cfg);
 		
 		edit.start();
+	}
+	
+	void dialog::loadGame(){
+		std::string name;
+		std::cout << "Input saved game filename:";
+		std::cin.ignore(std::numeric_limits<int>::max(), '\n');
+		std::getline(std::cin, name);
+		
+		try{
+			nodata::Game game(name);
+			game.start();
+		}catch(std::runtime_error &re){
+			std::cout << re.what() << std::endl;
+		}
 	}
 	
 	void dialog::changeCellsFile() {
