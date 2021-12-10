@@ -26,6 +26,12 @@ namespace nodata{
 		for(int i = 0;i < nearItems.amount;++i){
 			if(nearItems.ptr[i]->getType() == GUN){
 				gun = dynamic_cast<Gun*>(nearItems.ptr[i]);
+				
+				if(gun->getAmmoCurrent() <= 0){
+					gun = nullptr;
+					continue;
+				}
+				
 				break;
 			}
 		}
