@@ -79,6 +79,7 @@ namespace nodata{
 		void clearError();
 		
 		void saveGame();
+		ErrorCodes makeMove(int &prevAmount, int all);
 	public:
 		Game(std::string &cells_cfg, std::string &items_cfg, std::string &creatures_cfg);
 		explicit Game(std::string &save);

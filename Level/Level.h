@@ -248,6 +248,8 @@ namespace nodata{
 		void spawnGun(std::string &name, int weight, const Point &point, int damage, int shootTime, int reloadTime, int ammoTypeInt, int ammoMax, float accuracy, int switchTime);
 		
 		void saveGame(std::string &);
+		
+		int countEnemy() const;
 	};
 
 	/*! @} */

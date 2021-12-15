@@ -622,79 +622,57 @@ namespace nodata{
 		redrawWindow();
 	}
 	
+	ErrorCodes Game::makeMove(int &prevAmount, int all) {
+		bool itOver = false;
+		int cur = prevAmount;
+		int size;
+		while(!itOver){
+			itOver = true;
+			size = (int) level.getCurrentTeam().size();
+			for(auto it : level.getCurrentTeam()){
+				cur++;
+				mesTips[T_TURN].setString("Enemy's turn:" + std::to_string(cur) + "/" + std::to_string(all));
+				while(it->move(rand()) != ERROR){
+					if(level.gameOver()){
+						std::cout << "Game over!" << std::endl;
+						return ERROR;
+					}
+					if(std::abs(cr->getPosition().x - it->getPosition().x) < cr->getViewRadius() && std::abs(cr->getPosition().y - it->getPosition().y) < cr->getViewRadius()){
+						refreshMap();
+						redrawWindow();
+					}
+					while(window.pollEvent(event));
+				}
+				if(level.getCurrentTeam().size() != size){
+					cur = prevAmount;
+					mesTips[T_TURN].setString("Enemy's turn:" + std::to_string(cur) + "/" + std::to_string(all));
+					itOver = false;
+					break;
+				}
+			}
+		}
+		prevAmount += size;
+		
+		return OK;
+	}
+	
 	ErrorCodes Game::endInt() {
-		mesTips[T_TURN].setString("Enemy's turn");
+		int all = level.countEnemy(), prevAmount = 0;
+		mesTips[T_TURN].setString("Enemy's turn:" + std::to_string(0) + "/" + std::to_string(all));
 		srand(time(nullptr));
 		bool itOver;
 		
 //		sentient's move
-		itOver = false;
 		level.setTurn(SENTIENT);
-		while(!itOver){
-			itOver = true;
-			unsigned long long size = level.getCurrentTeam().size();
-			for(auto it : level.getCurrentTeam()){
-				while(it->move(rand()) != ERROR){
-					if(level.gameOver()){
-						std::cout << "Game over!" << std::endl;
-						return ERROR;
-					}
-					refreshMap();
-					redrawWindow();
-					while(window.pollEvent(event));
-				}
-				if(level.getCurrentTeam().size() != size){
-					itOver = false;
-					break;
-				}
-			}
-		}
+		if(makeMove(prevAmount, all) == ERROR) return ERROR;
 		
 //		wilds's move
-		itOver = false;
 		level.setTurn(WILD);
-		while(!itOver){
-			itOver = true;
-			unsigned long long size = level.getCurrentTeam().size();
-			for(auto it : level.getCurrentTeam()){
-				while(it->move(rand()) != ERROR){
-					if(level.gameOver()){
-						std::cout << "Game over!" << std::endl;
-						return ERROR;
-					}
-					refreshMap();
-					redrawWindow();
-					while(window.pollEvent(event));
-				}
-				if(level.getCurrentTeam().size() != size){
-					itOver = false;
-					break;
-				}
-			}
-		}
+		if(makeMove(prevAmount, all) == ERROR) return ERROR;
 		
 //		forager's move
-		itOver = false;
 		level.setTurn(FORAGER);
-		while(!itOver){
-			itOver = true;
-			unsigned long long size = level.getCurrentTeam().size();
-			for(auto it : level.getCurrentTeam()){
-				while(it->move(rand()) != ERROR){
-					if(level.gameOver()){
-						std::cout << "Game over!" << std::endl;
-						return ERROR;
-					}
-					refreshMap();
-					redrawWindow();
-					while(window.pollEvent(event));
-				}
-				if(level.getCurrentTeam().size() != size){
-					itOver = false;
-					break;
-				}
-			}
-		}
+		if(makeMove(prevAmount, all) == ERROR) return ERROR;
 		
 		level.setTurn(OPERATIVE);
 		mesTips[T_TURN].setString("");

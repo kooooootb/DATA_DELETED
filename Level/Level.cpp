@@ -1,4 +1,6 @@
 #include "../Game.h"
+#include "Level.h"
+
 
 #include <iostream>
 
@@ -1012,5 +1014,9 @@ namespace nodata{
 		}
 		
 		fs.close();
+	}
+	
+	int Level::countEnemy() const {
+		return (int) (foragerAr_.size() + wildAr_.size() + sentientAr_.size());
 	}
 }
