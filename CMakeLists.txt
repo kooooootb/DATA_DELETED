@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.18)
-project(lab4)
+project(data_deleted)
 
 set(CMAKE_CXX_STANDARD 20)
 set(EXECUTABLE_OUTPUT_PATH ../files)
 
-add_executable(lab4 main.cpp Game.cpp Game.h dialog.cpp dialog.h EditTool.cpp EditTool.h Map/Map.h)
+add_executable(data_deleted main.cpp Game.cpp Game.h dialog.cpp dialog.h EditTool.cpp EditTool.h)
 
 include_directories(Creatures)
 include_directories(Items)
@@ -19,11 +19,7 @@ add_subdirectory(Level)
 add_library(lib INTERFACE)
 target_link_libraries(lib INTERFACE level creatures items)
 
-target_link_libraries(lab4 lib)
-
-
-
-
+target_link_libraries(data_deleted lib)
 
 #sfml libs
 set(BUILD_SHARED_LIBS FALSE)
@@ -31,4 +27,4 @@ set(BUILD_SHARED_LIBS FALSE)
 add_subdirectory(sfml)
 include_directories(sfml/include)
 
-target_link_libraries(lab4 sfml-graphics sfml-audio sfml-network sfml-window sfml-system)
+target_link_libraries(data_deleted sfml-graphics sfml-audio sfml-network sfml-window sfml-system)

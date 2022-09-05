@@ -690,7 +690,7 @@ namespace nodata{
 		line[0] = sf::Vertex(sf::Vector2f((float)from.x + ((float)CELLSIZE)/2, (float)from.y + ((float)CELLSIZE)/2));
 		line[1] = sf::Vertex(sf::Vector2f((float)to.x + ((float)CELLSIZE)/2, (float)to.y + ((float)CELLSIZE)/2));
 		
-		period = sf::milliseconds(200);
+		period = sf::milliseconds(200);//zachem
 	}
 	
 	void Game::redrawWindow() {
